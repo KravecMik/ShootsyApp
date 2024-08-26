@@ -1,0 +1,7 @@
+C:\Users\KRAVEC\source\repos\fortiscabinet\Shootsy\Shootsy\obj\Debug\net6.0\Shootsy.csproj.AssemblyReference.cache
+C:\Users\KRAVEC\source\repos\fortiscabinet\Shootsy\Shootsy\obj\Debug\net6.0\Shootsy.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\KRAVEC\source\repos\fortiscabinet\Shootsy\Shootsy\obj\Debug\net6.0\Shootsy.AssemblyInfoInputs.cache
+C:\Users\KRAVEC\source\repos\fortiscabinet\Shootsy\Shootsy\obj\Debug\net6.0\Shootsy.AssemblyInfo.cs
+C:\Users\KRAVEC\source\repos\fortiscabinet\Shootsy\Shootsy\obj\Debug\net6.0\Shootsy.csproj.CoreCompileInputs.cache
+C:\Users\KRAVEC\source\repos\fortiscabinet\Shootsy\Shootsy\obj\Debug\net6.0\Shootsy.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\KRAVEC\source\repos\fortiscabinet\Shootsy\Shootsy\obj\Debug\net6.0\Shootsy.MvcApplicationPartsAssemblyInfo.cache
