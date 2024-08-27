@@ -1,37 +1,48 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Shootsy.Dtos;
+using Microsoft.AspNetCore.Server.HttpSys;
+using Shootsy.Database;
+using Shootsy.Database.Entities;
 using Shootsy.Models;
+using Shootsy.Repositories;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Net.Mime;
 
 namespace Shootsy.Controllers
 {
-    public class UsersController : Controller
+    [ApiController]
+    [Route("Users")]
+    //[Authorize(AuthenticationSchemes = nameof(AuthenticationSchemes.Basic))]
+    public class UsersController : ControllerBase
     {
-        // GET: UsersController
-        public ActionResult Index()
+        private readonly IMapper _mapper;
+        private readonly IUserRepository _userRepository;
+
+        public UsersController(IUserRepository userRepository, IMapper mapper)
         {
-            return View();
+            _userRepository = userRepository;
+            _mapper = mapper;
         }
 
-        // GET: UsersController/Details/5
-        public ActionResult Details(int id)
+        [HttpGet]
+        public async Task<IActionResult> GetUsersAsync([FromQuery] GetUsersModel model, CancellationToken cancellationToken = default)
         {
-            return View();
+            var users = await _userRepository.GetListAsync(model.Limit, model.Offset, model.Sort, cancellationToken);
+
+            var result = _mapper.Map<IEnumerable<UserModelResponse>>(users);
+            return Ok(result);
         }
 
         //// POST: User/Create
-        //[System.Web.Http.HttpPost]
-        ////[Consumes(MediaTypeNames.Application.Json)]
-        //[SwaggerOperation("Создание пользователя")]
-        //[SwaggerResponse(StatusCodes.Status201Created, "Пользователь создан", typeof(int))]
+        //[HttpPost]
+        //[Consumes(MediaTypeNames.Application.Json)]
         //public async Task<IActionResult> CreateAsync(
-        //    [System.Web.Http.FromBody, BindRequired, SwaggerParameter("Контракт на создание пользователя")]
         //    CreateUserModel model,
         //    CancellationToken cancellationToken = default)
         //{
-        //    var user = _mapper.Map<UserDto>(model);
+        //    var user = UserDto > (model);
         //    var id = await _userRepository.CreateAsync(user, cancellationToken);
 
         //    await _userRepository.UpdateAsync(
@@ -42,61 +53,5 @@ namespace Shootsy.Controllers
         //    return StatusCode(201, id);
         //}
 
-        // POST: UsersController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: UsersController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: UsersController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: UsersController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: UsersController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
     }
 }

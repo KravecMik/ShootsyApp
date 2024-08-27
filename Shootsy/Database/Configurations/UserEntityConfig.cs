@@ -14,9 +14,16 @@ namespace Shootsy.Database.Configurations
 
             entity.HasKey(x => x.Id);
 
-            entity.HasIndex(x => x.Login, "User_Login")
-                .IsUnique()
-                .HasFilter(@"(is_delete = false)");
+            entity.Property(x => x.Id)
+                .HasColumnName("id")
+                .HasComment("Идентификатор пользователя");
+
+            entity.Property(x => x.Login)
+                .HasColumnName("login")
+                .HasComment("Логин пользователя");
+
+            entity.HasIndex(x => x.Login, "login")
+                .IsUnique();
 
             entity.Property(x => x.Firstname)
                 .HasColumnName("firstname")
@@ -36,8 +43,9 @@ namespace Shootsy.Database.Configurations
             entity.Property(x => x.Fullname)
                 .HasColumnName("fullname")
                 .HasComment("Полное имя");
+                //.HasComputedColumnSql("firstname || ' ' || lastname");
 
-            entity.Property(x => x.City)
+            entity.Property(x => x.CityId)
                 .HasColumnName("city_id")
                 .HasComment("Город");
 
@@ -46,11 +54,11 @@ namespace Shootsy.Database.Configurations
                 .HasComment("Контакт для связи")
                 .HasMaxLength(100);
 
-            entity.Property(x => x.Gender)
+            entity.Property(x => x.GenderId)
                 .HasColumnName("gender_id")
                 .HasComment("Пол");
 
-            entity.Property(x => x.CooperationType)
+            entity.Property(x => x.CooperationTypeId)
                 .HasColumnName("cooperation_type_id")
                 .HasComment("Тип сотрудничества");
 
@@ -81,13 +89,29 @@ namespace Shootsy.Database.Configurations
                 .HasColumnName("is_nude")
                 .HasComment("Съемка ню");
 
-            entity.Property(x => x.Type)
+            entity.Property(x => x.TypeId)
                 .HasColumnName("type_id")
                 .HasComment("Тип пользователя");
 
             entity.Property(x => x.Password)
-                .HasColumnName("password_id")
+                .HasColumnName("password")
                 .HasComment("Хэш пароль пользователя");
+
+            entity.HasOne(u => u.UserType)
+                .WithMany(u => u.Users)
+                .HasForeignKey(u => u.TypeId);
+
+            entity.HasOne(u => u.City)
+                .WithMany(u => u.Users)
+                .HasForeignKey(u => u.CityId);
+
+            entity.HasOne(u => u.Gender)
+                .WithMany(u => u.Users)
+                .HasForeignKey(u => u.GenderId);
+
+            entity.HasOne(u => u.CooperationType)
+                .WithMany(u => u.Users)
+                .HasForeignKey(u => u.CooperationTypeId);
         }
     }
 }

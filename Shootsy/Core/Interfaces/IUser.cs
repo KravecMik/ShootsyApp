@@ -18,17 +18,17 @@
         /// <summary>
         /// Пол
         /// </summary>
-        int Gender { get; }
+        int GenderId { get; }
 
         /// <summary>
         /// Город
         /// </summary>
-        int City { get; }
+        int CityId { get; }
 
         /// <summary>
         /// Контакт для связи
         /// </summary>
-        string Contact { get; }
+        string? Contact { get; }
 
         /// <summary>
         /// Имя
@@ -38,27 +38,27 @@
         /// <summary>
         /// Фамилия
         /// </summary>
-        string Lastname { get; }
+        string? Lastname { get; }
 
         /// <summary>
         /// Отчество
         /// </summary>
-        string Patronymic { get; }
+        string? Patronymic { get; }
 
         /// <summary>
         /// Полное имя
         /// </summary>
-        string Fullname { get; }
+        string? Fullname { get; }
 
         /// <summary>
         /// Описание
         /// </summary>
-        string Discription { get; }
+        string? Discription { get; }
 
         /// <summary>
         /// Тип сотрудничества
         /// </summary>
-        int CooperationType { get; }
+        int? CooperationTypeId { get; }
 
         /// <summary>
         /// Хэш пароля пользователя
@@ -68,22 +68,22 @@
         /// <summary>
         /// Тип пользователя
         /// </summary>
-        int Type { get; }
+        int? TypeId { get; }
 
         /// <summary>
         /// Съемка ню
         /// </summary>
-        bool isNude { get; }
+        bool? isNude { get; }
 
         /// <summary>
         /// Признак удаления пользователя
         /// </summary>
-        bool isDelete { get; }
+        bool? isDelete { get; }
 
         /// <summary>
         /// Признак наличия активной подписки
         /// </summary>
-        bool isHasActiveSubscribe { get; }
+        bool? isHasActiveSubscribe { get; }
 
         /// <summary>
         /// Дата создания пользователя

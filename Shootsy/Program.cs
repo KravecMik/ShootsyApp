@@ -1,35 +1,37 @@
 using Shootsy.Database;
 using Shootsy.Database.Entities;
 
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+
+//app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
+
 using (ApplicationContext db = new ApplicationContext())
 {
-    UserTypeEntity userTypePhotograph = new UserTypeEntity{ Type = "Фотограф" };
-    UserTypeEntity userTypeModel = new UserTypeEntity{ Type = "Модель" };
 
-
-    UserEntity user1 = new UserEntity { Login = "Test", Type = userTypePhotograph.Id, Contact = "Telega" };
-    UserEntity user2 = new UserEntity { Login = "Test 2", Type = userTypeModel.Id, Contact = "Wazap" };
+    UserEntity user1 = new UserEntity { Login = "Test", TypeId = 2, Firstname = "Олега", Lastname = "Прокин", Password = new byte[5], CityId = 1, GenderId = 1 };
+    UserEntity user2 = new UserEntity { Login = "Test 2", TypeId = 1, Firstname = "Миха", Lastname = "Кравец", Password = new byte[5], CityId = 2, GenderId = 2 };
 
 
     UserSessionEntity userSession = new UserSessionEntity
     {
-        UserId = user1.Id,
+        User = user1,
         Guid = Guid.NewGuid(),
         CreateDate = DateTime.UtcNow,
     };
 
     // добавляем их в бд
-    db.UserTypes.AddRange(userTypePhotograph, userTypeModel);
     db.Users.AddRange(user1, user2);
-    //db.UserSession.Add(userSession);
+    db.UserSession.Add(userSession);
     db.SaveChanges();
-    Console.WriteLine("Объекты успешно сохранены");
-
-    // получаем объекты из бд и выводим на консоль
-    var users = db.Users.ToList();
-    Console.WriteLine("Список объектов:");
-    foreach (UserEntity u in users)
-    {
-        Console.WriteLine($"{u.Id}.{u.Login} - {u.CreateDate}");
-    }
 }

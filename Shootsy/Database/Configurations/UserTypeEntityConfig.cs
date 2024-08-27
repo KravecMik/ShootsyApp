@@ -18,9 +18,14 @@ namespace Shootsy.Database.Configurations
                 .HasColumnName("id")
                 .HasComment("Идентификатор типа");
 
-            entity.Property(x => x.Type)
-                .HasColumnName("type")
+            entity.Property(x => x.TypeName)
+                .HasColumnName("type_name")
                 .HasComment("Тип пользователя");
+
+            entity.HasData(
+                new UserTypeEntity { Id = 1, TypeName = "Фотограф" },
+                new UserTypeEntity { Id = 2, TypeName = "Модель" }
+                );
         }
     }
 }
