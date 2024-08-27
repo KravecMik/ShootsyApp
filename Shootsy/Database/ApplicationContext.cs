@@ -6,6 +6,9 @@ namespace Shootsy.Database
 {
     public class ApplicationContext : DbContext
     {
+        public ApplicationContext (DbContextOptions<ApplicationContext> options) : base(options)
+        { }
+
         public DbSet<UserEntity> Users { get; set; }
         public DbSet<UserSessionEntity> UserSession { get; set; }
         public DbSet<UserTypeEntity> UserTypes { get; set; }

@@ -43,7 +43,6 @@ namespace Shootsy.Database.Configurations
             entity.Property(x => x.Fullname)
                 .HasColumnName("fullname")
                 .HasComment("Полное имя");
-                //.HasComputedColumnSql("firstname || ' ' || lastname");
 
             entity.Property(x => x.CityId)
                 .HasColumnName("city_id")

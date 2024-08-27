@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Shootsy.Core.Interfaces;
 using Shootsy.Database;
 using Shootsy.Database.Entities;
 using Shootsy.Dtos;
@@ -69,18 +70,16 @@ namespace Shootsy.Repositories
         }
 
         public async Task<IReadOnlyList<UserDto>> GetListAsync(
-            int offset,
             int limit,
-            string sort,
+            int offset,
             CancellationToken cancellationToken = default)
         {
             var query = _context.Users.AsNoTracking().Select(x => x);
-
             var users = await query
                 .Skip(offset)
                 .Take(limit)
                 .ToArrayAsync(cancellationToken);
-            return _mapper.Map<UserDto[]>(users);
+            return _mapper.Map<IReadOnlyList<UserDto>>(users);
         }
 
         private void UpdateDateTimeProperty(string propertyName, EntityEntry<UserEntity> entityEntry)

@@ -9,8 +9,5 @@ namespace Shootsy.Models
 
         [FromQuery(Name = "limit")]
         public int Limit { get; set; }
-
-        [FromQuery(Name = "sort")]
-        public string Sort { get; set; }
     }
 }
