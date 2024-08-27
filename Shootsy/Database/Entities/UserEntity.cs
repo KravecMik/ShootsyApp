@@ -1,4 +1,5 @@
-﻿using Shootsy.Core.Interfaces;
+﻿using AutoMapper.Configuration.Annotations;
+using Shootsy.Core.Interfaces;
 
 namespace Shootsy.Database.Entities
 {
@@ -14,6 +15,9 @@ namespace Shootsy.Database.Entities
 
         public string? Contact { get; init; }
 
+        [Ignore]
+        public int Salt { get; set; }
+
         public string Firstname { get; init; }
 
         public string? Lastname { get; init; }
@@ -26,7 +30,7 @@ namespace Shootsy.Database.Entities
 
         public int? CooperationTypeId { get; init; }
 
-        public byte[] Password { get; init; }
+        public int PasswordId { get; init; }
 
         public int? TypeId { get; init; }
 
@@ -36,9 +40,9 @@ namespace Shootsy.Database.Entities
 
         public bool? isHasActiveSubscribe { get; init; }
 
-        public DateTime? CreateDate { get; init; }
+        public DateTime? CreateDate { get; set; }
 
-        public DateTime? EditDate { get; init; }
+        public DateTime? EditDate { get; set; }
 
         public ICollection<UserSessionEntity>? UserSessions { get; init; }
 
@@ -49,5 +53,7 @@ namespace Shootsy.Database.Entities
         public GenderEntity Gender { get; init; }
 
         public CooperationTypeEntity CooperationType { get; init; }
+
+        public ICollection<PasswordEntity> Password { get; init; }
     }
 }

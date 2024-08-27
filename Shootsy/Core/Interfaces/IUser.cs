@@ -16,12 +16,12 @@
         string Login { get; }
 
         /// <summary>
-        /// Пол
+        /// Идентификатор пола
         /// </summary>
         int GenderId { get; }
 
         /// <summary>
-        /// Город
+        /// Идентификатор города
         /// </summary>
         int CityId { get; }
 
@@ -56,17 +56,17 @@
         string? Discription { get; }
 
         /// <summary>
-        /// Тип сотрудничества
+        /// Идентификатор типа сотрудничества
         /// </summary>
         int? CooperationTypeId { get; }
 
         /// <summary>
-        /// Хэш пароля пользователя
+        /// Идентификатор пароля
         /// </summary>
-        byte[] Password { get; }
+        int PasswordId { get; }
 
         /// <summary>
-        /// Тип пользователя
+        /// Идентификатор типа  пользователя
         /// </summary>
         int? TypeId { get; }
 

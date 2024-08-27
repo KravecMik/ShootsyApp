@@ -1,4 +1,5 @@
-﻿using Shootsy.Core.Interfaces;
+﻿using AutoMapper.Configuration.Annotations;
+using Shootsy.Core.Interfaces;
 
 namespace Shootsy.Dtos
 {
@@ -32,7 +33,7 @@ namespace Shootsy.Dtos
 
         public int GenderId { get; init; }
 
-        public byte[] Password { get; init; }
+        public int PasswordId { get; init; }
 
         public bool? isDelete { get; init; }
 

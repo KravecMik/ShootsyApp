@@ -26,7 +26,7 @@ namespace Shootsy.Models
 
         public int? CooperationTypeId { get; init; }
 
-        public byte[] Password { get; init; }
+        public int PasswordId { get; init; }
 
         public int? TypeId { get; init; }
 

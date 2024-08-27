@@ -15,6 +15,7 @@ namespace Shootsy.Database
         public DbSet<CityEntity> CityEntities { get; set; }
         public DbSet<GenderEntity> GenderEntities { get; set; }
         public DbSet<CooperationTypeEntity> CooperationTypes { get; set; }
+        public DbSet<PasswordEntity> Passwords { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -24,6 +25,7 @@ namespace Shootsy.Database
             modelBuilder.ApplyConfiguration(new CityEntityConfig());
             modelBuilder.ApplyConfiguration(new  GenderEntityConfig());
             modelBuilder.ApplyConfiguration(new CooperationTypeEntityConfig());
+            modelBuilder.ApplyConfiguration(new PasswordEntityConfig());
         }
 
         public ApplicationContext()

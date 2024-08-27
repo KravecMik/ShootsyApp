@@ -19,10 +19,9 @@ namespace Shootsy
         {
             services.AddDbContext<ApplicationContext>(options =>
             options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddAutoMapper(typeof(CreateUserModel_UserDto_Profle));
+            services.AddAutoMapper(typeof(Profiles));
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddSingleton<IMapper, Mapper>();
-            //services.AddSingleton<ApplicationContext, DbContextOptions>();
             services.AddSingleton(TimeProvider.System);
             services.AddControllers();
         }

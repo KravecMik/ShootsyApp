@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Shootsy.Dtos;
 using Shootsy.Models;
 using Shootsy.Repositories;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Shootsy.Controllers
 {
@@ -23,28 +26,30 @@ namespace Shootsy.Controllers
         public async Task<IActionResult> GetUsersAsync([FromQuery] GetUsersModel model, CancellationToken cancellationToken = default)
         {
             var users = await _userRepository.GetListAsync(model.Limit, model.Offset, cancellationToken);
-
             var result = _mapper.Map<IEnumerable<UserModelResponse>>(users);
-            return Ok(result);
+            var resultJson = JsonSerializer.Serialize(result, new JsonSerializerOptions()
+            {
+                WriteIndented = true,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+            return Ok(resultJson);
         }
 
-        //// POST: User/Create
-        //[HttpPost]
-        //[Consumes(MediaTypeNames.Application.Json)]
-        //public async Task<IActionResult> CreateAsync(
-        //    CreateUserModel model,
-        //    CancellationToken cancellationToken = default)
-        //{
-        //    var user = UserDto > (model);
-        //    var id = await _userRepository.CreateAsync(user, cancellationToken);
+        // POST: User/Create
+        [HttpPost]
+        public async Task<IActionResult> CreateAsync(
+            CreateUserModel model,
+            CancellationToken cancellationToken = default)
+        {
+            var user = _mapper.Map<UserDto>(model);
+            var id = await _userRepository.CreateAsync(user, cancellationToken);
 
-        //    await _userRepository.UpdateAsync(
-        //        new UserDto { id = id, Login = id.ToString() }),
-        //        new[] { nameof(UserDto.Login) },
-        //        cancellationToken);
+            await _userRepository.UpdateAsync(
+                new UserDto { Id = id, Login = id.ToString() },
+                new[] { nameof(UserDto.Login) },
+                cancellationToken);
 
-        //    return StatusCode(201, id);
-        //}
-
+            return StatusCode(201, id);
+        }
     }
 }

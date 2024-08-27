@@ -1,47 +1,41 @@
-﻿using Shootsy.Enums;
-using Swashbuckle.AspNetCore.Annotations;
-using System.ComponentModel.DataAnnotations;
-
-namespace Shootsy.Models
+﻿namespace Shootsy.Models
 {
-    [SwaggerSchema("Команда на создание пользователя")]
     public class CreateUserModel
     {
-        [Required]
-        [SwaggerSchema("Логин")]
-        public string Usermame { get; set; }
+        public string Login { get; set; }
 
-        [Required]
-        [SwaggerSchema("Пароль")]
-        public byte[] Password { get; set; }
+        public string Password { get; set; }
 
-        [SwaggerSchema("Контакт")]
         public string Contact { get; set; }
 
-        [Required]
-        [SwaggerSchema("Имя")]
         public string Firstname { get; set; }
 
-        [Required]
-        [SwaggerSchema("Фамилия")]
         public string Lastname { get; set; }
 
-        [SwaggerSchema("Отчество")]
-        public string Patronymic { get; set; }
+        public string? Patronymic { get; set; }
 
-        [SwaggerSchema("Описание профиля")]
         public string Discription { get; set; }
 
-        [Required]
-        [SwaggerSchema("Условие сотрудничества")]
-        public CooperationTypeEnum CooperationType { get; set; }
+        public int CooperationTypeId { get; set; }
 
-        [Required]
-        [SwaggerSchema("Роль")]
-        public TypeEnum Role { get; set; }
+        public int RoleId { get; set; }
 
-        [Required]
-        [SwaggerSchema("Работа с НЮ съемками")]
-        public bool Nude { get; set; }
+        public bool? isNude { get; set; } = false;
+
+        public int GenderId { get; set; }
+
+        public int CityId { get; set; }
+
+        public string? Fullname { get; set; }
+
+        public int TypeId { get; set; }
+
+        public bool? isDelete { get; set; } = false;
+
+        public bool? isHasActiveSubscribe { get; set; } = false;
+
+        public DateTime? CreateDate { get; set; }
+
+        public DateTime? EditDate { get; set; }
     }
 }

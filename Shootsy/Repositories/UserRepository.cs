@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Shootsy.Core.Interfaces;
 using Shootsy.Database;
 using Shootsy.Database.Entities;
 using Shootsy.Dtos;
+using Shootsy.Security;
 using System.Linq.Expressions;
 
 namespace Shootsy.Repositories
@@ -14,24 +14,33 @@ namespace Shootsy.Repositories
         private readonly ApplicationContext _context;
         private readonly IMapper _mapper;
         private readonly TimeProvider _timeProvider;
+        private readonly PasswordMethods _passwordMethods;
 
-        public UserRepository(ApplicationContext context, IMapper mapper, TimeProvider timeProvider)
+        public UserRepository(ApplicationContext context, IMapper mapper, TimeProvider timeProvider, PasswordMethods passwordMethods)
         {
             _context = context;
             _mapper = mapper;
             _timeProvider = timeProvider;
+            _passwordMethods = passwordMethods;
         }
 
         public async Task<int> CreateAsync(UserDto user, CancellationToken cancellationToken = default)
         {
             var userEntity = _mapper.Map<UserEntity>(user);
-
+            var salt = _passwordMethods.GenerateSaltForPassword();
             var userEntityEntry = await _context.Users.AddAsync(userEntity, cancellationToken);
+
 
             UpdateDateTimeProperty(nameof(userEntity.CreateDate), userEntityEntry);
             UpdateDateTimeProperty(nameof(userEntity.EditDate), userEntityEntry);
 
             await _context.SaveChangesAsync(cancellationToken);
+
+            var password = _passwordMethods.ComputePasswordHash("12345", salt);
+            userEntity.Salt = salt;
+
+            //var passEntity = new PasswordEntity { isActive = true, Password = password, Salt = salt, UserId = userEntity.Id };
+            //var passEntityEntry = await _context.Passwords.AddAsync(userEntity, cancellationToken);
 
             userEntityEntry.State = EntityState.Detached;
 
@@ -87,11 +96,11 @@ namespace Shootsy.Repositories
             switch (propertyName)
             {
                 case nameof(UserEntity.CreateDate):
-                    SetValueToProperty(entityEntry, x => x.CreateDate, _timeProvider.GetLocalNow().DateTime);
+                    SetValueToProperty(entityEntry, x => x.CreateDate, DateTime.UtcNow);
                     break;
 
                 case nameof(UserEntity.EditDate):
-                    SetValueToProperty(entityEntry, x => x.EditDate, _timeProvider.GetLocalNow().DateTime);
+                    SetValueToProperty(entityEntry, x => x.EditDate, DateTime.UtcNow);
                     break;
                 default:
                     break;
