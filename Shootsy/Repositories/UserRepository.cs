@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Shootsy.Database;
 using Shootsy.Database.Entities;
 using Shootsy.Dtos;
-using Shootsy.Security;
 using System.Linq.Expressions;
 
 namespace Shootsy.Repositories
@@ -14,33 +13,23 @@ namespace Shootsy.Repositories
         private readonly ApplicationContext _context;
         private readonly IMapper _mapper;
         private readonly TimeProvider _timeProvider;
-        private readonly PasswordMethods _passwordMethods;
 
-        public UserRepository(ApplicationContext context, IMapper mapper, TimeProvider timeProvider, PasswordMethods passwordMethods)
+        public UserRepository(ApplicationContext context, IMapper mapper, TimeProvider timeProvider)
         {
             _context = context;
             _mapper = mapper;
             _timeProvider = timeProvider;
-            _passwordMethods = passwordMethods;
         }
 
         public async Task<int> CreateAsync(UserDto user, CancellationToken cancellationToken = default)
         {
             var userEntity = _mapper.Map<UserEntity>(user);
-            var salt = _passwordMethods.GenerateSaltForPassword();
             var userEntityEntry = await _context.Users.AddAsync(userEntity, cancellationToken);
-
 
             UpdateDateTimeProperty(nameof(userEntity.CreateDate), userEntityEntry);
             UpdateDateTimeProperty(nameof(userEntity.EditDate), userEntityEntry);
 
             await _context.SaveChangesAsync(cancellationToken);
-
-            var password = _passwordMethods.ComputePasswordHash("12345", salt);
-            userEntity.Salt = salt;
-
-            //var passEntity = new PasswordEntity { isActive = true, Password = password, Salt = salt, UserId = userEntity.Id };
-            //var passEntityEntry = await _context.Passwords.AddAsync(userEntity, cancellationToken);
 
             userEntityEntry.State = EntityState.Detached;
 
@@ -72,10 +61,20 @@ namespace Shootsy.Repositories
             await _context.SaveChangesAsync(cancellationToken);
         }
 
+        public async Task DeleteByIdAsync(int id, CancellationToken cancellationToken)
+        {
+            var userEntityEntry = await _context.Users.Where(x => x.Id == id).ExecuteDeleteAsync();
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
         public async Task<UserDto> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
-            var user = _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-            return _mapper.Map<UserDto>(user);
+            var user = _context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+            if (user.Result is null)
+                return new UserDto();
+            return _mapper.Map<UserDto>(user.Result);
         }
 
         public async Task<IReadOnlyList<UserDto>> GetListAsync(

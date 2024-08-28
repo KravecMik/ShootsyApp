@@ -24,7 +24,8 @@ namespace Shootsy.Database.Configurations
 
             entity.HasData(
                 new UserTypeEntity { Id = 1, TypeName = "Фотограф" },
-                new UserTypeEntity { Id = 2, TypeName = "Модель" }
+                new UserTypeEntity { Id = 2, TypeName = "Модель" },
+                new UserTypeEntity { Id = 3, TypeName = "Визажист" }
                 );
         }
     }

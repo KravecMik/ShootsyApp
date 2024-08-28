@@ -1,41 +1,35 @@
-﻿namespace Shootsy.Models
+﻿using Shootsy.Core.Interfaces;
+
+namespace Shootsy.Models
 {
     public class CreateUserModel
     {
-        public string Login { get; set; }
+        public string Login { get; init; }
 
-        public string Password { get; set; }
+        public byte[]? Password { get; init; }
 
-        public string Contact { get; set; }
+        public string Contact { get; init; }
 
-        public string Firstname { get; set; }
+        public string Firstname { get; init; }
 
-        public string Lastname { get; set; }
+        public string? Lastname { get; init; }
 
-        public string? Patronymic { get; set; }
+        public string? Patronymic { get; init; }
 
-        public string Discription { get; set; }
+        public string? Discription { get; init; }
 
-        public int CooperationTypeId { get; set; }
+        public int? CooperationTypeId { get; init; } = 1;
 
-        public int RoleId { get; set; }
+        public int RoleId { get; init; }
 
-        public bool? isNude { get; set; } = false;
+        public bool? isNude { get; init; } = false;
 
-        public int GenderId { get; set; }
+        public int GenderId { get; init; }
 
-        public int CityId { get; set; }
+        public int CityId { get; init; }
 
-        public string? Fullname { get; set; }
+        public int TypeId { get; init; }
 
-        public int TypeId { get; set; }
-
-        public bool? isDelete { get; set; } = false;
-
-        public bool? isHasActiveSubscribe { get; set; } = false;
-
-        public DateTime? CreateDate { get; set; }
-
-        public DateTime? EditDate { get; set; }
+        public bool? isHasActiveSubscribe { get; init; } = false;
     }
 }

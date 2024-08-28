@@ -15,6 +15,8 @@ namespace Shootsy.Dtos
 
         public string Lastname { get; init; }
 
+        public byte[] Password { get; init; }
+
         public string? Patronymic { get; init; }
 
         public string? Fullname { get; init; }
@@ -23,7 +25,7 @@ namespace Shootsy.Dtos
 
         public int? CooperationTypeId { get; init; }
 
-        public int? TypeId { get; init; }
+        public int TypeId { get; init; }
 
         public bool? isNude { get; init; }
 

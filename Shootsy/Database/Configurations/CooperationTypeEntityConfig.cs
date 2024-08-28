@@ -23,9 +23,10 @@ namespace Shootsy.Database.Configurations
                 .HasComment("Название города");
 
             entity.HasData(
-                new CooperationTypeEntity { Id = 1, TypeName = "Расходы оплачивает фотограф" },
-                new CooperationTypeEntity { Id = 2, TypeName = "Расходы оплачивает модель" },
-                new CooperationTypeEntity { Id = 3, TypeName = "Расходы оплачиваются поровну" }
+                new CooperationTypeEntity { Id = 1, TypeName = "Не указано" },
+                new CooperationTypeEntity { Id = 2, TypeName = "Расходы оплачивает фотограф" },
+                new CooperationTypeEntity { Id = 3, TypeName = "Расходы оплачивает модель" },
+                new CooperationTypeEntity { Id = 4, TypeName = "Расходы оплачиваются поровну" }
                 );
         }
     }

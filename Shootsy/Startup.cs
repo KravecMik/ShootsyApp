@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+using Shootsy.Controllers;
 using Shootsy.Database;
 using Shootsy.MappingProfiles;
 using Shootsy.Repositories;
+using Shootsy.Security;
 
 namespace Shootsy
 {
@@ -17,12 +18,12 @@ namespace Shootsy
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationContext>(options =>
-            options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<ApplicationContext>();
             services.AddAutoMapper(typeof(Profiles));
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddSingleton<IMapper, Mapper>();
             services.AddSingleton(TimeProvider.System);
+            services.AddSingleton<SupportMethods>();
             services.AddControllers();
         }
 

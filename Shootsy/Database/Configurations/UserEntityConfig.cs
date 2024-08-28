@@ -16,7 +16,8 @@ namespace Shootsy.Database.Configurations
 
             entity.Property(x => x.Id)
                 .HasColumnName("id")
-                .HasComment("Идентификатор пользователя");
+                .HasComment("Идентификатор пользователя")
+                .ValueGeneratedOnAdd();
 
             entity.Property(x => x.Login)
                 .HasColumnName("login")

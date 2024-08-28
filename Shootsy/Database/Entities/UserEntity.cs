@@ -15,9 +15,6 @@ namespace Shootsy.Database.Entities
 
         public string? Contact { get; init; }
 
-        [Ignore]
-        public int Salt { get; set; }
-
         public string Firstname { get; init; }
 
         public string? Lastname { get; init; }
@@ -30,9 +27,9 @@ namespace Shootsy.Database.Entities
 
         public int? CooperationTypeId { get; init; }
 
-        public int PasswordId { get; init; }
+        public byte[] Password { get; init; }
 
-        public int? TypeId { get; init; }
+        public int TypeId { get; init; }
 
         public bool? isNude { get; init; }
 
@@ -53,7 +50,5 @@ namespace Shootsy.Database.Entities
         public GenderEntity Gender { get; init; }
 
         public CooperationTypeEntity CooperationType { get; init; }
-
-        public ICollection<PasswordEntity> Password { get; init; }
     }
 }

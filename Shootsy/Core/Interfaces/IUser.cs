@@ -63,12 +63,12 @@
         /// <summary>
         /// Идентификатор пароля
         /// </summary>
-        int PasswordId { get; }
+        byte[] Password { get; }
 
         /// <summary>
         /// Идентификатор типа  пользователя
         /// </summary>
-        int? TypeId { get; }
+        int TypeId { get; }
 
         /// <summary>
         /// Съемка ню

@@ -6,8 +6,6 @@ namespace Shootsy.Database
 {
     public class ApplicationContext : DbContext
     {
-        public ApplicationContext (DbContextOptions<ApplicationContext> options) : base(options)
-        { }
 
         public DbSet<UserEntity> Users { get; set; }
         public DbSet<UserSessionEntity> UserSession { get; set; }
@@ -15,7 +13,12 @@ namespace Shootsy.Database
         public DbSet<CityEntity> CityEntities { get; set; }
         public DbSet<GenderEntity> GenderEntities { get; set; }
         public DbSet<CooperationTypeEntity> CooperationTypes { get; set; }
-        public DbSet<PasswordEntity> Passwords { get; set; }
+
+        public ApplicationContext()
+        {
+            //Database.EnsureDeleted();
+            Database.EnsureCreated();
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -25,13 +28,6 @@ namespace Shootsy.Database
             modelBuilder.ApplyConfiguration(new CityEntityConfig());
             modelBuilder.ApplyConfiguration(new  GenderEntityConfig());
             modelBuilder.ApplyConfiguration(new CooperationTypeEntityConfig());
-            modelBuilder.ApplyConfiguration(new PasswordEntityConfig());
-        }
-
-        public ApplicationContext()
-        {
-            Database.EnsureDeleted();
-            Database.EnsureCreated();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

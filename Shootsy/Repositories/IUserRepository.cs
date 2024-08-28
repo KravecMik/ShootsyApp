@@ -8,5 +8,6 @@ namespace Shootsy.Repositories
         Task UpdateAsync(UserDto user, IEnumerable<string> updateProperties, CancellationToken cancellationToken);
         Task<UserDto> GetByIdAsync(int id, CancellationToken cancellationToken);
         Task<IReadOnlyList<UserDto>> GetListAsync(int limit, int offset, CancellationToken cancellationToken);
+        Task DeleteByIdAsync(int id, CancellationToken cancellationToken);
     }
 }
