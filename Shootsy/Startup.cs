@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Shootsy.Controllers;
 using Shootsy.Database;
 using Shootsy.MappingProfiles;
 using Shootsy.Repositories;
@@ -19,9 +18,11 @@ namespace Shootsy
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationContext>();
-            services.AddAutoMapper(typeof(Profiles));
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddAutoMapper(typeof(Profiles));
             services.AddSingleton<IMapper, Mapper>();
+            services.AddSingleton<UserRepository>();
+            services.AddSingleton<Mapper>();
             services.AddSingleton(TimeProvider.System);
             services.AddSingleton<SupportMethods>();
             services.AddControllers();
@@ -33,9 +34,8 @@ namespace Shootsy
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            //app.UseHttpsRedirection();
             app.UseRouting();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

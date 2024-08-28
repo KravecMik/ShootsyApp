@@ -38,6 +38,8 @@ namespace Shootsy.Database
                             .Build();
 
             optionsBuilder.UseNpgsql(config.GetConnectionString("DefaultConnection"));
+
+            Console.WriteLine($"Состояние подключения к БД: {optionsBuilder.IsConfigured}");
         }
     }
 }

@@ -1,0 +1,31 @@
+version: '3'
+services:
+  shootsy:
+    container_name: shootsy
+    restart: always
+    build:
+      context: .
+      dockerfile: Shootsy/Dockerfile
+    ports:
+      - 5000:80
+      - 5001:443
+    depends_on:
+      - shootsy-pg-16.4
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+
+  shootsy-pg-16.4:
+    container_name: shootsy-pg-16.4
+    image: postgres:16.4
+    environment:
+      - POSTGRES_USER=shootsymain
+      - POSTGRES_PASSWORD=shootsy
+      - POSTGRES_DB=shootsy
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata: {}
