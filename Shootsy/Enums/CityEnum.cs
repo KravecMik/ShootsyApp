@@ -2,7 +2,7 @@
 {
     public enum CityEnum
     {
-        Novosibirsk = 54,
-        Barnaul = 22
+        Novosibirsk = 1,
+        Barnaul = 2
     }
 }

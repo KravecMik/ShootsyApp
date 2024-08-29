@@ -21,7 +21,8 @@ namespace Shootsy.Database.Configurations
 
             entity.Property(x => x.Login)
                 .HasColumnName("login")
-                .HasComment("Логин пользователя");
+                .HasComment("Логин пользователя")
+                .HasMaxLength(50);
 
             entity.HasIndex(x => x.Login, "login")
                 .IsUnique();
