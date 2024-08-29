@@ -15,13 +15,11 @@ namespace Shootsy.Controllers
     {
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
-        private readonly SupportMethods _supportMethods;
 
-        public UsersController(IUserRepository userRepository, IMapper mapper, SupportMethods supportMethods)
+        public UsersController(IUserRepository userRepository, IMapper mapper)
         {
             _userRepository = userRepository;
             _mapper = mapper;
-            _supportMethods = supportMethods;
         }
 
         [HttpGet]
@@ -34,31 +32,29 @@ namespace Shootsy.Controllers
                 WriteIndented = true,
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             });
-            return Ok(_supportMethods.RegexStringConverter(resultJson));
+            return Ok(resultJson.RegexStringConverter());
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetByIdAsync([FromRoute] GetUserModel model, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetUserByIdAsync([FromRoute] GetUserModel model, CancellationToken cancellationToken = default)
         {
             var user = await _userRepository.GetByIdAsync(model.Id, cancellationToken);
-            var result = _mapper.Map<UserModelResponse>(user);
             if (user.Id is 0)
                 return NotFound();
 
+            var result = _mapper.Map<UserModelResponse>(user);
             var resultJson = JsonSerializer.Serialize(result, new JsonSerializerOptions()
             {
                 WriteIndented = true,
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             });
-
-            return Ok(_supportMethods.RegexStringConverter(resultJson));
+            return Ok(resultJson.RegexStringConverter());
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteByIdAsync([FromRoute] GetUserModel model, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> DeleteUserByIdAsync([FromRoute] GetUserModel model, CancellationToken cancellationToken = default)
         {
             var user = await _userRepository.GetByIdAsync(model.Id, cancellationToken);
-            var result = _mapper.Map<UserModelResponse>(user);
             if (user.Id is 0)
                 return NotFound();
 
@@ -67,19 +63,31 @@ namespace Shootsy.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateAsync(
+        public async Task<IActionResult> CreateUserAsync(
             CreateUserModel model,
             CancellationToken cancellationToken = default)
         {
             var user = _mapper.Map<UserDto>(model);
             var id = await _userRepository.CreateAsync(user, cancellationToken);
 
-            await _userRepository.UpdateAsync(
-                new UserDto { Id = id, Login = id.ToString() },
-                new[] { nameof(UserDto.Login) },
-                cancellationToken);
-
             return StatusCode(201, id);
+        }
+
+        [HttpPatch]
+        public async Task<IActionResult> UpdateUserAsync(
+        UpdateUserModel model,
+        CancellationToken cancellationToken = default)
+        {
+            var user = new UserDto { Id = model.Id };
+            var operations = model.Operations.ToList();
+
+            var updatedProperties = typeof(UserDto).GetPublicProperties()
+                .Where(property => operations
+                    .Any(operation => operation.path.EqualsPath(property)));
+
+
+            await _userRepository.UpdateAsync(user, updatedProperties, cancellationToken);
+            return NoContent();
         }
     }
 }

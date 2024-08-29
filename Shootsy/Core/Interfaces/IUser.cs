@@ -18,12 +18,12 @@
         /// <summary>
         /// Идентификатор пола
         /// </summary>
-        int GenderId { get; }
+        int Gender { get; }
 
         /// <summary>
         /// Идентификатор города
         /// </summary>
-        int CityId { get; }
+        int City { get; }
 
         /// <summary>
         /// Контакт для связи
@@ -38,7 +38,7 @@
         /// <summary>
         /// Фамилия
         /// </summary>
-        string? Lastname { get; }
+        string Lastname { get; }
 
         /// <summary>
         /// Отчество
@@ -58,27 +58,22 @@
         /// <summary>
         /// Идентификатор типа сотрудничества
         /// </summary>
-        int? CooperationTypeId { get; }
+        int CooperationType { get; }
 
         /// <summary>
-        /// Идентификатор пароля
+        /// Хэш пароля пользователя
         /// </summary>
         byte[] Password { get; }
 
         /// <summary>
-        /// Идентификатор типа  пользователя
+        /// Идентификатор типа пользователя
         /// </summary>
-        int TypeId { get; }
+        int Type { get; }
 
         /// <summary>
         /// Съемка ню
         /// </summary>
         bool? isNude { get; }
-
-        /// <summary>
-        /// Признак удаления пользователя
-        /// </summary>
-        bool? isDelete { get; }
 
         /// <summary>
         /// Признак наличия активной подписки

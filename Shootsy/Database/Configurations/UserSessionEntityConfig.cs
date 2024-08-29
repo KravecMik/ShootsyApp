@@ -34,7 +34,7 @@ namespace Shootsy.Database.Configurations
                 .HasComment("GUID сессии");
 
             entity.HasOne(x => x.User)
-                .WithMany(x => x.UserSessions)
+                .WithMany(x => x.UserSessionEntity)
                 .HasForeignKey(x => x.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
         }

@@ -24,7 +24,6 @@ namespace Shootsy
             services.AddSingleton<UserRepository>();
             services.AddSingleton<Mapper>();
             services.AddSingleton(TimeProvider.System);
-            services.AddSingleton<SupportMethods>();
             services.AddControllers();
         }
 

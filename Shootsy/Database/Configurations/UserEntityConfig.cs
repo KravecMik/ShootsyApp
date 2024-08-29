@@ -46,7 +46,7 @@ namespace Shootsy.Database.Configurations
                 .HasColumnName("fullname")
                 .HasComment("Полное имя");
 
-            entity.Property(x => x.CityId)
+            entity.Property(x => x.City)
                 .HasColumnName("city_id")
                 .HasComment("Город");
 
@@ -55,11 +55,11 @@ namespace Shootsy.Database.Configurations
                 .HasComment("Контакт для связи")
                 .HasMaxLength(100);
 
-            entity.Property(x => x.GenderId)
+            entity.Property(x => x.Gender)
                 .HasColumnName("gender_id")
                 .HasComment("Пол");
 
-            entity.Property(x => x.CooperationTypeId)
+            entity.Property(x => x.CooperationType)
                 .HasColumnName("cooperation_type_id")
                 .HasComment("Тип сотрудничества");
 
@@ -90,7 +90,7 @@ namespace Shootsy.Database.Configurations
                 .HasColumnName("is_nude")
                 .HasComment("Съемка ню");
 
-            entity.Property(x => x.TypeId)
+            entity.Property(x => x.Type)
                 .HasColumnName("type_id")
                 .HasComment("Тип пользователя");
 
@@ -98,21 +98,21 @@ namespace Shootsy.Database.Configurations
                 .HasColumnName("password")
                 .HasComment("Хэш пароль пользователя");
 
-            entity.HasOne(u => u.UserType)
+            entity.HasOne(u => u.UserTypeEntity)
                 .WithMany(u => u.Users)
-                .HasForeignKey(u => u.TypeId);
+                .HasForeignKey(u => u.Type);
 
-            entity.HasOne(u => u.City)
+            entity.HasOne(u => u.CityEntity)
                 .WithMany(u => u.Users)
-                .HasForeignKey(u => u.CityId);
+                .HasForeignKey(u => u.City);
 
-            entity.HasOne(u => u.Gender)
+            entity.HasOne(u => u.GenderEntity)
                 .WithMany(u => u.Users)
-                .HasForeignKey(u => u.GenderId);
+                .HasForeignKey(u => u.Gender);
 
-            entity.HasOne(u => u.CooperationType)
+            entity.HasOne(u => u.CooperationTypeEntity)
                 .WithMany(u => u.Users)
-                .HasForeignKey(u => u.CooperationTypeId);
+                .HasForeignKey(u => u.CooperationType);
         }
     }
 }
