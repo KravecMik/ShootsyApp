@@ -8,12 +8,12 @@
         /// <summary>
         /// Фотограф
         /// </summary>
-        Photographer = 0,
+        Photographer = 1,
 
         /// <summary>
         /// Модель
         /// </summary>
-        Model = 1
+        Model = 2
     }
 
     /// <summary>
@@ -24,17 +24,17 @@
         /// <summary>
         /// Расходы оплачивает модель
         /// </summary>
-        ModelPaid = 0,
+        ModelPaid = 1,
 
         /// <summary>
         /// Расходы оплачивает фотограф
         /// </summary>
-        PhotographPaid = 1,
+        PhotographPaid = 2,
 
         /// <summary>
-        /// Расходы оплачиваются пополам
+        /// Расходы оплачиваются поровну
         /// </summary>
-        FiftyFifty = 2
+        FiftyFifty = 3
     }
 
     /// <summary>
@@ -45,11 +45,11 @@
         /// <summary>
         /// Мужской
         /// </summary>
-        Male = 0,
+        Male = 1,
 
         /// <summary>
         /// Женский
         /// </summary>
-        Female = 1
+        Female = 2
     }
 }

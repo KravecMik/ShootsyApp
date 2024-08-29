@@ -20,8 +20,6 @@ namespace Shootsy.Models
 
         public int? CooperationTypeId { get; init; } = 1;
 
-        public int RoleId { get; init; }
-
         public bool? isNude { get; init; } = false;
 
         public int GenderId { get; init; }
