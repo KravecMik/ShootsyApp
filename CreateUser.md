@@ -1,5 +1,3 @@
-﻿<details>
-
 # Method :: [POST]/Users/CreateUser
 
 ## Назначение
@@ -55,5 +53,3 @@ curl -L -X POST 'http://38.135.55.111:5000/Users' \
 2. Проверить уникальность поля Login
 3. Создать запись в БД таблице security.Users по входным параметрам
 4. Вернуть id созданной записи
-
-</details>
