@@ -49,8 +49,8 @@ curl -L -X GET 'http://38.135.55.111:5000/Users/1'
   "CreateDate": "2024-08-29T04:59:46.267916Z",
   "EditDate": "2024-08-29T04:59:46.287895Z"
   "Login": "156",
-  "Gender": Мужской,
-  "City": Новосибирск,
+  "Gender": "Мужской",
+  "City": "Новосибирск",
   "Contact": "@kravectv",
   "Firstname": "Алабай",
   "Lastname": "Кириешкин",
