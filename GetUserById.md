@@ -16,22 +16,20 @@
 ```json
 {
     "Id": int, //Идентификатор
+    "CreateDate": "DateTime", //Дата создания пользователя
+    "EditDate": "DateTime" //Дата редактирования пользователя
     "Login": "string", //Логин
     "Firstname": "string", //Имя
     "Lastname": "string", //Фамилия
     "Patronymic": "string", //Отчество
-    "Fullname": "string", //Фамилия Имя Отчество (при наличии)
+    "Fullname": "string", //Фамилия Имя Отчество(при наличии)
     "Gender": "string", //Пол
-    "Password": byte[], //Хэш пароля пользователя
     "City": "string", //Город проживания
     "Discription": "string", //Описание профиля
     "Contact": "string", //Контакт для связи
     "CooperationType": "string", //Тип сотрудничества
     "Type": "string", //Тип учетной записи
-    "isNude": bool, //Участвует ли пользователь в ню съемках,
-    "isHasActiveSubscribe": bool, //Активна ли у пользователя подписка,
-    "CreateDate": "DateTime", //Дата создания пользователя
-    "EditDate": "DateTime" //Дата редактирования пользователя
+    "isNude": bool, //Участвует ли пользователь в ню съемках
 }
 ```
 
@@ -48,6 +46,8 @@ curl -L -X GET 'http://38.135.55.111:5000/Users/1'
 ```bash
 {
   "Id": 1,
+  "CreateDate": "2024-08-29T04:59:46.267916Z",
+  "EditDate": "2024-08-29T04:59:46.287895Z"
   "Login": "156",
   "Gender": Мужской,
   "City": Новосибирск,
@@ -56,13 +56,9 @@ curl -L -X GET 'http://38.135.55.111:5000/Users/1'
   "Lastname": "Кириешкин",
   "Fullname": "Алабай Кириешкин",
   "Discription": "Описание моего лучшего профиля",
-  "CooperationTypeId": "Расходы оплачивает модель",
-  "Password": {4 55 6 23},
-  "TypeId": "Фотограф",
-  "isNude": false,
-  "isHasActiveSubscribe": false,
-  "CreateDate": "2024-08-29T04:59:46.267916Z",
-  "EditDate": "2024-08-29T04:59:46.287895Z"
+  "CooperationType": "Расходы оплачивает модель",
+  "Type": "Фотограф",
+  "isNude": false
 }
 ```
 
