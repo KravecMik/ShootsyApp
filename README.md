@@ -3,7 +3,9 @@
 # Users
 *[POST] [CreateUser -- *Создание пользователя*](CreateUser.md)<br>
 *[GET] [GetUserById -- *Получение информации о пользователе по идентификатору*](GetUserById.md)
-
+*[GET] [GetUsersAsync -- *Получение списка пользователей* <br>
+*[DELETE] [DeleteUserByIdAsync -- *Удаление пользователя по идентификатору*<br>
+*[PATCH] [UpdateUserAsync -- *Удаление пользователя по идентификатору*
 ## Перечисления
 
 ### Города
