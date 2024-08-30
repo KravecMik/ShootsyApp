@@ -1,6 +1,6 @@
 ## Методы взаимодействия
 
-*[POST] [CreateUser -- *Создание пользователя*](CreateUser.md)
+*[POST] [CreateUser -- *Создание пользователя*](CreateUser.md)<br>
 *[GET] [GetUserById -- *Получение информации о пользователе по идентификатору*](GetUserById.md)
 ## Перечисления
 
