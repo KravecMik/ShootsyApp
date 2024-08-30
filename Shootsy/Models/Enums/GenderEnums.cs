@@ -1,15 +1,13 @@
-﻿namespace Shootsy.Enums
+﻿using System.ComponentModel;
+
+namespace Shootsy.Enums
 {
     public enum GenderEnums
     {
-        /// <summary>
-        /// Мужской
-        /// </summary>
+        [Description("Мужской")]
         Male = 1,
 
-        /// <summary>
-        /// Женский
-        /// </summary>
+        [Description("Женский")]
         Female = 2
     }
 }

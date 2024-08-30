@@ -5,10 +5,10 @@ namespace Shootsy.Models
 {
     public class UpdateUserModel
     {
-        [Required]
-        public int Id { get; set; }
+        [Required(ErrorMessage = "Укажите Id редактируемого пользователя")]
+        public int Id { get; init; }
 
-        [Required]
-        public IEnumerable<Operation> Operations { get; set; }
+        [Required(ErrorMessage = "Укажите операции над пользователем")]
+        public IEnumerable<Operation> Operations { get; init; }
     }
 }

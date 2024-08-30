@@ -6,6 +6,14 @@ namespace Shootsy.Database
 {
     public class ApplicationContext : DbContext
     {
+        public ApplicationContext()
+        {
+        }
+
+        public ApplicationContext(DbContextOptions<ApplicationContext> options)
+            : base(options)
+        {
+        }
 
         public DbSet<UserEntity> Users { get; set; }
         public DbSet<UserSessionEntity> UserSession { get; set; }
@@ -14,11 +22,11 @@ namespace Shootsy.Database
         public DbSet<GenderEntity> GenderEntities { get; set; }
         public DbSet<CooperationTypeEntity> CooperationTypes { get; set; }
 
-        public ApplicationContext()
-        {
-            //Database.EnsureDeleted();
-            //Database.EnsureCreated();
-        }
+        //public ApplicationContext()
+        //{
+        //    Database.EnsureDeleted();
+        //    Database.EnsureCreated();
+        //}
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -39,7 +47,7 @@ namespace Shootsy.Database
 
             optionsBuilder.UseNpgsql(config.GetConnectionString("DefaultConnection"));
 
-            Console.WriteLine($"Состояние подключения к БД: {optionsBuilder.IsConfigured}");
+            Console.WriteLine($"Состояние подключения к БД: {optionsBuilder.Options.ContextType}");
         }
     }
 }

@@ -2,8 +2,24 @@
 
 namespace Shootsy.Models
 {
-    public class UserModelResponse : UserModelResponseBase
+    public class UserModelResponse
     {
+        public int Id { get; init; }
+
+        public string Login { get; init; }
+
+        public string Gender { get; init; }
+
+        public string City { get; init; }
+
+        public string Firstname { get; init; }
+
+        public string Lastname { get; init; }
+
+        public string CooperationType { get; init; }
+
+        public string Type { get; init; }
+
         public string? Contact { get; init; }
 
         public string? Patronymic { get; init; }
@@ -15,8 +31,6 @@ namespace Shootsy.Models
         public bool? isNude { get; init; }
 
         public bool? isDelete { get; init; }
-
-        public bool? isHasActiveSubscribe { get; init; }
 
         public DateTime? CreateDate { get; init; }
 

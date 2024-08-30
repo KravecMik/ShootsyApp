@@ -11,7 +11,7 @@ namespace Shootsy.Dtos
 
         public string Lastname { get; init; }
 
-        public string Login { get; init; }
+        public string Login { get; set; }
 
         public string Contact { get; init; }
 

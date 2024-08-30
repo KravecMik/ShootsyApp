@@ -13,7 +13,6 @@ namespace WebApplicationStartup
             host.Run();
         }
 
-
         public static IHostBuilder CreateHostBuilder(string currentDirectory, string[] args)
         {
             return Host.CreateDefaultBuilder(args)

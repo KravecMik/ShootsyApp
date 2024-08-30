@@ -1,20 +1,19 @@
-﻿namespace Shootsy.Enums
+﻿using System.ComponentModel;
+
+namespace Shootsy.Enums
 {
     public enum CooperationTypeEnums
     {
-        /// <summary>
-        /// Расходы оплачивает модель
-        /// </summary>
-        ModelPaid = 1,
+        [Description("Не указано")]
+        None = 1,
 
-        /// <summary>
-        /// Расходы оплачивает фотограф
-        /// </summary>
-        PhotographPaid = 2,
+        [Description("Расходы оплачивает модель")]
+        ModelPaid = 2,
 
-        /// <summary>
-        /// Расходы оплачиваются поровну
-        /// </summary>
-        FiftyFifty = 3
+        [Description("Расходы оплачивает фотограф")]
+        PhotographPaid = 3,
+
+        [Description("Расходы оплачиваются поровну")]
+        FiftyFifty = 4
     }
 }

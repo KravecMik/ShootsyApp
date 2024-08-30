@@ -1,10 +1,9 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Shootsy.Database;
 using Shootsy.Database.Entities;
 using Shootsy.Dtos;
-using System.Linq.Expressions;
 
 namespace Shootsy.Repositories
 {
@@ -26,8 +25,8 @@ namespace Shootsy.Repositories
             var userEntity = _mapper.Map<UserEntity>(user);
             var userEntityEntry = await _context.Users.AddAsync(userEntity, cancellationToken);
 
-            UpdateDateTimeProperty(nameof(userEntity.CreateDate), userEntityEntry);
-            UpdateDateTimeProperty(nameof(userEntity.EditDate), userEntityEntry);
+            userEntity.CreateDate = DateTime.UtcNow;
+            userEntity.EditDate = DateTime.UtcNow;
 
             await _context.SaveChangesAsync(cancellationToken);
 
@@ -36,29 +35,14 @@ namespace Shootsy.Repositories
             return userEntity.Id;
         }
 
-        public async Task UpdateAsync(UserDto user, IEnumerable<string> updateProperties, CancellationToken cancellationToken = default)
+        public async Task UpdateAsync(UserDto userDto, JsonPatchDocument<UserDto> jsonPatchDocument, CancellationToken cancellationToken = default)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
-            var currUserEntity = await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == user.Id, cancellationToken);
+            jsonPatchDocument.ApplyTo(userDto);
+            var userEntity = _mapper.Map<UserEntity>(userDto);
 
-            if (currUserEntity is null)
-            {
-                return;
-            }
-
-            var userEntity = _mapper.Map<UserEntity>(user);
-
-            var userEntityEntry = _context.Users.Attach(userEntity);
-
-            foreach (var property in updateProperties)
-            {
-                UpdateDateTimeProperty(property, userEntityEntry);
-                userEntityEntry.Property(property).IsModified = true;
-            }
-
-            UpdateDateTimeProperty(nameof(userEntity.EditDate), userEntityEntry);
-
-            await _context.SaveChangesAsync(cancellationToken);
+            userEntity.EditDate = DateTime.UtcNow;
+            _context.Update(userEntity);
+            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteByIdAsync(int id, CancellationToken cancellationToken)
@@ -67,13 +51,13 @@ namespace Shootsy.Repositories
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task<UserDto> GetByIdAsync(int id, CancellationToken cancellationToken)
+        public async Task<UserDto>? GetByIdAsync(int id, CancellationToken cancellationToken)
         {
             var user = _context.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
             if (user.Result is null)
-                return new UserDto();
+                return null;
             return _mapper.Map<UserDto>(user.Result);
         }
 
@@ -88,28 +72,6 @@ namespace Shootsy.Repositories
                 .Take(limit)
                 .ToArrayAsync(cancellationToken);
             return _mapper.Map<IReadOnlyList<UserDto>>(users);
-        }
-
-        private void UpdateDateTimeProperty(string propertyName, EntityEntry<UserEntity> entityEntry)
-        {
-            switch (propertyName)
-            {
-                case nameof(UserEntity.CreateDate):
-                    SetValueToProperty(entityEntry, x => x.CreateDate, DateTime.UtcNow);
-                    break;
-
-                case nameof(UserEntity.EditDate):
-                    SetValueToProperty(entityEntry, x => x.EditDate, DateTime.UtcNow);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        private void SetValueToProperty(EntityEntry<UserEntity> entityEntry, Expression<Func<UserEntity, DateTime?>> property, DateTime? dateTime)
-        {
-            entityEntry.Property(property).CurrentValue = dateTime;
-            entityEntry.Property(property).IsModified = true;
         }
     }
 }

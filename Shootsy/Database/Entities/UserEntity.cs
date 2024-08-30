@@ -7,7 +7,7 @@ namespace Shootsy.Database.Entities
     {
         public int Id { get; init; }
 
-        public required string Login { get; init; }
+        public string Login { get; set; }
 
         public int Gender { get; init; }
 

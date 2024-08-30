@@ -1,15 +1,13 @@
-﻿namespace Shootsy.Enums
+﻿using System.ComponentModel;
+
+namespace Shootsy.Enums
 {
     public enum UserTypeEnums
     {
-        /// <summary>
-        /// Фотограф
-        /// </summary>
+        [Description("Фотограф")]
         Photographer = 1,
 
-        /// <summary>
-        /// Модель
-        /// </summary>
+        [Description("Модель")]
         Model = 2
     }
 }
