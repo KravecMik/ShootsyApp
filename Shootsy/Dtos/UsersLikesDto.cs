@@ -8,7 +8,7 @@ namespace Shootsy.Dtos
 
         public int UserId { get; set; }
 
-        public TypeEnum UserType { get; set; }
+        public UserTypeEnums UserType { get; set; }
 
         public int LikedUserId { get; set; }
     }

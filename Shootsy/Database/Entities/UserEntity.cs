@@ -7,17 +7,17 @@ namespace Shootsy.Database.Entities
     {
         public int Id { get; init; }
 
-        public string? Login { get; init; }
+        public string Login { get; set; }
 
-        public int GenderId { get; init; }
+        public int Gender { get; init; }
 
-        public int CityId { get; init; }
+        public int City { get; init; }
 
         public string? Contact { get; init; }
 
-        public string Firstname { get; init; }
+        public required string Firstname { get; init; }
 
-        public string? Lastname { get; init; }
+        public required string Lastname { get; init; }
 
         public string? Patronymic { get; init; }
 
@@ -25,11 +25,11 @@ namespace Shootsy.Database.Entities
 
         public string? Discription { get; init; }
 
-        public int? CooperationTypeId { get; init; }
+        public int CooperationType { get; init; }
 
-        public byte[] Password { get; init; }
+        public required byte[] Password { get; init; }
 
-        public int TypeId { get; init; }
+        public int Type { get; init; }
 
         public bool? isNude { get; init; }
 
@@ -41,14 +41,14 @@ namespace Shootsy.Database.Entities
 
         public DateTime? EditDate { get; set; }
 
-        public ICollection<UserSessionEntity>? UserSessions { get; init; }
+        public ICollection<UserSessionEntity>? UserSessionEntity { get; init; }
 
-        public UserTypeEntity UserType { get; init; }
+        public required UserTypeEntity UserTypeEntity { get; init; }
 
-        public CityEntity City { get; init; }
+        public required CityEntity CityEntity { get; init; }
 
-        public GenderEntity Gender { get; init; }
+        public required GenderEntity GenderEntity { get; init; }
 
-        public CooperationTypeEntity CooperationType { get; init; }
+        public required CooperationTypeEntity CooperationTypeEntity { get; init; }
     }
 }

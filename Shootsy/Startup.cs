@@ -2,18 +2,13 @@
 using Shootsy.Database;
 using Shootsy.MappingProfiles;
 using Shootsy.Repositories;
-using Shootsy.Security;
+using Newtonsoft.Json;
+using JsonPatchSample;
 
 namespace Shootsy
 {
     public class Startup
     {
-        public IConfiguration Configuration { get; set; }
-
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -24,8 +19,10 @@ namespace Shootsy
             services.AddSingleton<UserRepository>();
             services.AddSingleton<Mapper>();
             services.AddSingleton(TimeProvider.System);
-            services.AddSingleton<SupportMethods>();
-            services.AddControllers();
+            services.AddControllers(options =>
+            {
+                options.InputFormatters.Insert(0, MyJPIF.GetJsonPatchInputFormatter());
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -34,7 +31,6 @@ namespace Shootsy
             {
                 app.UseDeveloperExceptionPage();
             }
-            //app.UseHttpsRedirection();
             app.UseRouting();
             app.UseEndpoints(endpoints =>
             {
