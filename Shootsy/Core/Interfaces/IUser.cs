@@ -11,6 +11,16 @@
         int Id { get; }
 
         /// <summary>
+        /// Дата создания пользователя
+        /// </summary>
+        DateTime CreateDate { get; }
+
+        /// <summary>
+        /// Дата редактирования пользователя
+        /// </summary>
+        DateTime EditDate { get; }
+
+        /// <summary>
         /// Логин
         /// </summary>
         string Login { get; }
@@ -66,6 +76,11 @@
         byte[] Password { get; }
 
         /// <summary>
+        /// Аватар пользователя
+        /// </summary>
+        byte[]? Avatar { get; }
+
+        /// <summary>
         /// Идентификатор типа пользователя
         /// </summary>
         int Type { get; }
@@ -74,20 +89,5 @@
         /// Съемка ню
         /// </summary>
         bool? isNude { get; }
-
-        /// <summary>
-        /// Признак наличия активной подписки
-        /// </summary>
-        bool? isHasActiveSubscribe { get; }
-
-        /// <summary>
-        /// Дата создания пользователя
-        /// </summary>
-        DateTime? CreateDate { get; }
-
-        /// <summary>
-        /// Дата редактирования пользователя
-        /// </summary>
-        DateTime? EditDate { get; }
     }
 }

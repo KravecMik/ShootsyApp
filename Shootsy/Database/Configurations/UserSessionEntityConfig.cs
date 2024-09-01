@@ -25,7 +25,7 @@ namespace Shootsy.Database.Configurations
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasComment("Дата создания сессии");
 
-            entity.Property(x => x.UserId)
+            entity.Property(x => x.User)
                 .HasColumnName("user_id")
                 .HasComment("Идентификатор пользователя");
 
@@ -33,9 +33,9 @@ namespace Shootsy.Database.Configurations
                 .HasColumnName("guid")
                 .HasComment("GUID сессии");
 
-            entity.HasOne(x => x.User)
+            entity.HasOne(x => x.UserEntity)
                 .WithMany(x => x.UserSessionEntity)
-                .HasForeignKey(x => x.UserId)
+                .HasForeignKey(x => x.User)
                 .OnDelete(DeleteBehavior.ClientSetNull);
         }
     }

@@ -10,7 +10,7 @@
         /// <summary>
         /// Идентификатор пользователя
         /// </summary>
-        public int UserId { get; init; }
+        public int User { get; init; }
 
         /// <summary>
         /// Дата начала сессии
@@ -25,6 +25,6 @@
         /// <summary>
         /// Сущность пользователя
         /// </summary>
-        public UserEntity User { get; init; }
+        public UserEntity UserEntity { get; init; }
     }
 }

@@ -30,6 +30,7 @@
     "CooperationType": "string", //Тип сотрудничества
     "Type": "string", //Тип учетной записи
     "isNude": bool, //Участвует ли пользователь в ню съемках
+    "Avatar": byte[] //Массив байт аватара
 }
 ```
 
@@ -58,7 +59,8 @@ curl -L -X GET 'http://38.135.55.111:5000/Users/1'
   "Discription": "Описание моего лучшего профиля",
   "CooperationType": "Расходы оплачивает модель",
   "Type": "Фотограф",
-  "isNude": false
+  "isNude": false,
+  "Avatar": [14, 56, 78]
 }
 ```
 

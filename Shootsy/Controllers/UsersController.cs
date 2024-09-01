@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Shootsy.Dtos;
 using Shootsy.Models;
 using Shootsy.Repositories;
+using System.ComponentModel.DataAnnotations;
 
 namespace Shootsy.Controllers
 {

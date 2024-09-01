@@ -9,9 +9,9 @@ using Shootsy.Security;
 
 namespace Shootsy.MappingProfiles
 {
-    public class Profiles : Profile
+    public class UserProfiles : Profile
     {
-        public Profiles()
+        public UserProfiles()
         {
             CreateMap<CreateUserModel, UserDto>();
             CreateMap<UserDto, UserModelResponse>()

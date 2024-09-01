@@ -82,10 +82,6 @@ namespace Shootsy.Database.Configurations
                 .HasComment("Описание")
                 .HasMaxLength(250);
 
-            entity.Property(x => x.isHasActiveSubscribe)
-                .HasColumnName("is_has_active_subscribe")
-                .HasComment("Признак наличия активной подписки");
-
             entity.Property(x => x.isNude)
                 .HasColumnName("is_nude")
                 .HasComment("Съемка ню");
@@ -97,6 +93,10 @@ namespace Shootsy.Database.Configurations
             entity.Property(x => x.Password)
                 .HasColumnName("password")
                 .HasComment("Хэш пароль пользователя");
+
+            entity.Property(x => x.Avatar)
+                .HasColumnName("avatar")
+                .HasComment("Хэш аватар пользователя");
 
             entity.HasOne(u => u.UserTypeEntity)
                 .WithMany(u => u.Users)

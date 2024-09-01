@@ -6,27 +6,20 @@ namespace Shootsy.Database
 {
     public class ApplicationContext : DbContext
     {
-        public ApplicationContext()
-        {
-        }
-
         public ApplicationContext(DbContextOptions<ApplicationContext> options)
             : base(options)
         {
+            //Database.EnsureDeleted();
+            Database.EnsureCreated();
         }
 
         public DbSet<UserEntity> Users { get; set; }
-        public DbSet<UserSessionEntity> UserSession { get; set; }
+        public DbSet<UserSessionEntity> UserSessions { get; set; }
         public DbSet<UserTypeEntity> UserTypes { get; set; }
-        public DbSet<CityEntity> CityEntities { get; set; }
-        public DbSet<GenderEntity> GenderEntities { get; set; }
+        public DbSet<CityEntity> Cities { get; set; }
+        public DbSet<GenderEntity> Genders { get; set; }
         public DbSet<CooperationTypeEntity> CooperationTypes { get; set; }
-
-        //public ApplicationContext()
-        //{
-        //    Database.EnsureDeleted();
-        //    Database.EnsureCreated();
-        //}
+        public DbSet<FileEntity> Files { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -34,8 +27,9 @@ namespace Shootsy.Database
             modelBuilder.ApplyConfiguration(new UserSessionEntityConfig());
             modelBuilder.ApplyConfiguration(new UserTypeEntityConfig());
             modelBuilder.ApplyConfiguration(new CityEntityConfig());
-            modelBuilder.ApplyConfiguration(new  GenderEntityConfig());
+            modelBuilder.ApplyConfiguration(new GenderEntityConfig());
             modelBuilder.ApplyConfiguration(new CooperationTypeEntityConfig());
+            modelBuilder.ApplyConfiguration(new FileEntityConfig());
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
