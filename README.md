@@ -12,7 +12,7 @@
 *[GET] GetFileById <br>
 *[GET] GetFiles <br>
 *[PATCH] UpdateFile <br>
-*[DELETE] DeleteFileById
+*[DELETE] DeleteFileById <br>
 *[DELETE] DeleteManyFiles
 
 ## Перечисления
