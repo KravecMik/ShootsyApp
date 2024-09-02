@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Shootsy.Dtos;
 using Shootsy.Models;
 using Shootsy.Repositories;
-using System.ComponentModel.DataAnnotations;
 
 namespace Shootsy.Controllers
 {
@@ -22,6 +21,21 @@ namespace Shootsy.Controllers
             _mapper = mapper;
         }
 
+        [HttpPost]
+        public async Task<IActionResult> CreateUserAsync(
+            [FromBody, BindRequired]
+            CreateUserModel model,
+            CancellationToken cancellationToken = default)
+        {
+            var user = _mapper.Map<UserDto>(model);
+            var existUsers = await _userRepository.GetListAsync(100, 0, cancellationToken);
+            if (existUsers.Any(x => x.Login.Contains(model.Login)))
+                return BadRequest();
+
+            var id = await _userRepository.CreateAsync(user, cancellationToken);
+            return StatusCode(201, id);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetUsersAsync([FromQuery] GetUsersModel model, CancellationToken cancellationToken = default)
         {
@@ -31,37 +45,14 @@ namespace Shootsy.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserByIdAsync([FromRoute] GetUserModel model, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetUserByIdAsync([FromRoute] int id, CancellationToken cancellationToken = default)
         {
-            var user = await _userRepository.GetByIdAsync(model.Id, cancellationToken);
+            var user = await _userRepository.GetByIdAsync(id, cancellationToken);
             if (user is null)
                 return NotFound();
 
             var result = _mapper.Map<UserModelResponse>(user);
             return Ok(result);
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUserByIdAsync([FromRoute] GetUserModel model, CancellationToken cancellationToken = default)
-        {
-            var user = await _userRepository.GetByIdAsync(model.Id, cancellationToken);
-            if (user is null)
-                return NotFound();
-
-            await _userRepository.DeleteByIdAsync(model.Id, cancellationToken);
-            return NoContent();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> CreateUserAsync(
-            [FromBody, BindRequired]
-            CreateUserModel model,
-            CancellationToken cancellationToken = default)
-        {
-            var user = _mapper.Map<UserDto>(model);
-            var id = await _userRepository.CreateAsync(user, cancellationToken);
-
-            return StatusCode(201, id);
         }
 
         [HttpPatch("{id}")]
@@ -74,6 +65,17 @@ namespace Shootsy.Controllers
                 return NotFound();
 
             await _userRepository.UpdateAsync(currentUser, patchDoc, cancellationToken);
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUserByIdAsync([FromRoute] int id, CancellationToken cancellationToken = default)
+        {
+            var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+            if (user is null)
+                return NotFound();
+
+            await _userRepository.DeleteByIdAsync(id, cancellationToken);
             return NoContent();
         }
     }

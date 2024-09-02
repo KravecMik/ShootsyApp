@@ -39,10 +39,5 @@
         /// Путь до содержимого
         /// </summary>
         string ContentPath { get; set; }
-
-        /// <summary>
-        /// Признак удаления
-        /// </summary>
-        bool isDeleted { get; set; }
     }
 }

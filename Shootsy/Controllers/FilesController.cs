@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
 using Shootsy.Dtos;
 using Shootsy.Models;
 using Shootsy.Repositories;
-using System.ComponentModel.DataAnnotations;
 
 namespace Shootsy.Controllers
 {
@@ -10,15 +11,17 @@ namespace Shootsy.Controllers
     [Route("Files")]
     public class FilesController : ControllerBase
     {
+        private readonly IMapper _mapper;
         private readonly IFileRepository _fileRepository;
         private readonly IUserRepository _userRepository;
         InternalConstants _internalConstants;
 
-        public FilesController(IFileRepository fileRepository, IUserRepository userRepository, InternalConstants internalConstants)
+        public FilesController(IFileRepository fileRepository, IUserRepository userRepository, InternalConstants internalConstants, IMapper mapper)
         {
             _fileRepository = fileRepository;
             _internalConstants = internalConstants;
             _userRepository = userRepository;
+            _mapper = mapper;
         }
 
         [HttpPost]
@@ -49,9 +52,7 @@ namespace Shootsy.Controllers
                 User = Convert.ToInt16(model.User),
                 FileName = model.File.FileName,
                 Extension = ext,
-                ContentPath = fullPath,
-                isDeleted = false,
-
+                ContentPath = fullPath
             };
 
             var id = await _fileRepository.CreateAsync(file, cancellationToken);
@@ -59,20 +60,66 @@ namespace Shootsy.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetFileByIdAsync([FromRoute] [Required(ErrorMessage = "Укажите идентификатор пользователя")] int id, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetFileByIdAsync([FromRoute] int id, CancellationToken cancellationToken = default)
         {
             var file = await _fileRepository.GetByIdAsync(id, cancellationToken);
             if (file is null)
                 return NotFound();
 
-            return Ok(file);
+            var result = _mapper.Map<FileModelResponse>(file);
+            return Ok(result);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetFilesAsync([FromQuery] GetFilesModel model, CancellationToken cancellationToken = default)
+        {
+            var files = await _fileRepository.GetListAsync(model.Limit, model.Offset, cancellationToken);
+            var result = _mapper.Map<IEnumerable<FileModelResponse>>(files);
+            return Ok(result.OrderByDescending(x => x.Id));
+        }
 
-        //[HttpDelete]
-        //public async Task<IActionResult> DeleteFileAsync(int id, CancellationToken cancellationToken = default)
-        //{
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdateFileAsync(
+        [FromBody] JsonPatchDocument<FileDto> patchDoc, [FromRoute] int id,
+        CancellationToken cancellationToken = default)
+        {
+            var currentFile = await _fileRepository.GetByIdAsync(id, cancellationToken);
+            if (currentFile is null)
+                return NotFound();
 
-        //}
+            await _fileRepository.UpdateAsync(currentFile, patchDoc, cancellationToken);
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteFileByIdAsync([FromRoute] int id, CancellationToken cancellationToken = default)
+        {
+            var file = await _fileRepository.GetByIdAsync(id, cancellationToken);
+            if (file is null)
+                return NotFound();
+
+            await _fileRepository.DeleteByIdAsync(id, cancellationToken);
+
+            if (System.IO.File.Exists(file.ContentPath))
+                System.IO.File.Delete(file.ContentPath);
+
+            return NoContent();
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteManyFilesAsync([FromQuery] int[] ids, CancellationToken cancellationToken = default)
+        {
+            foreach (var id in ids)
+            {
+                var file = await _fileRepository.GetByIdAsync(id, cancellationToken);
+                if (file is null)
+                    return NotFound();
+                await _fileRepository.DeleteByIdAsync(id, cancellationToken);
+
+                if (System.IO.File.Exists(file.ContentPath))
+                    System.IO.File.Delete(file.ContentPath);
+            }
+            return NoContent();
+        }
     }
 }

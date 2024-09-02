@@ -38,10 +38,6 @@ namespace Shootsy.Database.Configurations
                 .HasColumnName("content_path")
                 .HasComment("Путь до содержимого файла");
 
-            entity.Property(x => x.isDeleted)
-                .HasColumnName("is_deleted")
-                .HasComment("Признак удаления файла");
-
             entity.HasOne(x => x.UserEntity)
                 .WithMany(x => x.FileEntity)
                 .HasForeignKey(x => x.User)

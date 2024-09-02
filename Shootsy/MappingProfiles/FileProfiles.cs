@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Shootsy.Database.Entities;
 using Shootsy.Dtos;
+using Shootsy.Models;
 
 namespace Shootsy.MappingProfiles
 {
@@ -8,7 +9,10 @@ namespace Shootsy.MappingProfiles
     {
         public FileProfiles()
         {
-            CreateMap<FileDto, FileEntity>();
+            CreateMap<FileDto, FileEntity>().ReverseMap();
+            CreateMap<FileDto, FileModelResponse>()
+                                .ForMember(dest => dest.UserID, opt => opt.MapFrom(
+                    src => src.User));
         }
     }
 }

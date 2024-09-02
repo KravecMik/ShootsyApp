@@ -24,6 +24,7 @@ namespace Shootsy.Repositories
             var fileEntityEntry = await _context.Files.AddAsync(fileEntity, cancellationToken);
 
             fileEntity.CreateDate = DateTime.UtcNow;
+            fileEntity.EditDate = DateTime.UtcNow;
 
             await _context.SaveChangesAsync(cancellationToken);
             fileEntityEntry.State = EntityState.Detached;
@@ -44,16 +45,15 @@ namespace Shootsy.Repositories
         public async Task<IReadOnlyList<FileDto>>? GetListAsync(
             int limit,
             int offset,
-            int? userId,
             CancellationToken cancellationToken = default)
         {
             var query = _context.Files.AsNoTracking().Select(x => x);
-            var userEntities = await query
-                .Where(x => x.User == userId)
+            var fileEntities = await query
                 .Skip(offset)
                 .Take(limit)
                 .ToArrayAsync(cancellationToken);
-            return _mapper.Map<IReadOnlyList<FileDto>>(userEntities);
+
+            return _mapper.Map<IReadOnlyList<FileDto>>(fileEntities);
         }
 
         public async Task UpdateAsync(FileDto fileDto, JsonPatchDocument<FileDto> jsonPatchDocument, CancellationToken cancellationToken = default)
@@ -69,14 +69,6 @@ namespace Shootsy.Repositories
         public async Task DeleteByIdAsync(int id, CancellationToken cancellationToken)
         {
             var fileEntity = await _context.Files.Where(x => x.Id == id).ExecuteDeleteAsync();
-            await _context.SaveChangesAsync(cancellationToken);
-        }
-
-        public async Task DeleteManyAsync(IEnumerable<int> ids, CancellationToken cancellationToken)
-        {
-            var fileEntity = await _context.Files
-                .Where(x => ids.Any(y => y == x.Id))
-                .ExecuteDeleteAsync();
             await _context.SaveChangesAsync(cancellationToken);
         }
     }

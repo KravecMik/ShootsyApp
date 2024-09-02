@@ -7,9 +7,8 @@ namespace Shootsy.Repositories
     {
         Task<int> CreateAsync(FileDto file, CancellationToken cancellationToken);
         Task<FileDto>? GetByIdAsync(int id, CancellationToken cancellationToken);
-        Task<IReadOnlyList<FileDto>>? GetListAsync(int limit, int offset, int? userId, CancellationToken cancellationToken);
+        Task<IReadOnlyList<FileDto>>? GetListAsync(int limit, int offset, CancellationToken cancellationToken);
         Task UpdateAsync(FileDto fileDto, JsonPatchDocument<FileDto> jsonPatchDocument, CancellationToken cancellationToken = default);
         Task DeleteByIdAsync(int id, CancellationToken cancellationToken);
-        Task DeleteManyAsync(IEnumerable<int> ids, CancellationToken cancellationToken);
     }
 }
