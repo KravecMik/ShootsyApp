@@ -11,8 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ApiDocs", "ApiDocs", "{7627
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Users", "Users", "{D4575081-CACE-4F52-8F11-9A064A5CEE9F}"
 	ProjectSection(SolutionItems) = preProject
-		CreateUser.md = CreateUser.md
 		GetUserById.md = GetUserById.md
+		CreateUser.md = CreateUser.md
 	EndProjectSection
 EndProject
 Global
