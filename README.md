@@ -1,19 +1,19 @@
 # Методы взаимодействия
 
 # Users
-*[POST] [CreateUserAsync -- *Создание пользователя*](CreateUser.md)<br>
-*[GET] [GetUserByIdAsync -- *Получение информации о пользователе по идентификатору*](GetUserById.md)<br>
-*[GET] GetUsersAsync <br>
-*[PATCH] UpdateUserAsync <br>
-*[DELETE] DeleteUserByIdAsync
+*[POST] [CreateUser -- *Создание пользователя*](CreateUser.md)<br>
+*[GET] [GetUserById -- *Получение информации о пользователе по идентификатору*](GetUserById.md)<br>
+*[GET] GetUsers <br>
+*[PATCH] UpdateUser <br>
+*[DELETE] DeleteUserById
 
 # Files
-*[POST] CreateFileAsync <br>
-*[GET] GetFileByIdAsync <br>
-*[GET] GetFilesAsync <br>
-*[PATCH] UpdateFileAsync <br>
-*[DELETE] DeleteFileByIdAsync
-*[DELETE] DeleteManyFilesAsync
+*[POST] CreateFile <br>
+*[GET] GetFileById <br>
+*[GET] GetFiles <br>
+*[PATCH] UpdateFile <br>
+*[DELETE] DeleteFileById
+*[DELETE] DeleteManyFiles
 
 ## Перечисления
 
