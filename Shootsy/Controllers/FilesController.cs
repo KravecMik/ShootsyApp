@@ -73,7 +73,7 @@ namespace Shootsy.Controllers
         [HttpGet]
         public async Task<IActionResult> GetFilesAsync([FromQuery] GetFilesModel model, CancellationToken cancellationToken = default)
         {
-            var files = await _fileRepository.GetListAsync(model.Limit, model.Offset, cancellationToken);
+            var files = await _fileRepository.GetListAsync(Convert.ToInt16(model.Limit), model.Offset, model.Filter, model.Sort, cancellationToken);
             var result = _mapper.Map<IEnumerable<FileModelResponse>>(files);
             return Ok(result.OrderByDescending(x => x.Id));
         }

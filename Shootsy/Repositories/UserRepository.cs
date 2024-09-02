@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Shootsy.Database;
 using Shootsy.Database.Entities;
 using Shootsy.Dtos;
+using System.Linq.Dynamic.Core;
 
 namespace Shootsy.Repositories
 {
@@ -42,15 +43,28 @@ namespace Shootsy.Repositories
             return _mapper.Map<UserDto>(userEntity.Result);
         }
 
+        public async Task<UserDto>? GetByLoginAsync(string login, CancellationToken cancellationToken)
+        {
+            var userEntity = _context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Login == login, cancellationToken);
+            if (userEntity.Result is null)
+                return null;
+            return _mapper.Map<UserDto>(userEntity.Result);
+        }
+
         public async Task<IReadOnlyList<UserDto>> GetListAsync(
             int limit,
             int offset,
+            string filter,
+            string sort,
             CancellationToken cancellationToken = default)
         {
-            var query = _context.Users.AsNoTracking().Select(x => x);
+            var query = _context.Users.AsNoTracking().Select(x => x).Where(filter);
             var userEntities = await query
                 .Skip(offset)
                 .Take(limit)
+                .OrderBy(sort)
                 .ToArrayAsync(cancellationToken);
             return _mapper.Map<IReadOnlyList<UserDto>>(userEntities);
         }

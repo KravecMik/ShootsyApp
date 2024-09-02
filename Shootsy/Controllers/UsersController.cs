@@ -30,8 +30,8 @@ namespace Shootsy.Controllers
             CancellationToken cancellationToken = default)
         {
             var user = _mapper.Map<UserDto>(model);
-            var existUsers = await _userRepository.GetListAsync(100, 0, cancellationToken);
-            if (existUsers.Any(x => x.Login.Contains(model.Login)))
+            var existUsers = await _userRepository.GetByLoginAsync(model.Login, cancellationToken);
+            if (existUsers != null)
                 return BadRequest();
 
             var id = await _userRepository.CreateAsync(user, cancellationToken);
@@ -41,9 +41,9 @@ namespace Shootsy.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUsersAsync([FromQuery] GetUsersModel model, CancellationToken cancellationToken = default)
         {
-            var users = await _userRepository.GetListAsync(model.Limit, model.Offset, cancellationToken);
+            var users = await _userRepository.GetListAsync(Convert.ToInt16(model.Limit), model.Offset, model.Filter, model.Sort, cancellationToken);
             var result = _mapper.Map<IEnumerable<UserModelResponse>>(users);
-            return Ok(result.OrderByDescending(x => x.Id));
+            return Ok(result);
         }
 
         [HttpGet("{id}")]

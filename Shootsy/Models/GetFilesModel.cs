@@ -1,16 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace Shootsy.Models
 {
     public class GetFilesModel
     {
         [FromQuery(Name = "offset")]
-        public int Offset { get; set; } = 0;
+        public int Offset { get; set; }
 
         [FromQuery(Name = "limit")]
-        public int Limit { get; set; } = 100;
+        [Required(ErrorMessage = "Укажите сколько записей необходимо вернуть")]
+        public string Limit { get; set; }
 
-        [FromQuery(Name = "userId")]
-        public int? UserId { get; set; }
+        [FromQuery(Name = "filter")]
+        public string Filter { get; set; } = "id > 0";
+
+        [FromQuery(Name = "sort")]
+        public string Sort { get; set; } = "id desc";
     }
 }

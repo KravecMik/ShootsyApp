@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Shootsy.Database;
 using Shootsy.Database.Entities;
 using Shootsy.Dtos;
+using System.Linq.Dynamic.Core;
 
 namespace Shootsy.Repositories
 {
@@ -45,14 +46,16 @@ namespace Shootsy.Repositories
         public async Task<IReadOnlyList<FileDto>>? GetListAsync(
             int limit,
             int offset,
+            string filter,
+            string sort,
             CancellationToken cancellationToken = default)
         {
-            var query = _context.Files.AsNoTracking().Select(x => x);
+            var query = _context.Files.AsNoTracking().Select(x => x).Where(filter);
             var fileEntities = await query
                 .Skip(offset)
                 .Take(limit)
+                .OrderBy(sort)
                 .ToArrayAsync(cancellationToken);
-
             return _mapper.Map<IReadOnlyList<FileDto>>(fileEntities);
         }
 
