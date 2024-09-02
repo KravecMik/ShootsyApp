@@ -3,7 +3,6 @@
 # Users
 *[POST] [CreateUser -- *Создание пользователя*](CreateUser.md)<br>
 *[GET] [GetUserById -- *Получение информации о пользователе по идентификатору*](GetUserById.md)<br>
-*[GET] GetUserByLogin <br>
 *[GET] GetUsers <br>
 *[PATCH] UpdateUser <br>
 *[DELETE] DeleteUserById
