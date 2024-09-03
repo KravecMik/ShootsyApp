@@ -35,12 +35,12 @@ namespace Shootsy.Repositories
 
         public async Task<FileDto>? GetByIdAsync(int id, CancellationToken cancellationToken)
         {
-            var fileEntity = _context.Files
+            var fileEntity = await _context.Files
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-            if (fileEntity.Result is null)
+            if (fileEntity is null)
                 return null;
-            return _mapper.Map<FileDto>(fileEntity.Result);
+            return _mapper.Map<FileDto>(fileEntity);
         }
 
         public async Task<IReadOnlyList<FileDto>>? GetListAsync(

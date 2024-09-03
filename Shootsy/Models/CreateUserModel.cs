@@ -44,7 +44,7 @@ namespace Shootsy.Models
         [Range(1, 4, ErrorMessage = "Указанное значение поля не поддерживается")]
         public int? CooperationType { get; init; } = 1;
 
-        public bool? isNude { get; init; }
+        public bool? isNude { get; init; } = false;
 
         public byte[]? Avatar { get; init; }
 

@@ -1,12 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq.Dynamic.Core;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Shootsy.Dtos;
 using Shootsy.Models;
 using Shootsy.Repositories;
-using System.Linq;
+using Shootsy.Security;
 
 namespace Shootsy.Controllers
 {
@@ -16,11 +15,13 @@ namespace Shootsy.Controllers
     {
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
+        private readonly IUserSessionRepository _userSessionRepository;
 
-        public UsersController(IUserRepository userRepository, IMapper mapper)
+        public UsersController(IUserRepository userRepository, IMapper mapper, IUserSessionRepository userSessionRepository)
         {
             _userRepository = userRepository;
             _mapper = mapper;
+            _userSessionRepository = userSessionRepository;
         }
 
         [HttpPost]
@@ -35,7 +36,26 @@ namespace Shootsy.Controllers
                 return BadRequest();
 
             var id = await _userRepository.CreateAsync(user, cancellationToken);
-            return StatusCode(201, id);
+            var session = await _userSessionRepository.CreateAsync(id, cancellationToken);
+            return StatusCode(201, session);
+        }
+
+        [HttpPost("auth")]
+        public async Task<IActionResult> SignInAsync(
+            [FromBody, BindRequired]
+            SignInModel model,
+            CancellationToken cancellationToken = default)
+        {
+            var user = await _userRepository.GetByLoginAsync(model.Login, cancellationToken);
+            if (user is null)
+                return BadRequest();
+
+            var passwordVerification = model.Password.IsPasswordValid(model.Login, user.Password);
+            if (!passwordVerification)
+                return BadRequest();
+
+            var session = await _userSessionRepository.CreateAsync(user.Id, cancellationToken);
+            return StatusCode(200, session);
         }
 
         [HttpGet]
@@ -47,8 +67,19 @@ namespace Shootsy.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserByIdAsync([FromRoute] int id, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetUserByIdAsync([FromRoute] int id, [FromHeader] string? session, CancellationToken cancellationToken = default)
         {
+            if (session is null)
+                return Unauthorized();
+
+            var sessionGud = Guid.TryParse(session, out Guid res);
+            if (!sessionGud)
+                return Unauthorized();
+
+            var isSessionActive = await _userSessionRepository.isSessionActive(res, cancellationToken);
+            if (!isSessionActive)
+                return Unauthorized();
+
             var user = await _userRepository.GetByIdAsync(id, cancellationToken);
             if (user is null)
                 return NotFound();

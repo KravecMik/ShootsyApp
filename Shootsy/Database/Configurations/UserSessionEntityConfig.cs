@@ -20,10 +20,15 @@ namespace Shootsy.Database.Configurations
                 .HasColumnName("id")
                 .HasComment("Идентификатор сессии");
 
-            entity.Property(x => x.CreateDate)
-                .HasColumnName("create_date")
+            entity.Property(x => x.SessionDateFrom)
+                .HasColumnName("date_from")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasComment("Дата создания сессии");
+                .HasComment("Дата начала сессии");
+
+            entity.Property(x => x.SessionDateTo)
+                .HasColumnName("date_to")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasComment("Дата окончания сессии");
 
             entity.Property(x => x.User)
                 .HasColumnName("user_id")

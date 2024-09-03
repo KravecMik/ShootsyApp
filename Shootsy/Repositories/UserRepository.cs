@@ -35,22 +35,52 @@ namespace Shootsy.Repositories
 
         public async Task<UserDto>? GetByIdAsync(int id, CancellationToken cancellationToken)
         {
-            var userEntity = _context.Users
+            var userEntity = await _context.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-            if (userEntity.Result is null)
+            if (userEntity is null)
                 return null;
-            return _mapper.Map<UserDto>(userEntity.Result);
+            return _mapper.Map<UserDto>(userEntity);
         }
 
         public async Task<UserDto>? GetByLoginAsync(string login, CancellationToken cancellationToken)
         {
-            var userEntity = _context.Users
+            var userEntity = await _context.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Login == login, cancellationToken);
-            if (userEntity.Result is null)
+            if (userEntity is null)
                 return null;
-            return _mapper.Map<UserDto>(userEntity.Result);
+            return _mapper.Map<UserDto>(userEntity);
+        }
+
+        public async Task<UserDto>? GetByGuidAsync(Guid guid, CancellationToken cancellationToken)
+        {
+            var sessionEntity = await _context.UserSessions
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Guid == guid, cancellationToken);
+            if (sessionEntity is null)
+                return null;
+
+            var user = await GetByIdAsync(sessionEntity.User, cancellationToken);
+            if (user is null)
+                return null;
+
+            return user;
+        }
+
+        public async Task<Guid>? GetLastSessionAsync(int userId, CancellationToken cancellationToken)
+        {
+            var query = _context.UserSessions.AsNoTracking().Select(x => x).Where($"user eq {userId}");
+            var sessionEntities = await query
+                .Skip(0)
+                .Take(1)
+                .OrderBy("id desc")
+                .ToArrayAsync(cancellationToken);
+            var session = sessionEntities.FirstOrDefault();
+            if (session is null)
+                return Guid.Empty;
+
+            return session.Guid;
         }
 
         public async Task<IReadOnlyList<UserDto>> GetListAsync(

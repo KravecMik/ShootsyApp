@@ -1,28 +1,13 @@
-﻿namespace Shootsy.Dtos
+﻿using Shootsy.Core.Interfaces;
+
+namespace Shootsy.Dtos
 {
-    /// <summary>
-    /// Модель сессии пользователя
-    /// </summary>
-    public class UserSessionDto
+    public class UserSessionDto : IUserSession
     {
-        /// <summary>
-        /// Идентификатор сессии
-        /// </summary>
         public int Id { get; init; }
-
-        /// <summary>
-        /// Идентификатор пользователя
-        /// </summary>
-        public int UserId { get; init; }
-
-        /// <summary>
-        /// Дата начала сессии
-        /// </summary>
-        public DateTime StartDate { get; init; }
-
-        /// <summary>
-        /// Guid сессии 
-        /// </summary>
-        public Guid Guid { get; init; } = Guid.NewGuid();
+        public int User { get; init; }
+        public DateTime SessionDateFrom { get; set; }
+        public DateTime SessionDateTo { get; set; }
+        public Guid Guid { get; init; }
     }
 }

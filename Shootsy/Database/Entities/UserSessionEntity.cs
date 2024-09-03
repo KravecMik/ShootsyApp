@@ -1,30 +1,19 @@
-﻿namespace Shootsy.Database.Entities
+﻿using Shootsy.Core.Interfaces;
+
+namespace Shootsy.Database.Entities
 {
-    public class UserSessionEntity
+    public class UserSessionEntity : IUserSession
     {
-        /// <summary>
-        /// Идентификатор сессии
-        /// </summary>
         public int Id { get; init; }
-
-        /// <summary>
-        /// Идентификатор пользователя
-        /// </summary>
         public int User { get; init; }
-
-        /// <summary>
-        /// Дата начала сессии
-        /// </summary>
-        public DateTime CreateDate { get; init; }
-
-        /// <summary>
-        /// Guid сессии 
-        /// </summary>
+        public DateTime SessionDateFrom { get; set; }
+        public DateTime SessionDateTo { get; set; }
         public Guid Guid { get; init; }
 
         /// <summary>
         /// Сущность пользователя
         /// </summary>
         public UserEntity UserEntity { get; init; }
+
     }
 }
