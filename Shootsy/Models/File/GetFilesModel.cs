@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Shootsy.Models.File;
 using System.ComponentModel.DataAnnotations;
 
 namespace Shootsy.Models
 {
-    public class GetFilesModel
+    public class GetFilesModel : BaseFilesModel
     {
         [FromQuery(Name = "offset")]
         public int Offset { get; set; }
@@ -17,8 +18,5 @@ namespace Shootsy.Models
 
         [FromQuery(Name = "sort")]
         public string Sort { get; set; } = "id desc";
-
-        [FromHeader(Name = "session")]
-        public string? Session { get; set; }
     }
 }

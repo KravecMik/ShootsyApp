@@ -63,8 +63,8 @@ namespace Shootsy.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUsersAsync(GetUsersModel model, CancellationToken cancellationToken = default)
         {
-            var isSessionValid = await _userRepository.isAuthorized(model.Session, cancellationToken);
-            if (!isSessionValid)
+            var isAuthorized = await _userRepository.IsAuthorized(model.Session, cancellationToken);
+            if (!isAuthorized)
                 return Unauthorized();
 
             var users = await _userRepository.GetListAsync(Convert.ToInt16(model.Limit), model.Offset, model.Filter, model.Sort, cancellationToken);
@@ -75,8 +75,8 @@ namespace Shootsy.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserByIdAsync(GetUserByIdModel model, CancellationToken cancellationToken = default)
         {
-            var isSessionValid = await _userRepository.isAuthorized(model.Session, cancellationToken);
-            if (!isSessionValid)
+            var isAuthorized = await _userRepository.IsAuthorized(model.Session, cancellationToken);
+            if (!isAuthorized)
                 return Unauthorized();
 
             var user = await _userRepository.GetByIdAsync(model.Id, cancellationToken);
@@ -92,11 +92,15 @@ namespace Shootsy.Controllers
         UpdateUserModel model,
         CancellationToken cancellationToken = default)
         {
-            var isSessionValid = await _userRepository.isAuthorized(model.Session, cancellationToken);
-            if (!isSessionValid)
+            var isAuthorized = await _userRepository.IsAuthorized(model.Session, cancellationToken);
+            if (!isAuthorized)
                 return Unauthorized();
 
-            var currentUser = await _userRepository.GetByIdAsync(model.Id, cancellationToken);
+            var isForbidden = await _userRepository.IsForbidden(model.Session, model.Id, cancellationToken);
+            if (!isForbidden)
+                return StatusCode(403);
+
+                var currentUser = await _userRepository.GetByIdAsync(model.Id, cancellationToken);
             if (currentUser is null)
                 return NotFound();
 
@@ -107,6 +111,14 @@ namespace Shootsy.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUserByIdAsync(GetUserByIdModel model, CancellationToken cancellationToken = default)
         {
+            var isAuthorized = await _userRepository.IsAuthorized(model.Session, cancellationToken);
+            if (!isAuthorized)
+                return Unauthorized();
+
+            var isForbidden = await _userRepository.IsForbidden(model.Session, model.Id, cancellationToken);
+            if (!isForbidden)
+                return StatusCode(403);
+
             var user = await _userRepository.GetByIdAsync(model.Id, cancellationToken);
             if (user is null)
                 return NotFound();

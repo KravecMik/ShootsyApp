@@ -30,5 +30,6 @@ namespace Shootsy.Database.Entities
         public required CityEntity CityEntity { get; init; }
         public required GenderEntity GenderEntity { get; init; }
         public required CooperationTypeEntity CooperationTypeEntity { get; init; }
+        public ICollection<UserRoleEntity>? UserRoleEntity { get; init; }
     }
 }

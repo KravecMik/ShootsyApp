@@ -20,6 +20,8 @@ namespace Shootsy.Database
         public DbSet<GenderEntity> Genders { get; set; }
         public DbSet<CooperationTypeEntity> CooperationTypes { get; set; }
         public DbSet<FileEntity> Files { get; set; }
+        public DbSet<RoleEntity> Roles { get; set; }
+        public DbSet<UserRoleEntity> UserRoles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -30,6 +32,8 @@ namespace Shootsy.Database
             modelBuilder.ApplyConfiguration(new GenderEntityConfig());
             modelBuilder.ApplyConfiguration(new CooperationTypeEntityConfig());
             modelBuilder.ApplyConfiguration(new FileEntityConfig());
+            modelBuilder.ApplyConfiguration(new RoleEntityConfig());
+            modelBuilder.ApplyConfiguration(new UserRoleEntityConfig());
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

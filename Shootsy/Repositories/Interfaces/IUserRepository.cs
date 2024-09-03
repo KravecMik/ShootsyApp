@@ -20,6 +20,7 @@ namespace Shootsy.Repositories
         Task<UserSessionDto>? GetSessionByGuidAsync(Guid guid, CancellationToken cancellationToken);
         Task UpdateSessionIsActiveStatusAsync(Guid guid, bool status, CancellationToken cancellationToken);
         Task DeactivateUserSessions(int userId, CancellationToken cancellationToken);
-        Task<bool> isAuthorized(string? guid, CancellationToken cancellationToken);
+        Task<bool> IsAuthorized(string? guid, CancellationToken cancellationToken);
+        Task<bool> IsForbidden(string session, int needAccsessToId, CancellationToken cancellationToken);
     }
 }

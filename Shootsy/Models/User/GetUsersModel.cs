@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Shootsy.Models.User
 {
-    public class GetUsersModel
+    public class GetUsersModel : BaseUserModel
     {
         [FromQuery(Name = "offset")]
         public int Offset { get; set; }
@@ -17,8 +17,5 @@ namespace Shootsy.Models.User
 
         [FromQuery(Name = "sort")]
         public string Sort { get; set; } = "id desc";
-
-        [FromHeader(Name = "session")]
-        public string? Session { get; set; }
     }
 }

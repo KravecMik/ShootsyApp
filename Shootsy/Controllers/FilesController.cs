@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Shootsy.Core.Interfaces;
 using Shootsy.Dtos;
 using Shootsy.Models;
 using Shootsy.Models.File;
@@ -27,13 +28,17 @@ namespace Shootsy.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateFileAsync(CreateFileModel model, CancellationToken cancellationToken = default)
         {
-            var isSessionValid = await _userRepository.isAuthorized(model.Session, cancellationToken);
+            var isSessionValid = await _userRepository.IsAuthorized(model.Session, cancellationToken);
             if (!isSessionValid)
                 return Unauthorized();
 
             var user = await _userRepository.GetByIdAsync(Convert.ToInt16(model.User), cancellationToken);
             if (user is null)
                 return NotFound();
+
+            var isForbidden = await _userRepository.IsForbidden(model.Session, user.Id, cancellationToken);
+            if (!isForbidden)
+                return StatusCode(403);
 
             var dir = _internalConstants.BaseFilePath + @$"/{model.User}/";
 
@@ -66,7 +71,7 @@ namespace Shootsy.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetFileByIdAsync(GetFileByIdModel model, CancellationToken cancellationToken = default)
         {
-            var isSessionValid = await _userRepository.isAuthorized(model.Session, cancellationToken);
+            var isSessionValid = await _userRepository.IsAuthorized(model.Session, cancellationToken);
             if (!isSessionValid)
                 return Unauthorized();
 
@@ -81,7 +86,7 @@ namespace Shootsy.Controllers
         [HttpGet]
         public async Task<IActionResult> GetFilesAsync(GetFilesModel model, CancellationToken cancellationToken = default)
         {
-            var isSessionValid = await _userRepository.isAuthorized(model.Session, cancellationToken);
+            var isSessionValid = await _userRepository.IsAuthorized(model.Session, cancellationToken);
             if (!isSessionValid)
                 return Unauthorized();
 
@@ -95,13 +100,17 @@ namespace Shootsy.Controllers
         UpdateFileModel model,
         CancellationToken cancellationToken = default)
         {
-            var isSessionValid = await _userRepository.isAuthorized(model.Session, cancellationToken);
+            var isSessionValid = await _userRepository.IsAuthorized(model.Session, cancellationToken);
             if (!isSessionValid)
                 return Unauthorized();
 
             var currentFile = await _fileRepository.GetByIdAsync(model.Id, cancellationToken);
             if (currentFile is null)
                 return NotFound();
+
+            var isForbidden = await _userRepository.IsForbidden(model.Session, currentFile.User, cancellationToken);
+            if (!isForbidden)
+                return StatusCode(403);
 
             await _fileRepository.UpdateAsync(currentFile, model.PatchDocument, cancellationToken);
             return NoContent();
@@ -110,13 +119,17 @@ namespace Shootsy.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFileByIdAsync(GetFileByIdModel model, CancellationToken cancellationToken = default)
         {
-            var isSessionValid = await _userRepository.isAuthorized(model.Session, cancellationToken);
+            var isSessionValid = await _userRepository.IsAuthorized(model.Session, cancellationToken);
             if (!isSessionValid)
                 return Unauthorized();
 
             var file = await _fileRepository.GetByIdAsync(model.Id, cancellationToken);
             if (file is null)
                 return NotFound();
+
+            var isForbidden = await _userRepository.IsForbidden(model.Session, file.User, cancellationToken);
+            if (!isForbidden)
+                return StatusCode(403);
 
             await _fileRepository.DeleteByIdAsync(model.Id, cancellationToken);
 
@@ -129,7 +142,7 @@ namespace Shootsy.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteManyFilesAsync(DeleteManyFilesModel model, CancellationToken cancellationToken = default)
         {
-            var isSessionValid = await _userRepository.isAuthorized(model.Session, cancellationToken);
+            var isSessionValid = await _userRepository.IsAuthorized(model.Session, cancellationToken);
             if (!isSessionValid)
                 return Unauthorized();
 
@@ -138,6 +151,11 @@ namespace Shootsy.Controllers
                 var file = await _fileRepository.GetByIdAsync(id, cancellationToken);
                 if (file is null)
                     return NotFound();
+
+                var isForbidden = await _userRepository.IsForbidden(model.Session, file.User, cancellationToken);
+                if (!isForbidden)
+                    return StatusCode(403);
+
                 await _fileRepository.DeleteByIdAsync(id, cancellationToken);
 
                 if (System.IO.File.Exists(file.ContentPath))

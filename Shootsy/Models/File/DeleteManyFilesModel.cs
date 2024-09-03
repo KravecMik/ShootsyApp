@@ -2,12 +2,9 @@
 
 namespace Shootsy.Models.File
 {
-    public class DeleteManyFilesModel
+    public class DeleteManyFilesModel : BaseFilesModel
     {
         [FromQuery]
         public int[] Ids { get; set; }
-
-        [FromHeader(Name = "session")]
-        public string? Session { get; set; }
     }
 }

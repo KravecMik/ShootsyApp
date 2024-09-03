@@ -4,15 +4,12 @@ using Shootsy.Dtos;
 
 namespace Shootsy.Models.File
 {
-    public class UpdateFileModel
+    public class UpdateFileModel : BaseFilesModel
     {
         [FromBody]
         public JsonPatchDocument<FileDto> PatchDocument { get; set; }
 
         [FromRoute]
         public int Id { get; set; }
-
-        [FromHeader(Name = "session")]
-        public string? Session { get; set; }
     }
 }

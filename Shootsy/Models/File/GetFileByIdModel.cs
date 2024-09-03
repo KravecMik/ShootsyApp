@@ -2,12 +2,9 @@
 
 namespace Shootsy.Models.File
 {
-    public class GetFileByIdModel
+    public class GetFileByIdModel : BaseFilesModel
     {
         [FromRoute(Name = "id")]
         public int Id { get; set; }
-
-        [FromHeader(Name = "session")]
-        public string? Session { get; set; }
     }
 }

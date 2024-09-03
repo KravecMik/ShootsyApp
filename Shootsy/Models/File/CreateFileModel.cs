@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Shootsy.Models.File
 {
-    public class CreateFileModel
+    public class CreateFileModel : BaseFilesModel
     {
         [Required(ErrorMessage = "Укажите идентификатор пользователя")]
         [FromForm]
@@ -11,8 +11,5 @@ namespace Shootsy.Models.File
 
         [Required(ErrorMessage = "Укажите файл пользователя")]
         public IFormFile File { get; set; }
-
-        [FromHeader(Name = "session")]
-        public string? Session { get; set; }
     }
 }

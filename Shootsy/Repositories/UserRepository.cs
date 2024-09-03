@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shootsy.Database;
 using Shootsy.Database.Entities;
@@ -166,7 +167,7 @@ namespace Shootsy.Repositories
             return _mapper.Map<UserSessionDto>(sessionEntity);
         }
 
-        public async Task<bool> isAuthorized(string? session, CancellationToken cancellationToken)
+        public async Task<bool> IsAuthorized(string? session, CancellationToken cancellationToken)
         {
             if (session is null)
                 return false;
@@ -183,12 +184,24 @@ namespace Shootsy.Repositories
             if (!sessionDto.isActive)
                 return false;
 
-            var isAuthorized = sessionDto.SessionDateTo >= DateTime.UtcNow;
+            var IsAuthorized = sessionDto.SessionDateTo >= DateTime.UtcNow;
 
-            if (!isAuthorized)
+            if (!IsAuthorized)
                 await UpdateSessionIsActiveStatusAsync(guid, false, cancellationToken);
 
-            return isAuthorized;
+            return IsAuthorized;
+        }
+
+        public async Task<bool> IsForbidden(string session, int needAccsessToId, CancellationToken cancellationToken)
+        {
+            var guid = Guid.Parse(session);
+            var user = await GetByGuidAsync(guid, cancellationToken);
+            var isHaveSuperUser = _context.UserRoles
+                .Where(x => x.User == user.Id & x.RoleEntity.isSuperUser == true & x.isActive == true);
+            if (isHaveSuperUser.Count() == 0)
+                if (user.Id != needAccsessToId)
+                    return false;
+            return true;
         }
     }
 }
