@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Shootsy.Core.Interfaces;
 
-namespace Shootsy.Models
+namespace Shootsy.Models.File
 {
     public class FileModelResponse
     {

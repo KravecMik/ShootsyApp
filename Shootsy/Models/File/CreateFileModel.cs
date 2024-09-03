@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
-namespace Shootsy.Models
+namespace Shootsy.Models.File
 {
     public class CreateFileModel
     {
@@ -11,5 +11,8 @@ namespace Shootsy.Models
 
         [Required(ErrorMessage = "Укажите файл пользователя")]
         public IFormFile File { get; set; }
+
+        [FromHeader(Name = "session")]
+        public string? Session { get; set; }
     }
 }

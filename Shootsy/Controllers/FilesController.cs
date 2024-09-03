@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Shootsy.Dtos;
 using Shootsy.Models;
+using Shootsy.Models.File;
 using Shootsy.Repositories;
 
 namespace Shootsy.Controllers
@@ -27,6 +27,10 @@ namespace Shootsy.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateFileAsync(CreateFileModel model, CancellationToken cancellationToken = default)
         {
+            var isSessionValid = await _userRepository.isAuthorized(model.Session, cancellationToken);
+            if (!isSessionValid)
+                return Unauthorized();
+
             var user = await _userRepository.GetByIdAsync(Convert.ToInt16(model.User), cancellationToken);
             if (user is null)
                 return NotFound();
@@ -60,9 +64,13 @@ namespace Shootsy.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetFileByIdAsync([FromRoute] int id, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetFileByIdAsync(GetFileByIdModel model, CancellationToken cancellationToken = default)
         {
-            var file = await _fileRepository.GetByIdAsync(id, cancellationToken);
+            var isSessionValid = await _userRepository.isAuthorized(model.Session, cancellationToken);
+            if (!isSessionValid)
+                return Unauthorized();
+
+            var file = await _fileRepository.GetByIdAsync(model.Id, cancellationToken);
             if (file is null)
                 return NotFound();
 
@@ -71,8 +79,12 @@ namespace Shootsy.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetFilesAsync([FromQuery] GetFilesModel model, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetFilesAsync(GetFilesModel model, CancellationToken cancellationToken = default)
         {
+            var isSessionValid = await _userRepository.isAuthorized(model.Session, cancellationToken);
+            if (!isSessionValid)
+                return Unauthorized();
+
             var files = await _fileRepository.GetListAsync(Convert.ToInt16(model.Limit), model.Offset, model.Filter, model.Sort, cancellationToken);
             var result = _mapper.Map<IEnumerable<FileModelResponse>>(files);
             return Ok(result.OrderByDescending(x => x.Id));
@@ -80,25 +92,33 @@ namespace Shootsy.Controllers
 
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateFileAsync(
-        [FromBody] JsonPatchDocument<FileDto> patchDoc, [FromRoute] int id,
+        UpdateFileModel model,
         CancellationToken cancellationToken = default)
         {
-            var currentFile = await _fileRepository.GetByIdAsync(id, cancellationToken);
+            var isSessionValid = await _userRepository.isAuthorized(model.Session, cancellationToken);
+            if (!isSessionValid)
+                return Unauthorized();
+
+            var currentFile = await _fileRepository.GetByIdAsync(model.Id, cancellationToken);
             if (currentFile is null)
                 return NotFound();
 
-            await _fileRepository.UpdateAsync(currentFile, patchDoc, cancellationToken);
+            await _fileRepository.UpdateAsync(currentFile, model.PatchDocument, cancellationToken);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteFileByIdAsync([FromRoute] int id, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> DeleteFileByIdAsync(GetFileByIdModel model, CancellationToken cancellationToken = default)
         {
-            var file = await _fileRepository.GetByIdAsync(id, cancellationToken);
+            var isSessionValid = await _userRepository.isAuthorized(model.Session, cancellationToken);
+            if (!isSessionValid)
+                return Unauthorized();
+
+            var file = await _fileRepository.GetByIdAsync(model.Id, cancellationToken);
             if (file is null)
                 return NotFound();
 
-            await _fileRepository.DeleteByIdAsync(id, cancellationToken);
+            await _fileRepository.DeleteByIdAsync(model.Id, cancellationToken);
 
             if (System.IO.File.Exists(file.ContentPath))
                 System.IO.File.Delete(file.ContentPath);
@@ -107,9 +127,13 @@ namespace Shootsy.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteManyFilesAsync([FromQuery] int[] ids, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> DeleteManyFilesAsync(DeleteManyFilesModel model, CancellationToken cancellationToken = default)
         {
-            foreach (var id in ids)
+            var isSessionValid = await _userRepository.isAuthorized(model.Session, cancellationToken);
+            if (!isSessionValid)
+                return Unauthorized();
+
+            foreach (var id in model.Ids)
             {
                 var file = await _fileRepository.GetByIdAsync(id, cancellationToken);
                 if (file is null)

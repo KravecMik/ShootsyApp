@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Shootsy.Dtos;
 using Shootsy.Models;
+using Shootsy.Models.User;
 using Shootsy.Repositories;
 using Shootsy.Security;
 
@@ -15,13 +15,11 @@ namespace Shootsy.Controllers
     {
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
-        private readonly IUserSessionRepository _userSessionRepository;
 
-        public UsersController(IUserRepository userRepository, IMapper mapper, IUserSessionRepository userSessionRepository)
+        public UsersController(IUserRepository userRepository, IMapper mapper)
         {
             _userRepository = userRepository;
             _mapper = mapper;
-            _userSessionRepository = userSessionRepository;
         }
 
         [HttpPost]
@@ -36,14 +34,14 @@ namespace Shootsy.Controllers
                 return BadRequest();
 
             var id = await _userRepository.CreateAsync(user, cancellationToken);
-            var session = await _userSessionRepository.CreateAsync(id, cancellationToken);
+            var session = await _userRepository.CreateSessionAsync(id, cancellationToken);
             return StatusCode(201, session);
         }
 
         [HttpPost("auth")]
-        public async Task<IActionResult> SignInAsync(
+        public async Task<IActionResult> AuthorizationAsync(
             [FromBody, BindRequired]
-            SignInModel model,
+            AuthorizationModel model,
             CancellationToken cancellationToken = default)
         {
             var user = await _userRepository.GetByLoginAsync(model.Login, cancellationToken);
@@ -54,33 +52,34 @@ namespace Shootsy.Controllers
             if (!passwordVerification)
                 return BadRequest();
 
-            var session = await _userSessionRepository.CreateAsync(user.Id, cancellationToken);
+            var lastSession = await _userRepository.GetLastSessionAsync(user.Id, cancellationToken);
+            if (lastSession != null)
+                await _userRepository.DeactivateUserSessions(user.Id, cancellationToken);
+
+            var session = await _userRepository.CreateSessionAsync(user.Id, cancellationToken);
             return StatusCode(200, session);
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUsersAsync([FromQuery] GetUsersModel model, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetUsersAsync(GetUsersModel model, CancellationToken cancellationToken = default)
         {
+            var isSessionValid = await _userRepository.isAuthorized(model.Session, cancellationToken);
+            if (!isSessionValid)
+                return Unauthorized();
+
             var users = await _userRepository.GetListAsync(Convert.ToInt16(model.Limit), model.Offset, model.Filter, model.Sort, cancellationToken);
             var result = _mapper.Map<IEnumerable<UserModelResponse>>(users);
             return Ok(result);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserByIdAsync([FromRoute] int id, [FromHeader] string? session, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetUserByIdAsync(GetUserByIdModel model, CancellationToken cancellationToken = default)
         {
-            if (session is null)
+            var isSessionValid = await _userRepository.isAuthorized(model.Session, cancellationToken);
+            if (!isSessionValid)
                 return Unauthorized();
 
-            var sessionGud = Guid.TryParse(session, out Guid res);
-            if (!sessionGud)
-                return Unauthorized();
-
-            var isSessionActive = await _userSessionRepository.isSessionActive(res, cancellationToken);
-            if (!isSessionActive)
-                return Unauthorized();
-
-            var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+            var user = await _userRepository.GetByIdAsync(model.Id, cancellationToken);
             if (user is null)
                 return NotFound();
 
@@ -90,25 +89,29 @@ namespace Shootsy.Controllers
 
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateUserAsync(
-        [FromBody] JsonPatchDocument<UserDto> patchDoc, [FromRoute] int id,
+        UpdateUserModel model,
         CancellationToken cancellationToken = default)
         {
-            var currentUser = await _userRepository.GetByIdAsync(id, cancellationToken);
+            var isSessionValid = await _userRepository.isAuthorized(model.Session, cancellationToken);
+            if (!isSessionValid)
+                return Unauthorized();
+
+            var currentUser = await _userRepository.GetByIdAsync(model.Id, cancellationToken);
             if (currentUser is null)
                 return NotFound();
 
-            await _userRepository.UpdateAsync(currentUser, patchDoc, cancellationToken);
+            await _userRepository.UpdateAsync(currentUser, model.PatchDocument, cancellationToken);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUserByIdAsync([FromRoute] int id, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> DeleteUserByIdAsync(GetUserByIdModel model, CancellationToken cancellationToken = default)
         {
-            var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+            var user = await _userRepository.GetByIdAsync(model.Id, cancellationToken);
             if (user is null)
                 return NotFound();
 
-            await _userRepository.DeleteByIdAsync(id, cancellationToken);
+            await _userRepository.DeleteByIdAsync(model.Id, cancellationToken);
             return NoContent();
         }
     }

@@ -17,5 +17,8 @@ namespace Shootsy.Models
 
         [FromQuery(Name = "sort")]
         public string Sort { get; set; } = "id desc";
+
+        [FromHeader(Name = "session")]
+        public string? Session { get; set; }
     }
 }

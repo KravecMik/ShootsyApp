@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
-namespace Shootsy.Models
+namespace Shootsy.Models.User
 {
-    public class SignInModel
+    public class AuthorizationModel
     {
         [Required(ErrorMessage = "Укажите логин пользователя")]
         [MaxLength(50, ErrorMessage = "Максимальная длинна поля 50 символов")]

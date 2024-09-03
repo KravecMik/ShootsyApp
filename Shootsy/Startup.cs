@@ -14,7 +14,6 @@ namespace Shootsy
             services.AddDbContext<ApplicationContext>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IFileRepository, FileRepository>();
-            services.AddScoped<IUserSessionRepository, UserSessionRepository>();
             services.AddAutoMapper(typeof(UserProfiles));
             services.AddAutoMapper(typeof(FileProfiles));
             services.AddAutoMapper(typeof(UserSessionProfiles));

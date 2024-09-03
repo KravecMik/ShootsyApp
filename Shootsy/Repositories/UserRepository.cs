@@ -12,11 +12,13 @@ namespace Shootsy.Repositories
     {
         private readonly ApplicationContext _context;
         private readonly IMapper _mapper;
+        InternalConstants _internalConstants;
 
-        public UserRepository(ApplicationContext context, IMapper mapper)
+        public UserRepository(ApplicationContext context, IMapper mapper, InternalConstants internalConstants)
         {
             _context = context;
             _mapper = mapper;
+            _internalConstants = internalConstants;
         }
 
         public async Task<int> CreateAsync(UserDto user, CancellationToken cancellationToken = default)
@@ -115,6 +117,78 @@ namespace Shootsy.Repositories
                 .Where(x => x.Id == id)
                 .ExecuteDeleteAsync();
             await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task<Guid> CreateSessionAsync(int userId, CancellationToken cancellationToken)
+        {
+            var sessionEntity = new UserSessionEntity
+            {
+                User = userId,
+                Guid = Guid.NewGuid(),
+                isActive = true,
+            };
+            var sessionEntityEntry = await _context.UserSessions.AddAsync(sessionEntity, cancellationToken);
+
+            sessionEntity.SessionDateFrom = DateTime.UtcNow;
+            sessionEntity.SessionDateTo = DateTime.UtcNow.AddDays(_internalConstants.SessionActivityTime);
+
+            await _context.SaveChangesAsync(cancellationToken);
+            sessionEntityEntry.State = EntityState.Detached;
+
+            return sessionEntity.Guid;
+        }
+
+        public async Task UpdateSessionIsActiveStatusAsync(Guid guid, bool status, CancellationToken cancellationToken)
+        {
+            var userSessionEntity = _context.UserSessions.AsNoTracking().Where(x => x.Guid == guid).First();
+            userSessionEntity.isActive = status;
+            _context.Update(userSessionEntity);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task DeactivateUserSessions(int userId, CancellationToken cancellationToken)
+        {
+            var userSessionEntitys = await _context.UserSessions.AsNoTracking().Where(x => x.User == userId).ToArrayAsync(cancellationToken);
+            foreach (var userSessionEntity in userSessionEntitys)
+                await UpdateSessionIsActiveStatusAsync(userSessionEntity.Guid, false, cancellationToken);
+        }
+
+        public async Task<UserSessionDto>? GetSessionByGuidAsync(Guid guid, CancellationToken cancellationToken)
+        {
+            var sessionEntity = await _context.UserSessions
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Guid == guid, cancellationToken);
+
+            if (sessionEntity is null)
+            {
+                return null;
+            }
+            return _mapper.Map<UserSessionDto>(sessionEntity);
+        }
+
+        public async Task<bool> isAuthorized(string? session, CancellationToken cancellationToken)
+        {
+            if (session is null)
+                return false;
+
+            var sessionParseRes = Guid.TryParse(session, out Guid guid);
+            if (!sessionParseRes)
+                return false;
+
+            var sessionDto = await GetSessionByGuidAsync(guid, cancellationToken);
+
+            if (sessionDto is null)
+                return false;
+
+            if (!sessionDto.isActive)
+                return false;
+
+            var isAuthorized = sessionDto.SessionDateTo >= DateTime.UtcNow;
+
+            if (!isAuthorized)
+                await UpdateSessionIsActiveStatusAsync(guid, false, cancellationToken);
+
+            return isAuthorized;
         }
     }
 }

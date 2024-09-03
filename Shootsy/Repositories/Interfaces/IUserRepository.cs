@@ -13,5 +13,13 @@ namespace Shootsy.Repositories
         Task<IReadOnlyList<UserDto>> GetListAsync(int limit, int offset, string filter, string sort, CancellationToken cancellationToken);
         Task UpdateAsync(UserDto userDto, JsonPatchDocument<UserDto> jsonPatchDocument, CancellationToken cancellationToken = default);
         Task DeleteByIdAsync(int id, CancellationToken cancellationToken);
+
+
+
+        Task<Guid> CreateSessionAsync(int userId, CancellationToken cancellationToken);
+        Task<UserSessionDto>? GetSessionByGuidAsync(Guid guid, CancellationToken cancellationToken);
+        Task UpdateSessionIsActiveStatusAsync(Guid guid, bool status, CancellationToken cancellationToken);
+        Task DeactivateUserSessions(int userId, CancellationToken cancellationToken);
+        Task<bool> isAuthorized(string? guid, CancellationToken cancellationToken);
     }
 }
