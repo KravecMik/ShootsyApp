@@ -8,7 +8,7 @@ namespace Shootsy.Database.Configurations
     {
         public void Configure(EntityTypeBuilder<UserSessionEntity> entity)
         {
-            entity.ToTable("user_session", "security");
+            entity.ToTable("user_sessions", "security");
 
             entity.HasComment("Сессии пользователей");
 

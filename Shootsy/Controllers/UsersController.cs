@@ -108,6 +108,12 @@ namespace Shootsy.Controllers
             if (currentUser is null)
                 return NotFound();
 
+            var isExistOperationWithLogin = model.PatchDocument.Operations.Any(x => x.path.ToLower().Contains("login"));
+            if (isExistOperationWithLogin)
+            {
+                return BadRequest();
+            }
+
             await _userRepository.UpdateAsync(currentUser, model.PatchDocument, cancellationToken);
             return NoContent();
         }
