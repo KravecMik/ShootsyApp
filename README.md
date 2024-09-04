@@ -2,10 +2,15 @@
 
 # Users
 *[POST] [CreateUser -- *Создание пользователя*](CreateUser.md)<br>
+*[POST] Authorization <br>
 *[GET] [GetUserById -- *Получение информации о пользователе по идентификатору*](GetUserById.md)<br>
 *[GET] GetUsers <br>
 *[PATCH] UpdateUser <br>
 *[DELETE] DeleteUserById
+
+# UserSessions
+*[GET] GetLastUserSession <br>
+*[GET] CheckUserAccess
 
 # Files
 *[POST] CreateFile <br>
