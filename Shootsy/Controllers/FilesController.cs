@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Shootsy.Core.Interfaces;
 using Shootsy.Dtos;
 using Shootsy.Models;
 using Shootsy.Models.File;
@@ -16,13 +15,15 @@ namespace Shootsy.Controllers
         private readonly IFileRepository _fileRepository;
         private readonly IUserRepository _userRepository;
         InternalConstants _internalConstants;
+        private readonly HttpClient _httpClient;
 
-        public FilesController(IFileRepository fileRepository, IUserRepository userRepository, InternalConstants internalConstants, IMapper mapper)
+        public FilesController(IFileRepository fileRepository, IUserRepository userRepository, InternalConstants internalConstants, IMapper mapper, HttpClient httpClient)
         {
             _fileRepository = fileRepository;
             _internalConstants = internalConstants;
             _userRepository = userRepository;
             _mapper = mapper;
+            _httpClient = httpClient;
         }
 
         [HttpPost]
@@ -36,8 +37,8 @@ namespace Shootsy.Controllers
             if (user is null)
                 return NotFound();
 
-            var isForbidden = await _userRepository.IsForbidden(model.Session, user.Id, cancellationToken);
-            if (!isForbidden)
+            var isForbidden = await _httpClient.GetAsync($"{_internalConstants.BaseUrl}/users/session/{model.Session}/access-to/{model.User}");
+            if (!isForbidden.IsSuccessStatusCode)
                 return StatusCode(403);
 
             var dir = _internalConstants.BaseFilePath + @$"/{model.User}/";
@@ -108,8 +109,8 @@ namespace Shootsy.Controllers
             if (currentFile is null)
                 return NotFound();
 
-            var isForbidden = await _userRepository.IsForbidden(model.Session, currentFile.User, cancellationToken);
-            if (!isForbidden)
+            var isForbidden = await _httpClient.GetAsync($"{_internalConstants.BaseUrl}/users/session/{model.Session}/access-to/{model.Id}");
+            if (!isForbidden.IsSuccessStatusCode)
                 return StatusCode(403);
 
             await _fileRepository.UpdateAsync(currentFile, model.PatchDocument, cancellationToken);
@@ -127,8 +128,8 @@ namespace Shootsy.Controllers
             if (file is null)
                 return NotFound();
 
-            var isForbidden = await _userRepository.IsForbidden(model.Session, file.User, cancellationToken);
-            if (!isForbidden)
+            var isForbidden = await _httpClient.GetAsync($"{_internalConstants.BaseUrl}/users/session/{model.Session}/access-to/{model.Id}");
+            if (!isForbidden.IsSuccessStatusCode)
                 return StatusCode(403);
 
             await _fileRepository.DeleteByIdAsync(model.Id, cancellationToken);
@@ -145,15 +146,14 @@ namespace Shootsy.Controllers
             var isSessionValid = await _userRepository.IsAuthorized(model.Session, cancellationToken);
             if (!isSessionValid)
                 return Unauthorized();
-
             foreach (var id in model.Ids)
             {
                 var file = await _fileRepository.GetByIdAsync(id, cancellationToken);
                 if (file is null)
                     return NotFound();
 
-                var isForbidden = await _userRepository.IsForbidden(model.Session, file.User, cancellationToken);
-                if (!isForbidden)
+                var isForbidden = await _httpClient.GetAsync($"{_internalConstants.BaseUrl}/users/session/{model.Session}/access-to/{id}");
+                if (!isForbidden.IsSuccessStatusCode)
                     return StatusCode(403);
 
                 await _fileRepository.DeleteByIdAsync(id, cancellationToken);

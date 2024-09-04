@@ -10,7 +10,7 @@ namespace Shootsy.Database
             : base(options)
         {
             //Database.EnsureDeleted();
-            Database.EnsureCreated();
+            //Database.EnsureCreated();
         }
 
         public DbSet<UserEntity> Users { get; set; }

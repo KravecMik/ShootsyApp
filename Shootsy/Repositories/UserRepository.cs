@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shootsy.Database;
 using Shootsy.Database.Entities;
@@ -169,30 +168,23 @@ namespace Shootsy.Repositories
 
         public async Task<bool> IsAuthorized(string? session, CancellationToken cancellationToken)
         {
-            if (session is null)
-                return false;
+            if (session is null) return false;
 
             var sessionParseRes = Guid.TryParse(session, out Guid guid);
-            if (!sessionParseRes)
-                return false;
+            if (!sessionParseRes) return false;
 
             var sessionDto = await GetSessionByGuidAsync(guid, cancellationToken);
+            if (sessionDto is null) return false;
 
-            if (sessionDto is null)
-                return false;
+            if (!sessionDto.isActive) return false;
+            var isAuthorized = sessionDto.SessionDateTo >= DateTime.UtcNow;
 
-            if (!sessionDto.isActive)
-                return false;
+            if (!isAuthorized) await UpdateSessionIsActiveStatusAsync(guid, false, cancellationToken);
 
-            var IsAuthorized = sessionDto.SessionDateTo >= DateTime.UtcNow;
-
-            if (!IsAuthorized)
-                await UpdateSessionIsActiveStatusAsync(guid, false, cancellationToken);
-
-            return IsAuthorized;
+            return isAuthorized;
         }
 
-        public async Task<bool> IsForbidden(string session, int needAccsessToId, CancellationToken cancellationToken)
+        public async Task<bool> IsHaveAccessToIdAsync(string session, int needAccsessToId, CancellationToken cancellationToken)
         {
             var guid = Guid.Parse(session);
             var user = await GetByGuidAsync(guid, cancellationToken);

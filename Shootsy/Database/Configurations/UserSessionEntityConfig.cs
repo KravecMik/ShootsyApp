@@ -45,7 +45,7 @@ namespace Shootsy.Database.Configurations
             entity.HasOne(x => x.UserEntity)
                 .WithMany(x => x.UserSessionEntity)
                 .HasForeignKey(x => x.User)
-                .OnDelete(DeleteBehavior.ClientSetNull);
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using JsonPatchSample;
+using Microsoft.EntityFrameworkCore;
+using Shootsy.Controllers;
 using Shootsy.Database;
 using Shootsy.MappingProfiles;
 using Shootsy.Repositories;
@@ -8,7 +10,6 @@ namespace Shootsy
 {
     public class Startup
     {
-
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationContext>();
@@ -21,6 +22,8 @@ namespace Shootsy
             services.AddSingleton<UserRepository>();
             services.AddSingleton<InternalConstants>();
             services.AddSingleton<FileRepository>();
+            services.AddHttpClient<FilesController>();
+            services.AddHttpClient<UsersController>();
             services.AddSingleton<Mapper>();
             services.AddControllers(options =>
             {

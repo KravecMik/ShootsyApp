@@ -33,12 +33,12 @@ namespace Shootsy.Database.Configurations
             entity.HasOne(x => x.RoleEntity)
                 .WithMany(x => x.UserRoleEntity)
                 .HasForeignKey(x => x.Role)
-                .OnDelete(DeleteBehavior.ClientSetNull);
+                .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(x => x.UserEntity)
                 .WithMany(x => x.UserRoleEntity)
                 .HasForeignKey(x => x.User)
-                .OnDelete(DeleteBehavior.ClientSetNull);
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -15,11 +15,15 @@ namespace Shootsy.Controllers
     {
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
+        InternalConstants _internalConstants;
+        private readonly HttpClient _httpClient;
 
-        public UsersController(IUserRepository userRepository, IMapper mapper)
+        public UsersController(IUserRepository userRepository, IMapper mapper, HttpClient httpClient, InternalConstants internalConstants)
         {
             _userRepository = userRepository;
             _mapper = mapper;
+            _httpClient = httpClient;
+            _internalConstants = internalConstants;
         }
 
         [HttpPost]
@@ -96,11 +100,11 @@ namespace Shootsy.Controllers
             if (!isAuthorized)
                 return Unauthorized();
 
-            var isForbidden = await _userRepository.IsForbidden(model.Session, model.Id, cancellationToken);
-            if (!isForbidden)
+            var isForbidden = await _httpClient.GetAsync($"{_internalConstants.BaseUrl}/users/session/{model.Session}/access-to/{model.Id}");
+            if (!isForbidden.IsSuccessStatusCode)
                 return StatusCode(403);
 
-                var currentUser = await _userRepository.GetByIdAsync(model.Id, cancellationToken);
+            var currentUser = await _userRepository.GetByIdAsync(model.Id, cancellationToken);
             if (currentUser is null)
                 return NotFound();
 
@@ -115,9 +119,9 @@ namespace Shootsy.Controllers
             if (!isAuthorized)
                 return Unauthorized();
 
-            var isForbidden = await _userRepository.IsForbidden(model.Session, model.Id, cancellationToken);
-            if (!isForbidden)
-                return StatusCode(403);
+            var isForbidden = await _httpClient.GetAsync($"{_internalConstants.BaseUrl}/users/session/{model.Session}/access-to/{model.Id}");
+            if (!isForbidden.IsSuccessStatusCode)
+                return StatusCode((int)isForbidden.StatusCode);
 
             var user = await _userRepository.GetByIdAsync(model.Id, cancellationToken);
             if (user is null)
@@ -125,6 +129,22 @@ namespace Shootsy.Controllers
 
             await _userRepository.DeleteByIdAsync(model.Id, cancellationToken);
             return NoContent();
+        }
+
+        [HttpGet("{id}/session-last")]
+        public async Task<IActionResult> GetLastUserSessionAsync(GetUserByIdModel model, CancellationToken cancellationToken = default)
+        {
+            var lastSession = await _userRepository.GetLastSessionAsync(model.Id, cancellationToken);
+            if (lastSession == Guid.Empty) return NotFound();
+            return StatusCode(200, lastSession);
+        }
+
+        [HttpGet("session/{session}/access-to/{needAccessToId}")]
+        public async Task<IActionResult> CheckUserAccessAsync([FromRoute] string session, [FromRoute] int needAccessToId, CancellationToken cancellationToken = default)
+        {
+            var isHaveAccess = await _userRepository.IsHaveAccessToIdAsync(session, needAccessToId, cancellationToken);
+            if (!isHaveAccess) return StatusCode(403);
+            return StatusCode(204);
         }
     }
 }
