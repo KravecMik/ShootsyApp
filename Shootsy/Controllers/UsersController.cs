@@ -71,7 +71,7 @@ namespace Shootsy.Controllers
             if (!isAuthorized)
                 return Unauthorized();
 
-            var users = await _userRepository.GetListAsync(Convert.ToInt16(model.Limit), model.Offset, model.Filter, model.Sort, cancellationToken);
+            var users = await _userRepository.GetListAsync(model.Limit, model.Offset, model.Filter, model.Sort, cancellationToken);
             var result = _mapper.Map<IEnumerable<UserModelResponse>>(users);
             return Ok(result);
         }

@@ -10,7 +10,7 @@ namespace Shootsy.Models.User
 
         [FromQuery(Name = "limit")]
         [Required(ErrorMessage = "Укажите сколько записей необходимо вернуть")]
-        public string Limit { get; set; }
+        public int Limit { get; set; }
 
         [FromQuery(Name = "filter")]
         public string Filter { get; set; } = "id > 0";

@@ -45,7 +45,5 @@ namespace Shootsy.Models
         public int? CooperationType { get; init; } = 1;
 
         public bool? isNude { get; init; } = false;
-
-        public byte[]? Avatar { get; init; }
     }
 }
