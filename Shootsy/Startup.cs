@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using JsonPatchSample;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Shootsy.Controllers;
 using Shootsy.Database;
@@ -29,6 +30,15 @@ namespace Shootsy
             {
                 options.InputFormatters.Insert(0, MyJPIF.GetJsonPatchInputFormatter());
             });
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder.AllowAnyOrigin()
+                        .WithOrigins("http://localhost:3000")
+                        .AllowAnyMethod()
+                        .AllowCredentials()
+                        .AllowAnyHeader());
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -37,6 +47,7 @@ namespace Shootsy
             {
                 app.UseDeveloperExceptionPage();
             }
+            app.UseCors("CorsPolicy");
             app.UseRouting();
             app.UseEndpoints(endpoints =>
             {
