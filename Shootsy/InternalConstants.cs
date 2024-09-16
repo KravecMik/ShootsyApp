@@ -6,7 +6,7 @@
 
         public readonly string[] SupportedFileExtensions = [".jpg"];
 
-        public readonly int SessionActivityTime = 30;
+        public readonly int SessionActivityTime = 30; //Days
 
         public readonly string BaseUrl = "http://localhost:5000";
     }
