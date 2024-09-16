@@ -6,8 +6,14 @@
 
         public int UserId { get; set; }
 
-        public int FileId { get; set; }
+        public string Name { get; set; }
 
-        public bool isActive { get; set; } = false;
+        public string Extension { get; set; }
+
+        public string Path { get; set; }
+
+        public DateTime CreateDate { get; set; }
+
+        public bool isDeleted { get; set; }
     }
 }

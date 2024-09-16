@@ -8,7 +8,7 @@ namespace Shootsy.Database.Configurations
     {
         public void Configure(EntityTypeBuilder<UserSessionEntity> entity)
         {
-            entity.ToTable("user_session", "security");
+            entity.ToTable("user_sessions", "security");
 
             entity.HasComment("Сессии пользователей");
 
@@ -20,12 +20,17 @@ namespace Shootsy.Database.Configurations
                 .HasColumnName("id")
                 .HasComment("Идентификатор сессии");
 
-            entity.Property(x => x.CreateDate)
-                .HasColumnName("create_date")
+            entity.Property(x => x.SessionDateFrom)
+                .HasColumnName("date_from")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasComment("Дата создания сессии");
+                .HasComment("Дата начала сессии");
 
-            entity.Property(x => x.UserId)
+            entity.Property(x => x.SessionDateTo)
+                .HasColumnName("date_to")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasComment("Дата окончания сессии");
+
+            entity.Property(x => x.User)
                 .HasColumnName("user_id")
                 .HasComment("Идентификатор пользователя");
 
@@ -33,10 +38,10 @@ namespace Shootsy.Database.Configurations
                 .HasColumnName("guid")
                 .HasComment("GUID сессии");
 
-            entity.HasOne(x => x.User)
+            entity.HasOne(x => x.UserEntity)
                 .WithMany(x => x.UserSessionEntity)
-                .HasForeignKey(x => x.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull);
+                .HasForeignKey(x => x.User)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -11,9 +11,19 @@
         int Id { get; }
 
         /// <summary>
-        /// Логин
+        /// Дата создания пользователя
         /// </summary>
-        string Login { get; }
+        DateTime CreateDate { get; }
+
+        /// <summary>
+        /// Дата редактирования пользователя
+        /// </summary>
+        DateTime EditDate { get; }
+
+        /// <summary>
+        /// Имя пользователя
+        /// </summary>
+        string Username { get; }
 
         /// <summary>
         /// Идентификатор пола
@@ -41,11 +51,6 @@
         string Lastname { get; }
 
         /// <summary>
-        /// Отчество
-        /// </summary>
-        string? Patronymic { get; }
-
-        /// <summary>
         /// Полное имя
         /// </summary>
         string? Fullname { get; }
@@ -56,14 +61,14 @@
         string? Discription { get; }
 
         /// <summary>
-        /// Идентификатор типа сотрудничества
-        /// </summary>
-        int CooperationType { get; }
-
-        /// <summary>
         /// Хэш пароля пользователя
         /// </summary>
         byte[] Password { get; }
+
+        /// <summary>
+        /// Аватар пользователя
+        /// </summary>
+        byte[]? Avatar { get; }
 
         /// <summary>
         /// Идентификатор типа пользователя
@@ -73,21 +78,11 @@
         /// <summary>
         /// Съемка ню
         /// </summary>
-        bool? isNude { get; }
+        bool isNude { get; }
 
         /// <summary>
-        /// Признак наличия активной подписки
+        /// Совершеннолетний ли пользователь
         /// </summary>
-        bool? isHasActiveSubscribe { get; }
-
-        /// <summary>
-        /// Дата создания пользователя
-        /// </summary>
-        DateTime? CreateDate { get; }
-
-        /// <summary>
-        /// Дата редактирования пользователя
-        /// </summary>
-        DateTime? EditDate { get; }
+        bool isEighteen { get; }
     }
 }

@@ -9,9 +9,9 @@ using Shootsy.Security;
 
 namespace Shootsy.MappingProfiles
 {
-    public class Profiles : Profile
+    public class UserProfiles : Profile
     {
-        public Profiles()
+        public UserProfiles()
         {
             CreateMap<CreateUserModel, UserDto>();
             CreateMap<UserDto, UserModelResponse>()
@@ -20,9 +20,7 @@ namespace Shootsy.MappingProfiles
                  .ForMember(dest => dest.Type, opt => opt.MapFrom(
                     src => ((UserTypeEnums)src.Type).AsString(EnumFormat.Description)))
                 .ForMember(dest => dest.Gender, opt => opt.MapFrom(
-                    src => ((GenderEnums)src.Gender).AsString(EnumFormat.Description)))
-                .ForMember(dest => dest.CooperationType, opt => opt.MapFrom(
-                    src => ((CooperationTypeEnums)src.CooperationType).AsString(EnumFormat.Description)));
+                    src => ((GenderEnums)src.Gender).AsString(EnumFormat.Description)));
             CreateMap<IUser, UserDto>();
             CreateMap<UserDto, UserEntity>();
             CreateMap<CreateUserModel, UserDto>()
@@ -31,7 +29,7 @@ namespace Shootsy.MappingProfiles
                         src.Firstname + ' ' + src.Lastname + ' ' + src.Patronymic :
                             src.Firstname + ' ' + src.Lastname))
                 .ForMember(dest => dest.Password, opt => opt.MapFrom(
-                    src => src.Password.EncryptString(src.Login)));
+                    src => src.Password.EncryptString(src.Username)));
         }
     }
 }

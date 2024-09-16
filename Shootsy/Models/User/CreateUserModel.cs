@@ -4,15 +4,15 @@ namespace Shootsy.Models
 {
     public class CreateUserModel
     {
-        [Required(ErrorMessage = "Укажите логин пользователя")]
+        [Required(ErrorMessage = "Укажите имя пользователя")]
         [MaxLength(50, ErrorMessage = "Максимальная длинна поля 50 символов")]
-        public string Login { get; init; }
+        public string Username { get; init; }
 
         [Required(ErrorMessage = "Укажите пароль пользователя")]
         [MinLength(7, ErrorMessage = "Минимальная длинна поля 7 символов")]
         public string Password { get; init; }
 
-        [MaxLength(100, ErrorMessage = "Максимальная длинна поля 100 символов")]
+        [MaxLength(50, ErrorMessage = "Максимальная длинна поля 50 символов")]
         public string? Contact { get; init; }
 
         [Required(ErrorMessage = "Укажите имя пользователя")]
@@ -26,7 +26,7 @@ namespace Shootsy.Models
         [MaxLength(50, ErrorMessage = "Максимальная длинна поля 50 символов")]
         public string? Patronymic { get; init; }
 
-        [MaxLength(50, ErrorMessage = "Максимальная длинна поля 250 символов")]
+        [MaxLength(250, ErrorMessage = "Максимальная длинна поля 250 символов")]
         public string? Discription { get; init; }
 
         [Required(ErrorMessage = "Укажите пол пользователя")]
@@ -44,6 +44,6 @@ namespace Shootsy.Models
         [Range(1, 4, ErrorMessage = "Указанное значение поля не поддерживается")]
         public int? CooperationType { get; init; } = 1;
 
-        public bool? isNude { get; init; }
+        public bool? isNude { get; init; } = false;
     }
 }

@@ -8,6 +8,9 @@ namespace Shootsy.Enums
         Photographer = 1,
 
         [Description("Модель")]
-        Model = 2
+        Model = 2,
+
+        [Description("Визажист")]
+        MakeupArtist = 3
     }
 }
