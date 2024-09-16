@@ -1,6 +1,24 @@
-## Методы взаимодействия
+# Методы взаимодействия
 
-*[POST] [CreateUser -- *Создание пользователя*](CreateUser.md)
+# Users
+*[POST] [CreateUser -- *Создание пользователя*](CreateUser.md)<br>
+*[POST] Authorization <br>
+*[GET] [GetUserById -- *Получение информации о пользователе по идентификатору*](GetUserById.md)<br>
+*[GET] GetUsers <br>
+*[PATCH] UpdateUser <br>
+*[DELETE] DeleteUserById
+
+# UserSessions
+*[GET] GetLastUserSession <br>
+*[GET] CheckUserAccess
+
+# Files
+*[POST] CreateFile <br>
+*[GET] GetFileById <br>
+*[GET] GetFiles <br>
+*[PATCH] UpdateFile <br>
+*[DELETE] DeleteFileById <br>
+*[DELETE] DeleteManyFiles
 
 ## Перечисления
 
