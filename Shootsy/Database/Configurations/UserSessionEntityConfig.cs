@@ -38,10 +38,6 @@ namespace Shootsy.Database.Configurations
                 .HasColumnName("guid")
                 .HasComment("GUID сессии");
 
-            entity.Property(x => x.isActive)
-                .HasColumnName("is_active")
-                .HasComment("Признак активности сессии");
-
             entity.HasOne(x => x.UserEntity)
                 .WithMany(x => x.UserSessionEntity)
                 .HasForeignKey(x => x.User)

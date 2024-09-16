@@ -19,12 +19,12 @@ namespace Shootsy.Database.Configurations
                 .HasComment("Идентификатор пользователя")
                 .ValueGeneratedOnAdd();
 
-            entity.Property(x => x.Login)
-                .HasColumnName("login")
-                .HasComment("Логин пользователя")
+            entity.Property(x => x.Username)
+                .HasColumnName("username")
+                .HasComment("Имя пользователя")
                 .HasMaxLength(50);
 
-            entity.HasIndex(x => x.Login, "login")
+            entity.HasIndex(x => x.Username, "username")
                 .IsUnique();
 
             entity.Property(x => x.Firstname)
@@ -36,11 +36,6 @@ namespace Shootsy.Database.Configurations
                 .HasColumnName("lastname")
                 .HasMaxLength(50)
                 .HasComment("Фамилия");
-
-            entity.Property(x => x.Patronymic)
-                .HasColumnName("patronymic")
-                .HasMaxLength(50)
-                .HasComment("Отчество");
 
             entity.Property(x => x.Fullname)
                 .HasColumnName("fullname")
@@ -58,10 +53,6 @@ namespace Shootsy.Database.Configurations
             entity.Property(x => x.Gender)
                 .HasColumnName("gender_id")
                 .HasComment("Пол");
-
-            entity.Property(x => x.CooperationType)
-                .HasColumnName("cooperation_type_id")
-                .HasComment("Тип сотрудничества");
 
             entity.Property(x => x.CreateDate)
                 .HasColumnName("create_date")
@@ -109,10 +100,6 @@ namespace Shootsy.Database.Configurations
             entity.HasOne(u => u.GenderEntity)
                 .WithMany(u => u.Users)
                 .HasForeignKey(u => u.Gender);
-
-            entity.HasOne(u => u.CooperationTypeEntity)
-                .WithMany(u => u.Users)
-                .HasForeignKey(u => u.CooperationType);
         }
     }
 }

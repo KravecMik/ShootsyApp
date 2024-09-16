@@ -5,7 +5,7 @@
         public int Id { get; init; }
         public DateTime? CreateDate { get; init; }
         public DateTime? EditDate { get; init; }
-        public string Login { get; init; }
+        public string Username { get; init; }
         public string Gender { get; init; }
         public string City { get; init; }
         public string Firstname { get; init; }

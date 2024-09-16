@@ -21,9 +21,9 @@
         DateTime EditDate { get; }
 
         /// <summary>
-        /// Логин
+        /// Имя пользователя
         /// </summary>
-        string Login { get; }
+        string Username { get; }
 
         /// <summary>
         /// Идентификатор пола
@@ -51,11 +51,6 @@
         string Lastname { get; }
 
         /// <summary>
-        /// Отчество
-        /// </summary>
-        string? Patronymic { get; }
-
-        /// <summary>
         /// Полное имя
         /// </summary>
         string? Fullname { get; }
@@ -64,11 +59,6 @@
         /// Описание
         /// </summary>
         string? Discription { get; }
-
-        /// <summary>
-        /// Идентификатор типа сотрудничества
-        /// </summary>
-        int CooperationType { get; }
 
         /// <summary>
         /// Хэш пароля пользователя
@@ -88,6 +78,11 @@
         /// <summary>
         /// Съемка ню
         /// </summary>
-        bool? isNude { get; }
+        bool isNude { get; }
+
+        /// <summary>
+        /// Совершеннолетний ли пользователь
+        /// </summary>
+        bool isEighteen { get; }
     }
 }

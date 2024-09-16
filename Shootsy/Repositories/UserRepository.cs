@@ -45,11 +45,11 @@ namespace Shootsy.Repositories
             return _mapper.Map<UserDto>(userEntity);
         }
 
-        public async Task<UserDto>? GetByLoginAsync(string login, CancellationToken cancellationToken)
+        public async Task<UserDto>? GetByUsernameAsync(string username, CancellationToken cancellationToken)
         {
             var userEntity = await _context.Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Login == login, cancellationToken);
+                .FirstOrDefaultAsync(x => x.Username == username, cancellationToken);
             if (userEntity is null)
                 return null;
             return _mapper.Map<UserDto>(userEntity);
@@ -68,21 +68,6 @@ namespace Shootsy.Repositories
                 return null;
 
             return user;
-        }
-
-        public async Task<Guid>? GetLastSessionAsync(int userId, CancellationToken cancellationToken)
-        {
-            var query = _context.UserSessions.AsNoTracking().Select(x => x).Where($"user eq {userId}");
-            var sessionEntities = await query
-                .Skip(0)
-                .Take(1)
-                .OrderBy("id desc")
-                .ToArrayAsync(cancellationToken);
-            var session = sessionEntities.FirstOrDefault();
-            if (session is null)
-                return Guid.Empty;
-
-            return session.Guid;
         }
 
         public async Task<IReadOnlyList<UserDto>> GetListAsync(
@@ -124,8 +109,7 @@ namespace Shootsy.Repositories
             var sessionEntity = new UserSessionEntity
             {
                 User = userId,
-                Guid = Guid.NewGuid(),
-                isActive = true,
+                Guid = Guid.NewGuid()
             };
             var sessionEntityEntry = await _context.UserSessions.AddAsync(sessionEntity, cancellationToken);
 
@@ -138,19 +122,19 @@ namespace Shootsy.Repositories
             return sessionEntity.Guid;
         }
 
-        public async Task UpdateSessionIsActiveStatusAsync(Guid guid, bool status, CancellationToken cancellationToken)
+        public async Task<Guid>? GetLastSessionAsync(int userId, CancellationToken cancellationToken)
         {
-            var userSessionEntity = _context.UserSessions.AsNoTracking().Where(x => x.Guid == guid).First();
-            userSessionEntity.isActive = status;
-            _context.Update(userSessionEntity);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
+            var query = _context.UserSessions.AsNoTracking().Select(x => x).Where($"user eq {userId}");
+            var sessionEntities = await query
+                .Skip(0)
+                .Take(1)
+                .OrderBy("id desc")
+                .ToArrayAsync(cancellationToken);
+            var session = sessionEntities.FirstOrDefault();
+            if (session is null)
+                return Guid.Empty;
 
-        public async Task DeactivateUserSessions(int userId, CancellationToken cancellationToken)
-        {
-            var userSessionEntitys = await _context.UserSessions.AsNoTracking().Where(x => x.User == userId).ToArrayAsync(cancellationToken);
-            foreach (var userSessionEntity in userSessionEntitys)
-                await UpdateSessionIsActiveStatusAsync(userSessionEntity.Guid, false, cancellationToken);
+            return session.Guid;
         }
 
         public async Task<UserSessionDto>? GetSessionByGuidAsync(Guid guid, CancellationToken cancellationToken)
@@ -178,8 +162,6 @@ namespace Shootsy.Repositories
 
             if (!sessionDto.isActive) return false;
             var isAuthorized = sessionDto.SessionDateTo >= DateTime.UtcNow;
-
-            if (!isAuthorized) await UpdateSessionIsActiveStatusAsync(guid, false, cancellationToken);
 
             return isAuthorized;
         }

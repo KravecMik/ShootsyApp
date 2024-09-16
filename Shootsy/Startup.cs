@@ -1,7 +1,5 @@
 ﻿using AutoMapper;
 using JsonPatchSample;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
 using Shootsy.Controllers;
 using Shootsy.Database;
 using Shootsy.MappingProfiles;
@@ -58,6 +56,10 @@ namespace Shootsy
                 endpoints.MapControllerRoute(
                     name: "Files",
                     pattern: "{controller=Files}");
+
+                endpoints.MapControllerRoute(
+                    name: "Service",
+                    pattern: "{controller=Service}");
             });
         }
     }

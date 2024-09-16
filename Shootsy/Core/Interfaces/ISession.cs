@@ -26,10 +26,5 @@
         /// Guid сессии 
         /// </summary>
         Guid Guid { get; init; }
-
-        /// <summary>
-        /// Признак активности сессии
-        /// </summary>
-        bool isActive { get; set; }
     }
 }
