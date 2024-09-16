@@ -25,7 +25,6 @@ namespace Shootsy.Repositories
         {
             var userEntity = _mapper.Map<UserEntity>(user);
             var userEntityEntry = await _context.Users.AddAsync(userEntity, cancellationToken);
-
             userEntity.CreateDate = DateTime.UtcNow;
             userEntity.EditDate = DateTime.UtcNow;
 

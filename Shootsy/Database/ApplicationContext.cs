@@ -9,8 +9,6 @@ namespace Shootsy.Database
         public ApplicationContext(DbContextOptions<ApplicationContext> options)
             : base(options)
         {
-            Database.EnsureCreated();
-            Database.EnsureDeleted();
         }
 
         public DbSet<UserEntity> Users { get; set; }
