@@ -1,4 +1,4 @@
-﻿ using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Shootsy.Dtos;
@@ -39,7 +39,8 @@ namespace Shootsy.Controllers
 
             var id = await _userRepository.CreateAsync(user, cancellationToken);
             var session = await _userRepository.CreateSessionAsync(id, cancellationToken);
-            return StatusCode(201, session);
+
+            return StatusCode(201, new AuthorizationResponseModel { Id = id, Session = session });
         }
 
         [HttpPost("auth")]
