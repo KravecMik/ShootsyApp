@@ -9,6 +9,5 @@ namespace Shootsy.Dtos
         public DateTime SessionDateFrom { get; set; }
         public DateTime SessionDateTo { get; set; }
         public Guid Guid { get; init; }
-        public bool isActive { get; set; }
     }
 }
