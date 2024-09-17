@@ -27,10 +27,7 @@ namespace Shootsy.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateUserAsync(
-            [FromBody, BindRequired]
-            CreateUserModel model,
-            CancellationToken cancellationToken = default)
+        public async Task<IActionResult> CreateUserAsync([FromBody, BindRequired] CreateUserModel model, CancellationToken cancellationToken = default)
         {
             var user = _mapper.Map<UserDto>(model);
             var existUsers = await _userRepository.GetByUsernameAsync(model.Username, cancellationToken);
@@ -44,10 +41,7 @@ namespace Shootsy.Controllers
         }
 
         [HttpPost("auth")]
-        public async Task<IActionResult> AuthorizationAsync(
-            [FromBody, BindRequired]
-            AuthorizationModel model,
-            CancellationToken cancellationToken = default)
+        public async Task<IActionResult> AuthorizationAsync([FromBody, BindRequired] AuthorizationModel model, CancellationToken cancellationToken = default)
         {
             var user = await _userRepository.GetByUsernameAsync(model.Username, cancellationToken);
             if (user is null)
@@ -89,9 +83,7 @@ namespace Shootsy.Controllers
         }
 
         [HttpPatch("{id}")]
-        public async Task<IActionResult> UpdateUserAsync(
-        UpdateUserModel model,
-        CancellationToken cancellationToken = default)
+        public async Task<IActionResult> UpdateUserAsync(UpdateUserModel model, CancellationToken cancellationToken = default)
         {
             var isAuthorized = await _userRepository.IsAuthorized(model.Session, cancellationToken);
             if (!isAuthorized)
@@ -157,8 +149,19 @@ namespace Shootsy.Controllers
         {
             var existUsers = await _userRepository.GetByUsernameAsync(username, cancellationToken);
             if (existUsers is not null)
-                return StatusCode(200, "false");
-            return StatusCode(200, "true");
+                return StatusCode(400, "Пользователь с таким username уже существует");
+            return StatusCode(200);
+        }
+
+        [HttpGet("{guid}/session/check")]
+        public async Task<IActionResult> CheckUserSessionAsync(string session, CancellationToken cancellationToken = default)
+        {
+            var isAuthorized = await _userRepository.IsAuthorized(session, cancellationToken);
+            if (!isAuthorized)
+            {
+                return StatusCode(401, "Пользователь не авторизован");
+            }
+            return StatusCode(200);
         }
     }
 }
