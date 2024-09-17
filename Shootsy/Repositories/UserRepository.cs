@@ -159,7 +159,6 @@ namespace Shootsy.Repositories
             var sessionDto = await GetSessionByGuidAsync(guid, cancellationToken);
             if (sessionDto is null) return false;
 
-            if (!sessionDto.isActive) return false;
             var isAuthorized = sessionDto.SessionDateTo >= DateTime.UtcNow;
 
             return isAuthorized;
