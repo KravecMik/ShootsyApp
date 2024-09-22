@@ -6,6 +6,7 @@ if [ "$(id -u)" -eq 987 ]; then
     exec sudo -H -u shootsy $0 "$@"
 fi
 cd ~/ShootsyApp
+docker compose down
 git pull
 docker compose up -d
 
