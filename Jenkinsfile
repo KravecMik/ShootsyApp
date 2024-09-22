@@ -7,6 +7,7 @@ pipeline {
       steps {
 
         echo "Create build archive for project ${env.JOB_BASE_NAME}"
+        sh "chmod +x build.sh"
         sh "./build.sh"
 
       }
