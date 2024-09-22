@@ -2,8 +2,9 @@
 
 # Запуск от имени пользователя "shootsy":
 
-exec sudo -H -u shootsy $0 "$@"
-
+if [ "$(id -u)" -eq 987 ]; then
+    exec sudo -H -u shootsy $0 "$@"
+fi
 cd ~/ShootsyApp
 git pull
 docker compose up -d
