@@ -9,8 +9,7 @@ namespace Shootsy.Models.User
         public int Offset { get; set; }
 
         [FromQuery(Name = "limit")]
-        [Required(ErrorMessage = "Укажите сколько записей необходимо вернуть")]
-        public int Limit { get; set; }
+        public int Limit { get; set; } = 100;
 
         [FromQuery(Name = "filter")]
         public string Filter { get; set; } = "id > 0";
