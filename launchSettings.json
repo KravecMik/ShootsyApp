@@ -5,7 +5,9 @@
       "commandVersion": "1.0",
       "serviceActions": {
         "shootsy": "StartWithoutDebugging",
-        "shootsy-pg-16.4": "StartWithoutDebugging"
+        "shootsy-pg-15": "StartWithoutDebugging",
+        "kafka": "StartWithoutDebugging",
+        "zookeeper": "StartWithoutDebugging"
       }
     }
   }

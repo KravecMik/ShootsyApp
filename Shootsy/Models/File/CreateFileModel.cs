@@ -11,5 +11,7 @@ namespace Shootsy.Models.File
 
         [Required(ErrorMessage = "Укажите файл пользователя")]
         public IFormFile File { get; set; }
+
+        public string Extension { get; set; }
     }
 }

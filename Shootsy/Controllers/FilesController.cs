@@ -41,28 +41,28 @@ namespace Shootsy.Controllers
             if (!isForbidden.IsSuccessStatusCode)
                 return StatusCode(403);
 
-            var dir = _internalConstants.BaseFilePath + @$"/{model.User}/";
+            //var dir = _internalConstants.BaseFilePath + @$"/{model.User}/";
 
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
+            //if (!Directory.Exists(dir))
+            //    Directory.CreateDirectory(dir);
 
-            var fullPath = dir + model.File.FileName;
-            var ext = Path.GetExtension(fullPath);
+            //var fullPath = dir + model.File.FileName;
+            //var ext = Path.GetExtension(fullPath);
 
-            if (!_internalConstants.SupportedFileExtensions.Contains(ext.ToLower()))
+            if (!_internalConstants.SupportedFileExtensions.Contains(model.Extension.ToLower()))
                 return BadRequest();
 
-            using (var fileStream = new FileStream(fullPath, FileMode.Create))
-            {
-                await model.File.CopyToAsync(fileStream);
-            }
+            //using (var fileStream = new FileStream(fullPath, FileMode.Create))
+            //{
+            //    await model.File.CopyToAsync(fileStream);
+            //}
 
             var file = new FileDto
             {
                 User = Convert.ToInt16(model.User),
                 FileName = model.File.FileName,
-                Extension = ext,
-                ContentPath = fullPath
+                Extension = model.Extension,
+                ContentPath = _internalConstants.BaseFilePath + model.File.FileName + model.Extension
             };
 
             var id = await _fileRepository.CreateAsync(file, cancellationToken);

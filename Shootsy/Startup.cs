@@ -4,11 +4,19 @@ using Shootsy.Controllers;
 using Shootsy.Database;
 using Shootsy.MappingProfiles;
 using Shootsy.Repositories;
+using Shootsy.Service;
 
 namespace Shootsy
 {
     public class Startup
     {
+        private readonly IConfiguration _configuration;
+
+        public Startup(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationContext>();
@@ -24,10 +32,14 @@ namespace Shootsy
             services.AddHttpClient<FilesController>();
             services.AddHttpClient<UsersController>();
             services.AddSingleton<Mapper>();
+            services.Configure<KafkaSettings>(_configuration.GetSection("Kafka"));
+            services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
+
             services.AddControllers(options =>
             {
                 options.InputFormatters.Insert(0, MyJPIF.GetJsonPatchInputFormatter());
             });
+
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",
@@ -45,8 +57,11 @@ namespace Shootsy
             {
                 app.UseDeveloperExceptionPage();
             }
+
             app.UseCors("CorsPolicy");
             app.UseRouting();
+
+            // УБЕРИТЕ ВСЕ MapHealthChecks ОТСЮДА
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
@@ -60,6 +75,12 @@ namespace Shootsy
                 endpoints.MapControllerRoute(
                     name: "Service",
                     pattern: "{controller=Service}");
+
+                // Добавьте default route для корня
+                endpoints.MapGet("/", async context =>
+                {
+                    await context.Response.WriteAsync("Shootsy API is running!");
+                });
             });
         }
     }

@@ -6,6 +6,8 @@ using Shootsy.Models;
 using Shootsy.Models.User;
 using Shootsy.Repositories;
 using Shootsy.Security;
+using Shootsy.Service;
+using System.Text.Json;
 
 namespace Shootsy.Controllers
 {
@@ -16,14 +18,16 @@ namespace Shootsy.Controllers
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
         InternalConstants _internalConstants;
+        private readonly IKafkaProducerService _kafkaProducer;
         private readonly HttpClient _httpClient;
 
-        public UsersController(IUserRepository userRepository, IMapper mapper, HttpClient httpClient, InternalConstants internalConstants)
+        public UsersController(IUserRepository userRepository, IMapper mapper, HttpClient httpClient, InternalConstants internalConstants, IKafkaProducerService kafkaProducer)
         {
             _userRepository = userRepository;
             _mapper = mapper;
             _httpClient = httpClient;
             _internalConstants = internalConstants;
+            _kafkaProducer = kafkaProducer;
         }
 
         [HttpPost]
@@ -32,11 +36,15 @@ namespace Shootsy.Controllers
             var user = _mapper.Map<UserDto>(model);
             var existUsers = await _userRepository.GetByUsernameAsync(model.Username, cancellationToken);
             if (existUsers != null)
-                return StatusCode(400, "Пользователь с таким Username уже существует");
+            {
+                await _kafkaProducer.ProduceUserEventAsync("user.error", $"Пользователь с таким Username: {model.Username} уже существует");
+                return StatusCode(400, $"Пользователь с таким Username: {model.Username} уже существует");
+            }
 
             var id = await _userRepository.CreateAsync(user, cancellationToken);
             var session = await _userRepository.CreateSessionAsync(id, cancellationToken);
 
+            await _kafkaProducer.ProduceUserEventAsync("user.created", new { id, user.Username });
             return StatusCode(201, new AuthorizationResponseModel { Id = id, Session = session });
         }
 
@@ -52,6 +60,7 @@ namespace Shootsy.Controllers
                 return StatusCode(400, "Неверно указан Username или пароль пользователя");
 
             var session = await _userRepository.CreateSessionAsync(user.Id, cancellationToken);
+            await _kafkaProducer.ProduceUserEventAsync("user.authorized", $"Пользователь Username: {model.Username} авторизовался");
             return StatusCode(200, session);
         }
 
