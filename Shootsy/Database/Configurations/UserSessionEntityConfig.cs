@@ -9,35 +9,25 @@ namespace Shootsy.Database.Configurations
         public void Configure(EntityTypeBuilder<UserSessionEntity> entity)
         {
             entity.ToTable("user_sessions", "security");
-
-            entity.HasComment("Сессии пользователей");
-
             entity.HasKey(x => x.Id);
-
             entity.HasIndex(x => x.Guid, "guid");
-
             entity.Property(x => x.Id)
                 .HasColumnName("id")
                 .HasComment("Идентификатор сессии");
-
             entity.Property(x => x.SessionDateFrom)
                 .HasColumnName("date_from")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasComment("Дата начала сессии");
-
             entity.Property(x => x.SessionDateTo)
                 .HasColumnName("date_to")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasComment("Дата окончания сессии");
-
             entity.Property(x => x.User)
                 .HasColumnName("user_id")
                 .HasComment("Идентификатор пользователя");
-
             entity.Property(x => x.Guid)
                 .HasColumnName("guid")
                 .HasComment("GUID сессии");
-
             entity.HasOne(x => x.UserEntity)
                 .WithMany(x => x.UserSessionEntity)
                 .HasForeignKey(x => x.User)
