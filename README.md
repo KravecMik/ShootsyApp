@@ -47,3 +47,15 @@
 |:---------:|:---------:|
 |1|Мужской|
 |2|Женский|
+
+# Files
+*[POST] [CreateFile](Files_CreateFile.md) <br>
+*[GET] [GetFileById](Files_GetFileById.md) <br>
+*[GET] [GetFiles](Files_GetFiles.md) <br>
+*[DELETE] [DeleteFileById](Files_DeleteFileById.md) <br>
+*[DELETE] [DeleteManyFiles](Files_DeleteManyFiles.md) <br>
+
+# Service
+*[GET] [Health](Service_Health.md) <br>
+*[POST] [EnsureCreated](Service_EnsureCreated.md) <br>
+*[DELETE] [EnsureDeleted](Service_EnsureDeleted.md) <br>

@@ -4,6 +4,8 @@ using Shootsy.Dtos;
 using Shootsy.Models;
 using Shootsy.Models.File;
 using Shootsy.Repositories;
+using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace Shootsy.Controllers
 {
@@ -69,8 +71,13 @@ namespace Shootsy.Controllers
             return StatusCode(201, id);
         }
 
+
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetFileByIdAsync(GetFileByIdModel model, CancellationToken cancellationToken = default)
+        [SwaggerOperation(OperationId = "GetFileByIdAsync", Summary = "Получение файла по идентификатору")]
+        [SwaggerRequestExample(typeof(GetFileByIdModel), typeof(GetFileByIdRequestExample))]
+        [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(FileModelResponse))]
+        [SwaggerResponseExample(200, typeof(FileModelResponseExample))]
+        public async Task<IActionResult> GetFileByIdAsync([FromQuery] GetFileByIdModel model, CancellationToken cancellationToken = default)
         {
             var isSessionValid = await _userRepository.IsAuthorized(model.Session, cancellationToken);
             if (!isSessionValid)
@@ -85,7 +92,11 @@ namespace Shootsy.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetFilesAsync(GetFilesModel model, CancellationToken cancellationToken = default)
+        [SwaggerOperation(Summary = "Получить список файлов")]
+        [SwaggerRequestExample(typeof(GetFilesModel), typeof(GetFilesModelRequestExample))] 
+        [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(IEnumerable<FileModelResponse>))]
+        [SwaggerResponseExample(200, typeof(GetFilesResponseExample))]
+        public async Task<IActionResult> GetFilesAsync([FromQuery]GetFilesModel model, CancellationToken cancellationToken = default)
         {
             var isSessionValid = await _userRepository.IsAuthorized(model.Session, cancellationToken);
             if (!isSessionValid)

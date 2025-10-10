@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using JsonPatchSample;
+using Microsoft.OpenApi.Models;
 using Shootsy.Controllers;
 using Shootsy.Database;
 using Shootsy.MappingProfiles;
 using Shootsy.Repositories;
 using Shootsy.Service;
-
+using Swashbuckle.AspNetCore.Filters;
+using Swashbuckle.AspNetCore.SwaggerUI;
 namespace Shootsy
 {
     public class Startup
@@ -19,6 +21,15 @@ namespace Shootsy
 
         public void ConfigureServices(IServiceCollection services)
         {
+
+            services.AddEndpointsApiExplorer();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Shootsy API", Version = "v1" });
+                c.EnableAnnotations();   
+                c.ExampleFilters();
+            });
+            services.AddSwaggerExamplesFromAssemblyOf<Startup>();
             services.AddDbContext<ApplicationContext>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IFileRepository, FileRepository>();
@@ -61,6 +72,14 @@ namespace Shootsy
             app.UseCors("CorsPolicy");
             app.UseRouting();
 
+
+            // Swagger
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Shootsy API v1");
+                c.RoutePrefix = "swagger";
+            });
             // УБЕРИТЕ ВСЕ MapHealthChecks ОТСЮДА
             app.UseEndpoints(endpoints =>
             {

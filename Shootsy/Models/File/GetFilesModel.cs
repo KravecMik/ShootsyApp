@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Shootsy.Models.File;
-using System.ComponentModel.DataAnnotations;
 
 namespace Shootsy.Models
 {
@@ -10,8 +9,7 @@ namespace Shootsy.Models
         public int Offset { get; set; }
 
         [FromQuery(Name = "limit")]
-        [Required(ErrorMessage = "Укажите сколько записей необходимо вернуть")]
-        public string Limit { get; set; }
+        public int Limit { get; set; } = 100;
 
         [FromQuery(Name = "filter")]
         public string Filter { get; set; } = "id > 0";
