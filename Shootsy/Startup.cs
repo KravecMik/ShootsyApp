@@ -37,6 +37,9 @@ namespace Shootsy
             services.AddAuthorization();
             services.AddEndpointsApiExplorer();
             services.AddEndpointsApiExplorer();
+            services.Configure<MinioOptions>(_configuration.GetSection("Minio"));
+            services.AddSingleton<IObjectStorage, MinioStorageService>();
+            services.AddHostedService<MinioInitializer>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo

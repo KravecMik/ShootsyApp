@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
+using SharpCompress.Common;
 using Shootsy.Database.Mongo;
 using Shootsy.Models.File;
 using Shootsy.Models.File.Swagger;
@@ -18,19 +19,21 @@ namespace Shootsy.Controllers
     [Route("Files")]
     public class FilesController : ControllerBase
     {
+        private readonly IObjectStorage _objectStorage;
         private readonly IMapper _mapper;
         private readonly IFileRepository _fileRepository;
         private readonly IUserRepository _userRepository;
         private readonly InternalConstants _internalConstants;
         private readonly HttpClient _httpClient;
 
-        public FilesController(IFileRepository fileRepository, IUserRepository userRepository, InternalConstants internalConstants, IMapper mapper, HttpClient httpClient)
+        public FilesController(IFileRepository fileRepository, IUserRepository userRepository, InternalConstants internalConstants, IMapper mapper, HttpClient httpClient, IObjectStorage objectStorage)
         {
             _fileRepository = fileRepository;
             _internalConstants = internalConstants;
             _userRepository = userRepository;
             _mapper = mapper;
             _httpClient = httpClient;
+            _objectStorage = objectStorage;
         }
 
         [Authorize]
@@ -44,35 +47,25 @@ namespace Shootsy.Controllers
             if (user is null)
                 return NotFound();
 
-            var dir = _internalConstants.BaseFilePath + @$"/{model.IdUser}/";
-
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
-
-            var fullPath = dir + model.File.FileName;
-            var ext = Path.GetExtension(fullPath);
-
-            if (!_internalConstants.SupportedFileExtensions.Contains(ext.ToLower()))
+            if (!_internalConstants.SupportedFileExtensions.Contains(Path.GetExtension(model.File.FileName).ToLower()))
                 return BadRequest();
 
-            using (var fileStream = new FileStream(fullPath, FileMode.Create))
-            {
-                await model.File.CopyToAsync(fileStream);
-            }
+            var objectKey = $"{model.IdUser}/{Guid.NewGuid():N}/{Path.GetFileName(model.File.FileName)}";
+            await using var stream = model.File.OpenReadStream();
+            var (key, publicUrl) = await _objectStorage.UploadAsync(stream, objectKey, model.File.ContentType ?? "", cancellationToken);
 
-            var file = new FileStorageEntity
+            var fileId = await _fileRepository.CreateAsync(new FileStorageEntity
             {
                 IdUser = model.IdUser,
                 FileInfo = new Database.Mongo.FileInfo
                 {
                     FileName = model.File.FileName,
-                    Extension = ext,
-                    ContentPath = _internalConstants.BaseFilePath + model.File.FileName + ext
+                    Extension = Path.GetExtension(model.File.FileName),
+                    ContentPath = publicUrl
                 }
-            };
+            }, cancellationToken);
 
-            var id = await _fileRepository.CreateAsync(file, cancellationToken);
-            return StatusCode(201, new CreateFileResponse { IdFile = id });
+            return CreatedAtAction(nameof(GetFileByIdAsync), new { id = fileId }, new { id = fileId, objectKey = key, url = publicUrl });
         }
 
         [Authorize]

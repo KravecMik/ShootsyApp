@@ -11,6 +11,7 @@ services:
       - zookeeper
       - kafka
       - mongoDb
+      - minio
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
@@ -90,9 +91,41 @@ services:
       - "8081:8081"
     networks:
       - shootsy-network
+
+  minio:
+    image: minio/minio:latest
+    container_name: shootsy-minio
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin123
+    ports:
+      - "9000:9000"  
+      - "9001:9001"  
+    volumes:
+      - shootsy_minio_data:/data
+    networks:
+      - shootsy-network
+      
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    depends_on:
+      - kafka
+      - zookeeper
+    networks:
+      - shootsy-network
+      
 volumes:
   shootsy_pgdata:
   shootsy_mongodata:
+  shootsy_minio_data:
 
 networks:
   shootsy-network:
