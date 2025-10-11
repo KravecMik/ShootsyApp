@@ -18,6 +18,7 @@ namespace Shootsy.Database.Mongo
     {
         public required string FileName { get; set; }
         public required string Extension { get; set; }
+        public required string ObjectKey { get; set; }
         public required string ContentPath { get; set; }
     }
 }

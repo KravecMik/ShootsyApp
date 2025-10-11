@@ -2,16 +2,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
-using SharpCompress.Common;
 using Shootsy.Database.Mongo;
 using Shootsy.Models.File;
 using Shootsy.Models.File.Swagger;
 using Shootsy.Repositories;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
-using System.Linq;
-using static System.Net.Mime.MediaTypeNames;
+using System.IO;
 
 namespace Shootsy.Controllers
 {
@@ -38,17 +35,19 @@ namespace Shootsy.Controllers
 
         [Authorize]
         [HttpPost]
-        [SwaggerOperation(Summary = "Создание файла")]
+        [SwaggerOperation(Summary = "Создание карточки файла")]
         [SwaggerResponse(statusCode: 201, description: "OK", type: typeof(CreateFileResponse))]
         [SwaggerResponseExample(201, typeof(CreateFileResponseExample))]
         public async Task<IActionResult> CreateFileAsync([FromForm] CreateFileRequest model, CancellationToken cancellationToken = default)
         {
             var user = await _userRepository.GetByIdAsync(model.IdUser, cancellationToken);
-            if (user is null)
-                return NotFound();
+            if (user is null) return NotFound();
 
             if (!_internalConstants.SupportedFileExtensions.Contains(Path.GetExtension(model.File.FileName).ToLower()))
-                return BadRequest();
+            {
+                ModelState.AddModelError("File.Extension", "Файл с таким расширением не поддерживается");
+                return ValidationProblem();
+            }
 
             var objectKey = $"{model.IdUser}/{Guid.NewGuid():N}/{Path.GetFileName(model.File.FileName)}";
             await using var stream = model.File.OpenReadStream();
@@ -61,6 +60,7 @@ namespace Shootsy.Controllers
                 {
                     FileName = model.File.FileName,
                     Extension = Path.GetExtension(model.File.FileName),
+                    ObjectKey = key,
                     ContentPath = publicUrl
                 }
             }, cancellationToken);
@@ -70,22 +70,20 @@ namespace Shootsy.Controllers
 
         [Authorize]
         [HttpGet("{id}")]
-        [SwaggerOperation(Summary = "Получение файла по идентификатору")]
+        [SwaggerOperation(Summary = "Получение карточки файла по идентификатору")]
         [SwaggerRequestExample(typeof(GetFileByIdRequest), typeof(GetFileByIdRequestExample))]
         [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(GetFileByIdResponse))]
         [SwaggerResponseExample(200, typeof(GetFileByIdResponseExample))]
         public async Task<IActionResult> GetFileByIdAsync([FromQuery] GetFileByIdRequest model, CancellationToken cancellationToken = default)
         {
             var file = await _fileRepository.GetByIdAsync(model.IdFile, cancellationToken);
-            if (file is null)
-                return NotFound();
-
+            if (file is null) return NotFound();
             return Ok(file);
         }
 
         [Authorize]
         [HttpGet]
-        [SwaggerOperation(Summary = "Получить список файлов")]
+        [SwaggerOperation(Summary = "Получить список карточек файлов")]
         [SwaggerRequestExample(typeof(FileStorageFilter), typeof(GetFileListRequestExample))]
         [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(IEnumerable<GetFileByIdResponse>))]
         [SwaggerResponseExample(200, typeof(GetFileListResponseExample))]
@@ -102,8 +100,6 @@ namespace Shootsy.Controllers
         [SwaggerResponse(statusCode: 204, description: "NoContent")]
         public async Task<IActionResult> UpdateFileAsync([FromRoute(Name = "id")] string id, [FromBody] JsonPatchDocument<FileStorageEntity> patch, CancellationToken cancellationToken = default)
         {
-            if (patch is null) return BadRequest("Patch document is required.");
-
             var entity = await _fileRepository.GetByIdAsync(id, cancellationToken);
             if (entity is null) return NotFound();
 
@@ -114,13 +110,23 @@ namespace Shootsy.Controllers
                 if (item.path.ToLower().Contains("iduser"))
                 {
                     var user = await _userRepository.GetByIdAsync(int.Parse(item.value.ToString()), cancellationToken);
-                    if (user is null)return NotFound();
+                    if (user is null) return NotFound();
                 }
                 if (item.path.ToLower().Contains("extension"))
                 {
                     if (!_internalConstants.SupportedFileExtensions.Contains(item.value.ToString().ToLower()))
                         ModelState.AddModelError("Extension", "Указанный тип файла не поддерживается");
-                        return ValidationProblem();
+                    return ValidationProblem();
+                }
+                if (item.path.ToLower().Contains("ContentPath"))
+                {
+                    ModelState.AddModelError("ContentPath", "Данное поле редактировать запрещено");
+                    return ValidationProblem();
+                }
+                if (item.path.ToLower().Contains("ObjectKey"))
+                {
+                    ModelState.AddModelError("ObjectKey", "Данное поле редактировать запрещено");
+                    return ValidationProblem();
                 }
             }
 
@@ -143,13 +149,10 @@ namespace Shootsy.Controllers
         public async Task<IActionResult> DeleteFileByIdAsync([FromQuery] GetFileByIdRequest model, CancellationToken cancellationToken = default)
         {
             var file = await _fileRepository.GetByIdAsync(model.IdFile, cancellationToken);
-            if (file is null)
-                return NotFound();
+            if (file is null) return NotFound();
 
+            await _objectStorage.DeleteAsync(file.FileInfo.ObjectKey, cancellationToken);
             await _fileRepository.DeleteByIdAsync(model.IdFile, cancellationToken);
-
-            if (System.IO.File.Exists(file.FileInfo.ContentPath))
-                System.IO.File.Delete(file.FileInfo.ContentPath);
 
             return NoContent();
         }
@@ -165,10 +168,8 @@ namespace Shootsy.Controllers
 
             foreach (var file in fileList.Item1)
             {
+                await _objectStorage.DeleteAsync(file.FileInfo.ObjectKey, cancellationToken);
                 await _fileRepository.DeleteByIdAsync(file.Id, cancellationToken);
-
-                if (System.IO.File.Exists(file.FileInfo.ContentPath))
-                    System.IO.File.Delete(file.FileInfo.ContentPath);
             }
             return NoContent();
         }

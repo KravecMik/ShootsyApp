@@ -38,9 +38,10 @@ namespace Shootsy.Models.File.Swagger
             IdUser = 57254,
             FileInfo = new Database.Mongo.FileInfo()
             {
-                FileName = "example",
-                Extension = "jpg",
-                ContentPath = "minio/gdfsjsfadfgy/example.jpg"
+                FileName = "jDPlUgZS8So",
+                Extension = ".jpg",
+                ObjectKey = "1/97279b7eb30141469accb05116b901da/jDPlUgZS8So.jpg",
+                ContentPath = "http://localhost:9000/shootsy/1%2F97279b7eb30141469accb05116b901da%2FjDPlUgZS8So.jpg"
             }
         };
     }
@@ -66,9 +67,9 @@ namespace Shootsy.Models.File.Swagger
     {
         public IEnumerable<GetFileByIdResponse> GetExamples() => new[]
         {
-            new GetFileByIdResponse { Id = Guid.NewGuid().ToString().Replace("-", ""), CreateDate = DateTime.Now.AddDays(-2), EditDate = DateTime.Now, IdUser = 57954, FileInfo = new Database.Mongo.FileInfo {FileName = "example1", Extension = "jpg", ContentPath = "minio/gdfsjsfadfgy/example1.jpg"} },
-            new GetFileByIdResponse { Id = Guid.NewGuid().ToString().Replace("-", ""), CreateDate = DateTime.Now.AddDays(-3), EditDate = DateTime.Now, IdUser = 57954, FileInfo = new Database.Mongo.FileInfo {FileName = "example2", Extension = "jpg", ContentPath = "minio/gdfsjsfadfgy/example2.jpg"} },
-            new GetFileByIdResponse { Id = Guid.NewGuid().ToString().Replace("-", ""), CreateDate = DateTime.Now.AddDays(-4), EditDate = DateTime.Now, IdUser = 57954, FileInfo = new Database.Mongo.FileInfo {FileName = "example3", Extension = "jpg", ContentPath = "minio/gdfsjsfadfgy/example3.jpg"} },
+            new GetFileByIdResponse { Id = Guid.NewGuid().ToString().Replace("-", ""), CreateDate = DateTime.Now.AddDays(-2), EditDate = DateTime.Now, IdUser = 57954, FileInfo = new Database.Mongo.FileInfo {FileName = "example1", Extension = ".jpg", ObjectKey = "1/97279b7eb30141469accb05116b901da/example1.jpg", ContentPath = "http://localhost:9000/shootsy/1%2F97279b7eb30141469accb05116b901da%example1.jpg"} },
+            new GetFileByIdResponse { Id = Guid.NewGuid().ToString().Replace("-", ""), CreateDate = DateTime.Now.AddDays(-3), EditDate = DateTime.Now, IdUser = 57954, FileInfo = new Database.Mongo.FileInfo {FileName = "example2", Extension = ".jpg", ObjectKey = "1/97279b7eb30141469accb05116b901da/example2.jpg", ContentPath = "http://localhost:9000/shootsy/1%2F97279b7eb30141469accb05116b901da%example2.jpg"} },
+            new GetFileByIdResponse { Id = Guid.NewGuid().ToString().Replace("-", ""), CreateDate = DateTime.Now.AddDays(-4), EditDate = DateTime.Now, IdUser = 57954, FileInfo = new Database.Mongo.FileInfo {FileName = "example3", Extension = ".jpg", ObjectKey = "1/97279b7eb30141469accb05116b901da/example3.jpg", ContentPath = "http://localhost:9000/shootsy/1%2F97279b7eb30141469accb05116b901da%example3.jpg"} },
         };
     }
 }

@@ -44,8 +44,8 @@ namespace Shootsy.Controllers
             var existUsers = await _userRepository.GetByLoginAsync(model.Login, cancellationToken);
             if (existUsers != null)
             {
-                await _kafkaProducer.ProduceUserEventAsync("user.error", $"Пользователь с таким Login: {model.Login} уже существует");
-                return StatusCode(400, $"Пользователь с таким Login: {model.Login} уже существует");
+                ModelState.AddModelError("Login", $"Пользователь с таким логином уже существует");
+                return ValidationProblem();
             }
 
             var id = await _userRepository.CreateAsync(user, cancellationToken);
@@ -65,15 +65,17 @@ namespace Shootsy.Controllers
         public async Task<IActionResult> SignInAsync([FromBody, BindRequired] SignInRequest model, CancellationToken cancellationToken = default)
         {
             var user = await _userRepository.GetByLoginAsync(model.Login, cancellationToken);
-            if (user is null)
-                return NotFound("Пользователь не найден");
+            if (user is null) return NotFound("Пользователь не найден");
 
             var passwordVerification = model.Password.IsPasswordValid(model.Login, user.Password);
             if (!passwordVerification)
-                return StatusCode(400, "Неверно указан логин или пароль пользователя");
+            {
+                ModelState.AddModelError("detail", "Неверно указан логин или пароль пользователя");
+                return ValidationProblem();
+            }    
 
             var session = await _userRepository.CreateSessionAsync(user.Id, cancellationToken);
-            await _kafkaProducer.ProduceUserEventAsync("user.authorized", $"Пользователь с логином: {model.Login} успешно авторизовался");
+            await _kafkaProducer.ProduceUserEventAsync("user.authorized", $"Пользователь с логином {model.Login} успешно авторизовался");
             return StatusCode(200, session);
         }
 
@@ -99,8 +101,7 @@ namespace Shootsy.Controllers
         public async Task<IActionResult> GetUserByIdAsync([FromQuery] GetUserByIdRequest model, CancellationToken cancellationToken = default)
         {
             var user = await _userRepository.GetByIdAsync(model.IdUser, cancellationToken);
-            if (user is null)
-                return NotFound("Пользователь по указанному id не найден");
+            if (user is null) return NotFound("Пользователь по указанному идентификатору не найден");
 
             var result = _mapper.Map<GetUserByIdResponse>(user);
             return Ok(result);
@@ -114,13 +115,12 @@ namespace Shootsy.Controllers
         public async Task<IActionResult> UpdateUserAsync([FromBody] UpdateUserRequest model, CancellationToken cancellationToken = default)
         {
             var currentUser = await _userRepository.GetByIdAsync(model.IdUser, cancellationToken);
-            if (currentUser is null)
-                return NotFound("Пользователь по указанному id не найден");
+            if (currentUser is null) return NotFound("Пользователь по указанному идентификатору не найден");
 
-            var isExistOperationWithLogin = model.PatchDocument.Operations.Any(x => x.path.ToLower().Contains("Login"));
-            if (isExistOperationWithLogin)
+            if (model.PatchDocument.Operations.Any(x => x.path.ToLower().Contains("login")))
             {
-                return StatusCode(400, "Поле 'Login' недоступно для редактирования");
+                ModelState.AddModelError("Login", "Поле логин недоступно для редактирования");
+                return ValidationProblem();
             }
 
             await _userRepository.UpdateAsync(currentUser, model.PatchDocument, cancellationToken);
@@ -135,8 +135,7 @@ namespace Shootsy.Controllers
         public async Task<IActionResult> DeleteUserByIdAsync([FromQuery] GetUserByIdRequest model, CancellationToken cancellationToken = default)
         {
             var user = await _userRepository.GetByIdAsync(model.IdUser, cancellationToken);
-            if (user is null)
-                return NotFound("Пользователь по указанному id не найден");
+            if (user is null) return NotFound("Пользователь по указанному идентификаторуid не найден");
 
             await _userRepository.DeleteByIdAsync(model.IdUser, cancellationToken);
             return NoContent();
