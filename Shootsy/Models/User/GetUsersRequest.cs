@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Shootsy.Models.File;
 
-namespace Shootsy.Models
+namespace Shootsy.Models.User
 {
-    public class GetFilesModel : BaseFilesModel
+    public class GetUsersRequest
     {
         [FromQuery(Name = "offset")]
         public int Offset { get; set; }

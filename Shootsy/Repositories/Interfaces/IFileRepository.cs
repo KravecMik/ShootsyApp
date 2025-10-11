@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.JsonPatch;
-using Shootsy.Dtos;
+using Shootsy.Database.Mongo;
 
 namespace Shootsy.Repositories
 {
     public interface IFileRepository
     {
-        Task<int> CreateAsync(FileDto file, CancellationToken cancellationToken);
-        Task<FileDto>? GetByIdAsync(int id, CancellationToken cancellationToken);
-        Task<IReadOnlyList<FileDto>>? GetListAsync(int limit, int offset, string filter, string sort, CancellationToken cancellationToken);
-        Task UpdateAsync(FileDto fileDto, JsonPatchDocument<FileDto> jsonPatchDocument, CancellationToken cancellationToken = default);
-        Task DeleteByIdAsync(int id, CancellationToken cancellationToken);
+        Task<string> CreateAsync(FileStorageEntity file, CancellationToken cancellationToken);
+        Task<FileStorageEntity>? GetByIdAsync(string idFile, CancellationToken cancellationToken);
+        Task<(IReadOnlyList<FileStorageEntity>, long total)>? GetListAsync(FileStorageFilter f, CancellationToken cancellationToken);
+        Task<bool> ReplaceAsync(FileStorageEntity entity, CancellationToken cancellationToken = default);
+        Task DeleteByIdAsync(string id, CancellationToken cancellationToken);
     }
 }

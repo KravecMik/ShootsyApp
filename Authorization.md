@@ -10,7 +10,7 @@
 
 ```json
 {
-    "Username": "Cat", //Имя пользователя -- Required
+    "Login": "Cat", //Имя пользователя -- Required
     "Password" : "jaLalka145" //Пароль -- Required
 }
 ```
@@ -26,7 +26,7 @@
 curl -L -X POST 'http://38.135.55.111:5000/Users/auth' \
 -H 'Content-Type: application/json' \
 -d '{
-    "Username": "8355",
+    "Login": "8355",
     "Password": "42343324"
 }
 ```

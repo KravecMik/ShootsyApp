@@ -44,11 +44,11 @@ namespace Shootsy.Repositories
             return _mapper.Map<UserDto>(userEntity);
         }
 
-        public async Task<UserDto>? GetByUsernameAsync(string username, CancellationToken cancellationToken)
+        public async Task<UserDto>? GetByLoginAsync(string Login, CancellationToken cancellationToken)
         {
             var userEntity = await _context.Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Username == username, cancellationToken);
+                .FirstOrDefaultAsync(x => x.Login == Login, cancellationToken);
             if (userEntity is null)
                 return null;
             return _mapper.Map<UserDto>(userEntity);

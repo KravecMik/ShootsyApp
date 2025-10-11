@@ -6,7 +6,7 @@
         public int User { get; set; }
         public int Role { get; set; }
         public bool isActive { get; set; }
-        public UserEntity UserEntity { get; set; }
-        public RoleEntity RoleEntity { get; set; }
+        public required UserEntity UserEntity { get; set; }
+        public required RoleEntity RoleEntity { get; set; }
     }
 }

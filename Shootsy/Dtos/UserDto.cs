@@ -9,7 +9,7 @@ namespace Shootsy.Dtos
         public DateTime EditDate { get; init; }
         public string Firstname { get; init; }
         public string Lastname { get; init; }
-        public string Username { get; set; }
+        public string Login { get; set; }
         public string Contact { get; init; }
         public byte[] Password { get; init; }
         public byte[]? Avatar { get; init; }

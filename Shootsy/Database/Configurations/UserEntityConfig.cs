@@ -14,11 +14,11 @@ namespace Shootsy.Database.Configurations
                 .HasColumnName("id")
                 .HasComment("Идентификатор пользователя")
                 .ValueGeneratedOnAdd();
-            entity.Property(x => x.Username)
-                .HasColumnName("username")
+            entity.Property(x => x.Login)
+                .HasColumnName("Login")
                 .HasComment("Имя пользователя")
                 .HasMaxLength(50);
-            entity.HasIndex(x => x.Username, "username")
+            entity.HasIndex(x => x.Login, "Login")
                 .IsUnique();
             entity.Property(x => x.Firstname)
                 .HasColumnName("firstname")

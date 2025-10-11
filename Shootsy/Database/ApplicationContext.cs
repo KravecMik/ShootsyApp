@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Shootsy.Database.Configurations;
 using Shootsy.Database.Entities;
+using Shootsy.Database.Mongo;
 
 namespace Shootsy.Database
 {
@@ -16,7 +17,6 @@ namespace Shootsy.Database
         public DbSet<UserTypeEntity> UserTypes { get; set; }
         public DbSet<CityEntity> Cities { get; set; }
         public DbSet<GenderEntity> Genders { get; set; }
-        public DbSet<FileEntity> Files { get; set; }
         public DbSet<RoleEntity> Roles { get; set; }
         public DbSet<UserRoleEntity> UserRoles { get; set; }
 
@@ -27,7 +27,6 @@ namespace Shootsy.Database
             modelBuilder.ApplyConfiguration(new UserTypeEntityConfig());
             modelBuilder.ApplyConfiguration(new CityEntityConfig());
             modelBuilder.ApplyConfiguration(new GenderEntityConfig());
-            modelBuilder.ApplyConfiguration(new FileEntityConfig());
             modelBuilder.ApplyConfiguration(new RoleEntityConfig());
             modelBuilder.ApplyConfiguration(new UserRoleEntityConfig());
         }

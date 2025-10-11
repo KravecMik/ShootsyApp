@@ -8,7 +8,7 @@
         /// <summary>
         /// Идентификатор
         /// </summary>
-        int Id { get; set; }
+        string Id { get; set; }
 
         /// <summary>
         /// Дата создания
@@ -23,21 +23,11 @@
         /// <summary>
         /// Идентификатор пользователя
         /// </summary>
-        int User { get; set; }
+        int IdUser { get; set; }
 
         /// <summary>
-        /// Наименование
+        /// Информация о файле
         /// </summary>
-        string FileName { get; set; }
-
-        /// <summary>
-        /// Расширение
-        /// </summary>
-        string Extension { get; set; }
-
-        /// <summary>
-        /// Путь до содержимого
-        /// </summary>
-        string ContentPath { get; set; }
+        public FileInfo FileInfo { get; set; }
     }
 }

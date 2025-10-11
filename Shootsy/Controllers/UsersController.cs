@@ -1,13 +1,14 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Shootsy.Dtos;
-using Shootsy.Models;
 using Shootsy.Models.User;
 using Shootsy.Repositories;
 using Shootsy.Security;
 using Shootsy.Service;
-using System.Text.Json;
+using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace Shootsy.Controllers
 {
@@ -17,7 +18,7 @@ namespace Shootsy.Controllers
     {
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
-        InternalConstants _internalConstants;
+        private readonly InternalConstants _internalConstants;
         private readonly IKafkaProducerService _kafkaProducer;
         private readonly HttpClient _httpClient;
 
@@ -30,147 +31,115 @@ namespace Shootsy.Controllers
             _kafkaProducer = kafkaProducer;
         }
 
+        [AllowAnonymous]
         [HttpPost]
-        public async Task<IActionResult> CreateUserAsync([FromBody, BindRequired] CreateUserModel model, CancellationToken cancellationToken = default)
+        [SwaggerOperation(Summary = "Регистрация пользователя")]
+        [Consumes("application/json")]
+        [SwaggerRequestExample(typeof(SignUpRequest), typeof(SignUpRequestExample))]
+        [SwaggerResponse(statusCode: 201, description: "OK", type: typeof(SignInResponse))]
+        [SwaggerResponseExample(201, typeof(SignInResponseExample))]
+        public async Task<IActionResult> SignUpAsync([FromBody, BindRequired] SignUpRequest model, CancellationToken cancellationToken = default)
         {
             var user = _mapper.Map<UserDto>(model);
-            var existUsers = await _userRepository.GetByUsernameAsync(model.Username, cancellationToken);
+            var existUsers = await _userRepository.GetByLoginAsync(model.Login, cancellationToken);
             if (existUsers != null)
             {
-                await _kafkaProducer.ProduceUserEventAsync("user.error", $"Пользователь с таким Username: {model.Username} уже существует");
-                return StatusCode(400, $"Пользователь с таким Username: {model.Username} уже существует");
+                await _kafkaProducer.ProduceUserEventAsync("user.error", $"Пользователь с таким Login: {model.Login} уже существует");
+                return StatusCode(400, $"Пользователь с таким Login: {model.Login} уже существует");
             }
 
             var id = await _userRepository.CreateAsync(user, cancellationToken);
             var session = await _userRepository.CreateSessionAsync(id, cancellationToken);
 
-            await _kafkaProducer.ProduceUserEventAsync("user.created", new { id, user.Username });
-            return StatusCode(201, new AuthorizationResponseModel { Id = id, Session = session });
+            await _kafkaProducer.ProduceUserEventAsync("user.created", new { id, user.Login });
+            return StatusCode(201, new SignInResponse { IdUser = id, Session = session });
         }
 
+        [AllowAnonymous]
         [HttpPost("auth")]
-        public async Task<IActionResult> AuthorizationAsync([FromBody, BindRequired] AuthorizationModel model, CancellationToken cancellationToken = default)
+        [Consumes("application/json")]
+        [SwaggerOperation(Summary = "Авторизация пользователя")]
+        [SwaggerRequestExample(typeof(SignInRequest), typeof(SignInRequestExample))]
+        [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(SignInResponse))]
+        [SwaggerResponseExample(200, typeof(SignInResponseExample))]
+        public async Task<IActionResult> SignInAsync([FromBody, BindRequired] SignInRequest model, CancellationToken cancellationToken = default)
         {
-            var user = await _userRepository.GetByUsernameAsync(model.Username, cancellationToken);
+            var user = await _userRepository.GetByLoginAsync(model.Login, cancellationToken);
             if (user is null)
-                return NotFound("Пользователь по указанному Username не найден");
+                return NotFound("Пользователь не найден");
 
-            var passwordVerification = model.Password.IsPasswordValid(model.Username, user.Password);
+            var passwordVerification = model.Password.IsPasswordValid(model.Login, user.Password);
             if (!passwordVerification)
-                return StatusCode(400, "Неверно указан Username или пароль пользователя");
+                return StatusCode(400, "Неверно указан логин или пароль пользователя");
 
             var session = await _userRepository.CreateSessionAsync(user.Id, cancellationToken);
-            await _kafkaProducer.ProduceUserEventAsync("user.authorized", $"Пользователь Username: {model.Username} авторизовался");
+            await _kafkaProducer.ProduceUserEventAsync("user.authorized", $"Пользователь с логином: {model.Login} успешно авторизовался");
             return StatusCode(200, session);
         }
 
+        [Authorize]
         [HttpGet]
-        public async Task<IActionResult> GetUsersAsync(GetUsersModel model, CancellationToken cancellationToken = default)
+        [SwaggerOperation(Summary = "Получить список пользователей")]
+        [SwaggerRequestExample(typeof(GetUsersRequest), typeof(GetUsersRequestExample))]
+        [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(IEnumerable<GetUserByIdResponse>))]
+        [SwaggerResponseExample(200, typeof(GetUsersResponseExample))]
+        public async Task<IActionResult> GetUsersAsync([FromQuery] GetUsersRequest model, CancellationToken cancellationToken = default)
         {
-            var isAuthorized = await _userRepository.IsAuthorized(model.Session, cancellationToken);
-            if (!isAuthorized)
-                return StatusCode(401, "Пользователь не авторизован");
-
             var users = await _userRepository.GetListAsync(model.Limit, model.Offset, model.Filter, model.Sort, cancellationToken);
-            var result = _mapper.Map<IEnumerable<UserModelResponse>>(users);
+            var result = _mapper.Map<IEnumerable<GetUserByIdResponse>>(users);
             return Ok(result);
         }
 
+        [Authorize]
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserByIdAsync(GetUserByIdModel model, CancellationToken cancellationToken = default)
+        [SwaggerOperation(Summary = "Получить данные пользователя по идентификатору")]
+        [SwaggerRequestExample(typeof(GetUserByIdRequest), typeof(GetUserByIdRequestExample))]
+        [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(GetUserByIdResponse))]
+        [SwaggerResponseExample(200, typeof(GetUserByIdResponseExample))]
+        public async Task<IActionResult> GetUserByIdAsync([FromQuery] GetUserByIdRequest model, CancellationToken cancellationToken = default)
         {
-            var isAuthorized = await _userRepository.IsAuthorized(model.Session, cancellationToken);
-            if (!isAuthorized)
-                return StatusCode(401, "Пользователь не авторизован");
-
-            var user = await _userRepository.GetByIdAsync(model.Id, cancellationToken);
+            var user = await _userRepository.GetByIdAsync(model.IdUser, cancellationToken);
             if (user is null)
                 return NotFound("Пользователь по указанному id не найден");
 
-            var result = _mapper.Map<UserModelResponse>(user);
+            var result = _mapper.Map<GetUserByIdResponse>(user);
             return Ok(result);
         }
 
+        [Authorize]
         [HttpPatch("{id}")]
-        public async Task<IActionResult> UpdateUserAsync(UpdateUserModel model, CancellationToken cancellationToken = default)
+        [SwaggerOperation(Summary = "Обновить данные пользователя по идентификатору")]
+        [SwaggerRequestExample(typeof(UpdateUserRequest), typeof(UpdateUserRequestExample))]
+        [SwaggerResponse(statusCode: 204, description: "NoContent")]
+        public async Task<IActionResult> UpdateUserAsync([FromBody] UpdateUserRequest model, CancellationToken cancellationToken = default)
         {
-            var isAuthorized = await _userRepository.IsAuthorized(model.Session, cancellationToken);
-            if (!isAuthorized)
-                return StatusCode(401, "Пользователь не авторизован");
-
-            var isForbidden = await _httpClient.GetAsync($"{_internalConstants.BaseUrl}/users/session/{model.Session}/access-to/{model.Id}");
-            if (!isForbidden.IsSuccessStatusCode)
-                return StatusCode(403, "У пользователя недостаточно прав");
-
-            var currentUser = await _userRepository.GetByIdAsync(model.Id, cancellationToken);
+            var currentUser = await _userRepository.GetByIdAsync(model.IdUser, cancellationToken);
             if (currentUser is null)
                 return NotFound("Пользователь по указанному id не найден");
 
-            var isExistOperationWithUsername = model.PatchDocument.Operations.Any(x => x.path.ToLower().Contains("username"));
-            if (isExistOperationWithUsername)
+            var isExistOperationWithLogin = model.PatchDocument.Operations.Any(x => x.path.ToLower().Contains("Login"));
+            if (isExistOperationWithLogin)
             {
-                return StatusCode(400, "Поле 'Username' недоступно для редактирования");
+                return StatusCode(400, "Поле 'Login' недоступно для редактирования");
             }
 
             await _userRepository.UpdateAsync(currentUser, model.PatchDocument, cancellationToken);
             return NoContent();
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUserByIdAsync(GetUserByIdModel model, CancellationToken cancellationToken = default)
+        [SwaggerOperation(Summary = "Удалить пользователя по идентификатору")]
+        [SwaggerRequestExample(typeof(GetUserByIdRequest), typeof(GetUserByIdRequestExample))]
+        [SwaggerResponse(statusCode: 204, description: "NoContent")]
+        public async Task<IActionResult> DeleteUserByIdAsync([FromQuery] GetUserByIdRequest model, CancellationToken cancellationToken = default)
         {
-            var isAuthorized = await _userRepository.IsAuthorized(model.Session, cancellationToken);
-            if (!isAuthorized)
-                return StatusCode(401, "Пользователь не авторизован");
-
-            var isForbidden = await _httpClient.GetAsync($"{_internalConstants.BaseUrl}/users/session/{model.Session}/access-to/{model.Id}");
-            if (!isForbidden.IsSuccessStatusCode)
-                return StatusCode(403, "У пользователя недостаточно прав");
-
-            var user = await _userRepository.GetByIdAsync(model.Id, cancellationToken);
+            var user = await _userRepository.GetByIdAsync(model.IdUser, cancellationToken);
             if (user is null)
                 return NotFound("Пользователь по указанному id не найден");
 
-            await _userRepository.DeleteByIdAsync(model.Id, cancellationToken);
+            await _userRepository.DeleteByIdAsync(model.IdUser, cancellationToken);
             return NoContent();
-        }
-
-        [HttpGet("{id}/session/last")]
-        public async Task<IActionResult> GetLastUserSessionAsync(GetUserByIdModel model, CancellationToken cancellationToken = default)
-        {
-            var lastSession = await _userRepository.GetLastSessionAsync(model.Id, cancellationToken);
-            if (lastSession == Guid.Empty)
-                return NotFound("Пользователь по указанной сессии не найден");
-            return StatusCode(200, lastSession);
-        }
-
-        [HttpGet("session/{session}/access-to/{needAccessToId}")]
-        public async Task<IActionResult> CheckUserAccessAsync([FromRoute] string session, [FromRoute] int needAccessToId, CancellationToken cancellationToken = default)
-        {
-            var isHaveAccess = await _userRepository.IsHaveAccessToIdAsync(session, needAccessToId, cancellationToken);
-            if (!isHaveAccess)
-                return StatusCode(403, "У пользователя недостаточно прав");
-            return StatusCode(204);
-        }
-
-        [HttpGet("{username}/is-available")]
-        public async Task<IActionResult> CheckIsUsernameAvailableAsync([FromRoute] string username, CancellationToken cancellationToken = default)
-        {
-            var existUsers = await _userRepository.GetByUsernameAsync(username, cancellationToken);
-            if (existUsers is not null)
-                return StatusCode(400, "Пользователь с таким username уже существует");
-            return StatusCode(200);
-        }
-
-        [HttpGet("{guid}/session/check")]
-        public async Task<IActionResult> CheckUserSessionAsync(string session, CancellationToken cancellationToken = default)
-        {
-            var isAuthorized = await _userRepository.IsAuthorized(session, cancellationToken);
-            if (!isAuthorized)
-            {
-                return StatusCode(401, "Пользователь не авторизован");
-            }
-            return StatusCode(200);
         }
     }
 }

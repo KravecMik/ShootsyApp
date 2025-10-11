@@ -23,7 +23,7 @@
         /// <summary>
         /// Имя пользователя
         /// </summary>
-        string Username { get; }
+        string Login { get; }
 
         /// <summary>
         /// Идентификатор пола
@@ -74,15 +74,5 @@
         /// Идентификатор типа пользователя
         /// </summary>
         int Type { get; }
-
-        /// <summary>
-        /// Съемка ню
-        /// </summary>
-        bool isNude { get; }
-
-        /// <summary>
-        /// Совершеннолетний ли пользователь
-        /// </summary>
-        bool isEighteen { get; }
     }
 }

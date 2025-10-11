@@ -8,6 +8,9 @@ namespace Shootsy.Enums
         Novosibirsk = 1,
 
         [Description("Барнаул")]
-        Barnaul = 2
+        Barnaul = 2,
+
+        [Description("Москва")]
+        Moscow = 3
     }
 }

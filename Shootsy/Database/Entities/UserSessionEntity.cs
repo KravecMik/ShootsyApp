@@ -9,10 +9,6 @@ namespace Shootsy.Database.Entities
         public DateTime SessionDateFrom { get; set; }
         public DateTime SessionDateTo { get; set; }
         public Guid Guid { get; init; }
-
-        /// <summary>
-        /// Сущность пользователя
-        /// </summary>
-        public UserEntity UserEntity { get; init; }
+        public UserEntity? UserEntity { get; init; }
     }
 }

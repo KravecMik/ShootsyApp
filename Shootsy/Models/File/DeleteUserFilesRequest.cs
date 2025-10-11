@@ -2,9 +2,9 @@
 
 namespace Shootsy.Models.File
 {
-    public class GetFileByIdModel : BaseFilesModel
+    public class DeleteUserFilesRequest
     {
         [FromRoute(Name = "id")]
-        public int Id { get; set; }
+        public required int IdUser { get; set; }
     }
 }

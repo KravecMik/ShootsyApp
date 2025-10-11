@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Shootsy.Database;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Shootsy.Controllers
 {
@@ -16,7 +18,9 @@ namespace Shootsy.Controllers
             _httpClient = httpClient;
         }
 
+        [AllowAnonymous]
         [HttpGet("health")]
+        [SwaggerOperation(Summary = "Проверка доступности сервера")]
         public async Task<IActionResult> HealthCheckAsync(CancellationToken cancellationToken = default)
         {
             var isCanConnectDatabase = await _context.Database.CanConnectAsync(cancellationToken);
@@ -25,14 +29,18 @@ namespace Shootsy.Controllers
             return StatusCode(200, "heath");
         }
 
+        [AllowAnonymous]
         [HttpPost("ensure-created")]
+        [SwaggerOperation(Summary = "Создает Postgres базу данных, если она удалена (для миграций)")]
         public async Task<IActionResult> EnsureCreatedAsync(CancellationToken cancellationToken = default)
         {
             await _context.Database.EnsureCreatedAsync(cancellationToken);
             return StatusCode(200);
         }
 
+        [AllowAnonymous]
         [HttpDelete("ensure-deleted")]
+        [SwaggerOperation(Summary = "Удаляет Postgres таблицы и БД (для миграций)")]
         public async Task<IActionResult> EnsureDeletedAsync(CancellationToken cancellationToken = default)
         {
             var isCanConnectDatabase = await _context.Database.CanConnectAsync(cancellationToken);

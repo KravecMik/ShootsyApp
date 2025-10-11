@@ -1,11 +1,16 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Shootsy.Dtos;
-using Shootsy.Models;
+using Newtonsoft.Json.Linq;
+using Shootsy.Database.Mongo;
 using Shootsy.Models.File;
+using Shootsy.Models.File.Swagger;
 using Shootsy.Repositories;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
+using System.Linq;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Shootsy.Controllers
 {
@@ -16,7 +21,7 @@ namespace Shootsy.Controllers
         private readonly IMapper _mapper;
         private readonly IFileRepository _fileRepository;
         private readonly IUserRepository _userRepository;
-        InternalConstants _internalConstants;
+        private readonly InternalConstants _internalConstants;
         private readonly HttpClient _httpClient;
 
         public FilesController(IFileRepository fileRepository, IUserRepository userRepository, InternalConstants internalConstants, IMapper mapper, HttpClient httpClient)
@@ -28,149 +33,149 @@ namespace Shootsy.Controllers
             _httpClient = httpClient;
         }
 
+        [Authorize]
         [HttpPost]
-        public async Task<IActionResult> CreateFileAsync(CreateFileModel model, CancellationToken cancellationToken = default)
+        [SwaggerOperation(Summary = "Создание файла")]
+        [SwaggerResponse(statusCode: 201, description: "OK", type: typeof(CreateFileResponse))]
+        [SwaggerResponseExample(201, typeof(CreateFileResponseExample))]
+        public async Task<IActionResult> CreateFileAsync([FromForm] CreateFileRequest model, CancellationToken cancellationToken = default)
         {
-            var isSessionValid = await _userRepository.IsAuthorized(model.Session, cancellationToken);
-            if (!isSessionValid)
-                return Unauthorized();
-
-            var user = await _userRepository.GetByIdAsync(Convert.ToInt16(model.User), cancellationToken);
+            var user = await _userRepository.GetByIdAsync(model.IdUser, cancellationToken);
             if (user is null)
                 return NotFound();
 
-            var isForbidden = await _httpClient.GetAsync($"{_internalConstants.BaseUrl}/users/session/{model.Session}/access-to/{model.User}");
-            if (!isForbidden.IsSuccessStatusCode)
-                return StatusCode(403);
+            var dir = _internalConstants.BaseFilePath + @$"/{model.IdUser}/";
 
-            //var dir = _internalConstants.BaseFilePath + @$"/{model.User}/";
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
 
-            //if (!Directory.Exists(dir))
-            //    Directory.CreateDirectory(dir);
+            var fullPath = dir + model.File.FileName;
+            var ext = Path.GetExtension(fullPath);
 
-            //var fullPath = dir + model.File.FileName;
-            //var ext = Path.GetExtension(fullPath);
-
-            if (!_internalConstants.SupportedFileExtensions.Contains(model.Extension.ToLower()))
+            if (!_internalConstants.SupportedFileExtensions.Contains(ext.ToLower()))
                 return BadRequest();
 
-            //using (var fileStream = new FileStream(fullPath, FileMode.Create))
-            //{
-            //    await model.File.CopyToAsync(fileStream);
-            //}
-
-            var file = new FileDto
+            using (var fileStream = new FileStream(fullPath, FileMode.Create))
             {
-                User = Convert.ToInt16(model.User),
-                FileName = model.File.FileName,
-                Extension = model.Extension,
-                ContentPath = _internalConstants.BaseFilePath + model.File.FileName + model.Extension
+                await model.File.CopyToAsync(fileStream);
+            }
+
+            var file = new FileStorageEntity
+            {
+                IdUser = model.IdUser,
+                FileInfo = new Database.Mongo.FileInfo
+                {
+                    FileName = model.File.FileName,
+                    Extension = ext,
+                    ContentPath = _internalConstants.BaseFilePath + model.File.FileName + ext
+                }
             };
 
             var id = await _fileRepository.CreateAsync(file, cancellationToken);
-            return StatusCode(201, id);
+            return StatusCode(201, new CreateFileResponse { IdFile = id });
         }
 
-
+        [Authorize]
         [HttpGet("{id}")]
-        [SwaggerOperation(OperationId = "GetFileByIdAsync", Summary = "Получение файла по идентификатору")]
-        [SwaggerRequestExample(typeof(GetFileByIdModel), typeof(GetFileByIdRequestExample))]
-        [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(FileModelResponse))]
-        [SwaggerResponseExample(200, typeof(FileModelResponseExample))]
-        public async Task<IActionResult> GetFileByIdAsync([FromQuery] GetFileByIdModel model, CancellationToken cancellationToken = default)
+        [SwaggerOperation(Summary = "Получение файла по идентификатору")]
+        [SwaggerRequestExample(typeof(GetFileByIdRequest), typeof(GetFileByIdRequestExample))]
+        [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(GetFileByIdResponse))]
+        [SwaggerResponseExample(200, typeof(GetFileByIdResponseExample))]
+        public async Task<IActionResult> GetFileByIdAsync([FromQuery] GetFileByIdRequest model, CancellationToken cancellationToken = default)
         {
-            var isSessionValid = await _userRepository.IsAuthorized(model.Session, cancellationToken);
-            if (!isSessionValid)
-                return Unauthorized();
-
-            var file = await _fileRepository.GetByIdAsync(model.Id, cancellationToken);
+            var file = await _fileRepository.GetByIdAsync(model.IdFile, cancellationToken);
             if (file is null)
                 return NotFound();
 
-            var result = _mapper.Map<FileModelResponse>(file);
-            return Ok(result);
+            return Ok(file);
         }
 
+        [Authorize]
         [HttpGet]
         [SwaggerOperation(Summary = "Получить список файлов")]
-        [SwaggerRequestExample(typeof(GetFilesModel), typeof(GetFilesModelRequestExample))] 
-        [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(IEnumerable<FileModelResponse>))]
-        [SwaggerResponseExample(200, typeof(GetFilesResponseExample))]
-        public async Task<IActionResult> GetFilesAsync([FromQuery]GetFilesModel model, CancellationToken cancellationToken = default)
+        [SwaggerRequestExample(typeof(FileStorageFilter), typeof(GetFileListRequestExample))]
+        [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(IEnumerable<GetFileByIdResponse>))]
+        [SwaggerResponseExample(200, typeof(GetFileListResponseExample))]
+        public async Task<IActionResult> GetFilesAsync([FromQuery] FileStorageFilter filter, CancellationToken cancellationToken = default)
         {
-            var isSessionValid = await _userRepository.IsAuthorized(model.Session, cancellationToken);
-            if (!isSessionValid)
-                return Unauthorized();
-
-            var files = await _fileRepository.GetListAsync(Convert.ToInt16(model.Limit), model.Offset, model.Filter, model.Sort, cancellationToken);
-            var result = _mapper.Map<IEnumerable<FileModelResponse>>(files);
-            return Ok(result.OrderByDescending(x => x.Id));
+            var result = await _fileRepository.GetListAsync(filter, cancellationToken);
+            return Ok(result.Item1);
         }
 
+        [Authorize]
         [HttpPatch("{id}")]
-        public async Task<IActionResult> UpdateFileAsync(
-        UpdateFileModel model,
-        CancellationToken cancellationToken = default)
+        [Consumes("application/json-patch+json")]
+        [SwaggerOperation(Summary = "Обновить карточку файла")]
+        [SwaggerResponse(statusCode: 204, description: "NoContent")]
+        public async Task<IActionResult> UpdateFileAsync([FromRoute(Name = "id")] string id, [FromBody] JsonPatchDocument<FileStorageEntity> patch, CancellationToken cancellationToken = default)
         {
-            var isSessionValid = await _userRepository.IsAuthorized(model.Session, cancellationToken);
-            if (!isSessionValid)
-                return Unauthorized();
+            if (patch is null) return BadRequest("Patch document is required.");
 
-            var currentFile = await _fileRepository.GetByIdAsync(model.Id, cancellationToken);
-            if (currentFile is null)
-                return NotFound();
+            var entity = await _fileRepository.GetByIdAsync(id, cancellationToken);
+            if (entity is null) return NotFound();
 
-            var isForbidden = await _httpClient.GetAsync($"{_internalConstants.BaseUrl}/users/session/{model.Session}/access-to/{model.Id}");
-            if (!isForbidden.IsSuccessStatusCode)
-                return StatusCode(403);
+            var targetPath = patch.Operations.Select(x => x).ToList();
 
-            await _fileRepository.UpdateAsync(currentFile, model.PatchDocument, cancellationToken);
+            foreach (var item in targetPath)
+            {
+                if (item.path.ToLower().Contains("iduser"))
+                {
+                    var user = await _userRepository.GetByIdAsync(int.Parse(item.value.ToString()), cancellationToken);
+                    if (user is null)return NotFound();
+                }
+                if (item.path.ToLower().Contains("extension"))
+                {
+                    if (!_internalConstants.SupportedFileExtensions.Contains(item.value.ToString().ToLower()))
+                        ModelState.AddModelError("Extension", "Указанный тип файла не поддерживается");
+                        return ValidationProblem();
+                }
+            }
+
+            patch.ApplyTo(entity, ModelState);
+            if (!ModelState.IsValid) return ValidationProblem(ModelState);
+
+            entity.EditDate = DateTime.UtcNow;
+
+            var updated = await _fileRepository.ReplaceAsync(entity, cancellationToken);
+            if (!updated) return NotFound();
+
             return NoContent();
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteFileByIdAsync(GetFileByIdModel model, CancellationToken cancellationToken = default)
+        [SwaggerOperation(Summary = "Удалить файл по идентификатору")]
+        [SwaggerRequestExample(typeof(GetFileByIdRequest), typeof(GetFileByIdRequestExample))]
+        [SwaggerResponse(statusCode: 204, description: "NoContent")]
+        public async Task<IActionResult> DeleteFileByIdAsync([FromQuery] GetFileByIdRequest model, CancellationToken cancellationToken = default)
         {
-            var isSessionValid = await _userRepository.IsAuthorized(model.Session, cancellationToken);
-            if (!isSessionValid)
-                return Unauthorized();
-
-            var file = await _fileRepository.GetByIdAsync(model.Id, cancellationToken);
+            var file = await _fileRepository.GetByIdAsync(model.IdFile, cancellationToken);
             if (file is null)
                 return NotFound();
 
-            var isForbidden = await _httpClient.GetAsync($"{_internalConstants.BaseUrl}/users/session/{model.Session}/access-to/{model.Id}");
-            if (!isForbidden.IsSuccessStatusCode)
-                return StatusCode(403);
+            await _fileRepository.DeleteByIdAsync(model.IdFile, cancellationToken);
 
-            await _fileRepository.DeleteByIdAsync(model.Id, cancellationToken);
-
-            if (System.IO.File.Exists(file.ContentPath))
-                System.IO.File.Delete(file.ContentPath);
+            if (System.IO.File.Exists(file.FileInfo.ContentPath))
+                System.IO.File.Delete(file.FileInfo.ContentPath);
 
             return NoContent();
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> DeleteManyFilesAsync(DeleteManyFilesModel model, CancellationToken cancellationToken = default)
+        [Authorize]
+        [HttpDelete("iduser={id}")]
+        [SwaggerOperation(Summary = "Удалить все файлы по идентификатору пользователя")]
+        [SwaggerRequestExample(typeof(DeleteUserFilesRequest), typeof(DeleteUserFilesRequestExample))]
+        [SwaggerResponse(statusCode: 204, description: "NoContent")]
+        public async Task<IActionResult> DeleteUserFilesAsync([FromQuery] DeleteUserFilesRequest model, CancellationToken cancellationToken = default)
         {
-            var isSessionValid = await _userRepository.IsAuthorized(model.Session, cancellationToken);
-            if (!isSessionValid)
-                return Unauthorized();
-            foreach (var id in model.Ids)
+            var fileList = await _fileRepository.GetListAsync(new FileStorageFilter { UserId = model.IdUser }, cancellationToken);
+
+            foreach (var file in fileList.Item1)
             {
-                var file = await _fileRepository.GetByIdAsync(id, cancellationToken);
-                if (file is null)
-                    return NotFound();
+                await _fileRepository.DeleteByIdAsync(file.Id, cancellationToken);
 
-                var isForbidden = await _httpClient.GetAsync($"{_internalConstants.BaseUrl}/users/session/{model.Session}/access-to/{id}");
-                if (!isForbidden.IsSuccessStatusCode)
-                    return StatusCode(403);
-
-                await _fileRepository.DeleteByIdAsync(id, cancellationToken);
-
-                if (System.IO.File.Exists(file.ContentPath))
-                    System.IO.File.Delete(file.ContentPath);
+                if (System.IO.File.Exists(file.FileInfo.ContentPath))
+                    System.IO.File.Delete(file.FileInfo.ContentPath);
             }
             return NoContent();
         }

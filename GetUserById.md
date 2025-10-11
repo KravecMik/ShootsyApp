@@ -20,7 +20,7 @@
     "Id": int, //Идентификатор
     "CreateDate": "DateTime", //Дата создания пользователя
     "EditDate": "DateTime" //Дата редактирования пользователя
-    "Username": "string", //Имя пользователя
+    "Login": "string", //Имя пользователя
     "Firstname": "string", //Имя
     "Lastname": "string", //Фамилия
     "Patronymic": "string", //Отчество
@@ -56,7 +56,7 @@ curl -L -X GET 'http://38.135.55.111:5000/Users/1' \
   "Id": 1,
   "CreateDate": "2024-08-29T04:59:46.267916Z",
   "EditDate": "2024-08-29T04:59:46.287895Z"
-  "Username": "156",
+  "Login": "156",
   "Gender": Мужской,
   "City": Новосибирск,
   "Contact": "@kravectv",
