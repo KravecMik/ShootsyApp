@@ -20,7 +20,7 @@ namespace Shootsy.Controllers
 
         [AllowAnonymous]
         [HttpGet("health")]
-        [SwaggerOperation(Summary = "Проверка доступности сервера")]
+        [SwaggerOperation(Summary = "Проверка доступности PostgresDb")]
         public async Task<IActionResult> HealthCheckAsync(CancellationToken cancellationToken = default)
         {
             var isCanConnectDatabase = await _context.Database.CanConnectAsync(cancellationToken);
@@ -43,8 +43,7 @@ namespace Shootsy.Controllers
         [SwaggerOperation(Summary = "Удаляет Postgres таблицы и БД (для миграций)")]
         public async Task<IActionResult> EnsureDeletedAsync(CancellationToken cancellationToken = default)
         {
-            var isCanConnectDatabase = await _context.Database.CanConnectAsync(cancellationToken);
-            if (!isCanConnectDatabase)
+            if (!await _context.Database.CanConnectAsync(cancellationToken))
                 return StatusCode(500, "Ошибка сервера. Невозможно подключиться к базе данных");
             await _context.Database.EnsureDeletedAsync(cancellationToken);
             return StatusCode(200);
