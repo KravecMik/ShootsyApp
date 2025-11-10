@@ -17,7 +17,6 @@ public class MinioInitializer : IHostedService
             .WithEndpoint(_opt.Endpoint)
             .WithCredentials(_opt.AccessKey, _opt.SecretKey)
             .WithSSL(_opt.UseSSL)
-            .WithTimeout(60000)
             .Build();
     }
 
