@@ -28,16 +28,9 @@ namespace Shootsy.Database.Configurations
                 .HasColumnName("lastname")
                 .HasMaxLength(50)
                 .HasComment("Фамилия");
-            entity.Property(x => x.Fullname)
-                .HasColumnName("fullname")
-                .HasComment("Полное имя");
             entity.Property(x => x.City)
                 .HasColumnName("city_id")
                 .HasComment("Город");
-            entity.Property(x => x.Contact)
-                .HasColumnName("contact")
-                .HasComment("Контакт для связи")
-                .HasMaxLength(100);
             entity.Property(x => x.Gender)
                 .HasColumnName("gender_id")
                 .HasComment("Пол");
@@ -56,21 +49,15 @@ namespace Shootsy.Database.Configurations
                 .HasColumnName("discription")
                 .HasComment("Описание")
                 .HasMaxLength(250);
-            entity.Property(x => x.isNude)
-                .HasColumnName("is_nude")
-                .HasComment("Съемка ню");
-            entity.Property(x => x.Type)
-                .HasColumnName("type_id")
-                .HasComment("Тип пользователя");
+            entity.Property(x => x.ITProfession)
+                .HasColumnName("it_profession_id")
+                .HasComment("Тип it специальности");
             entity.Property(x => x.Password)
                 .HasColumnName("password")
                 .HasComment("Хэш пароль пользователя");
-            entity.Property(x => x.Avatar)
-                .HasColumnName("avatar")
-                .HasComment("Хэш аватар пользователя");
             entity.HasOne(u => u.UserTypeEntity)
                 .WithMany(u => u.Users)
-                .HasForeignKey(u => u.Type);
+                .HasForeignKey(u => u.ITProfession);
             entity.HasOne(u => u.CityEntity)
                 .WithMany(u => u.Users)
                 .HasForeignKey(u => u.City);

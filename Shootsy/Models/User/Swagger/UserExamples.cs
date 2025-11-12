@@ -1,4 +1,5 @@
-﻿using Swashbuckle.AspNetCore.Filters;
+﻿using Shootsy.Enums;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace Shootsy.Models.User
 {
@@ -26,14 +27,12 @@ namespace Shootsy.Models.User
         {
             Login = "stalker",
             Password = "coolboy",
-            Contact = "Аська UIN 7856",
             Firstname = "Олег",
             Lastname = "Пронин",
-            Patronymic = "Двиглов",
             Discription = "Это мое описание 54346",
             Gender = 1,
             City = 2,
-            Type = 1
+            ITProfession = 1
         };
     }
 
@@ -55,13 +54,10 @@ namespace Shootsy.Models.User
             Login = "stalker",
             Gender = "Мужчина",
             City = "Новосибирск",
-            Type = "Фотограф",
+            ITProfession = ITProfessionEnums.QA.ToString(),
             Firstname = "Олег",
             Lastname = "Пронин",
-            Patronymic = "Двиглов",
-            Contact = "Аська UIN 7856",
-            Discription = "Это мое описание 54346",
-            Avatar = [byte.MinValue, 3]
+            Discription = "Это мое описание 54346"
         };
     }
 
@@ -69,11 +65,11 @@ namespace Shootsy.Models.User
     {
         public IEnumerable<GetUserByIdResponse> GetExamples() => new[]
         {
-        new GetUserByIdResponse { Id = 74, CreateDate = DateTime.UtcNow.AddDays(-3), EditDate = DateTime.UtcNow.AddDays(-2), Login = "stalkerNoob228", Gender = "Мужчина", City = "Новосибирск", Firstname = "Олег", Type = "Фотограф" },
-        new GetUserByIdResponse { Id = 762, CreateDate = DateTime.UtcNow.AddDays(-67), EditDate = DateTime.UtcNow.AddDays(-6), Login = "Chelkastij", Gender = "Женщина", City = "Москва", Firstname = "Оля", Type = "Модель" },
-        new GetUserByIdResponse { Id = 978, CreateDate = DateTime.UtcNow.AddDays(-6), EditDate = DateTime.UtcNow.AddDays(-2), Login = "Shabra", Gender = "Мужчина", City = "Барнаул", Firstname = "Гена", Type = "Фотограф" },
-        new GetUserByIdResponse { Id = 123, CreateDate = DateTime.UtcNow.AddDays(-27), EditDate = DateTime.UtcNow.AddDays(-12), Login = "Kitaez", Gender = "Женщина", City = "Новосибирск", Firstname = "Вика", Type = "Фотограф" },
-        new GetUserByIdResponse { Id = 1, CreateDate = DateTime.UtcNow.AddDays(-99), EditDate = DateTime.UtcNow.AddDays(-76), Login = "Biliboba28", Gender = "Мужчина", City = "Москва", Firstname = "Анжела", Type = "Модель" },
+        new GetUserByIdResponse { Id = 74, CreateDate = DateTime.UtcNow.AddDays(-3), EditDate = DateTime.UtcNow.AddDays(-2), Login = "stalkerNoob228", Gender = "Мужчина", City = "Новосибирск", Firstname = "Олег", ITProfession = ITProfessionEnums.AQA.ToString() },
+        new GetUserByIdResponse { Id = 762, CreateDate = DateTime.UtcNow.AddDays(-67), EditDate = DateTime.UtcNow.AddDays(-6), Login = "Chelkastij", Gender = "Женщина", City = "Москва", Firstname = "Оля", ITProfession = ITProfessionEnums.AccountManager.ToString() },
+        new GetUserByIdResponse { Id = 978, CreateDate = DateTime.UtcNow.AddDays(-6), EditDate = DateTime.UtcNow.AddDays(-2), Login = "Shabra", Gender = "Мужчина", City = "Барнаул", Firstname = "Гена", ITProfession = ITProfessionEnums.BIAnalyst.ToString() },
+        new GetUserByIdResponse { Id = 123, CreateDate = DateTime.UtcNow.AddDays(-27), EditDate = DateTime.UtcNow.AddDays(-12), Login = "Kitaez", Gender = "Женщина", City = "Новосибирск", Firstname = "Вика", ITProfession = ITProfessionEnums.CloudEngineer.ToString() },
+        new GetUserByIdResponse { Id = 1, CreateDate = DateTime.UtcNow.AddDays(-99), EditDate = DateTime.UtcNow.AddDays(-76), Login = "Biliboba28", Gender = "Мужчина", City = "Москва", Firstname = "Анжела", ITProfession = ITProfessionEnums.DevOps.ToString() },
         };
     }
 

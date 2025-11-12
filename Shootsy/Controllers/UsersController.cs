@@ -32,7 +32,7 @@ namespace Shootsy.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost]
+        [HttpPost("sign-up")]
         [SwaggerOperation(Summary = "Регистрация пользователя")]
         [Consumes("application/json")]
         [SwaggerRequestExample(typeof(SignUpRequest), typeof(SignUpRequestExample))]
@@ -56,7 +56,7 @@ namespace Shootsy.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("auth")]
+        [HttpPost("sign-in")]
         [Consumes("application/json")]
         [SwaggerOperation(Summary = "Авторизация пользователя")]
         [SwaggerRequestExample(typeof(SignInRequest), typeof(SignInRequestExample))]
@@ -65,7 +65,7 @@ namespace Shootsy.Controllers
         public async Task<IActionResult> SignInAsync([FromBody, BindRequired] SignInRequest model, CancellationToken cancellationToken = default)
         {
             var user = await _userRepository.GetByLoginAsync(model.Login, cancellationToken);
-            if (user is null) return NotFound("Пользователь не найден");
+            if (user is null) return NotFound();
 
             var passwordVerification = model.Password.IsPasswordValid(model.Login, user.Password);
             if (!passwordVerification)
@@ -135,7 +135,7 @@ namespace Shootsy.Controllers
         public async Task<IActionResult> DeleteUserByIdAsync([FromQuery] GetUserByIdRequest model, CancellationToken cancellationToken = default)
         {
             var user = await _userRepository.GetByIdAsync(model.IdUser, cancellationToken);
-            if (user is null) return NotFound("Пользователь по указанному идентификаторуid не найден");
+            if (user is null) return NotFound("Пользователь по указанному идентификатору id не найден");
 
             await _userRepository.DeleteByIdAsync(model.IdUser, cancellationToken);
             return NoContent();

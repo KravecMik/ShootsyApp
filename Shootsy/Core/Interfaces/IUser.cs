@@ -36,11 +36,6 @@
         int City { get; }
 
         /// <summary>
-        /// Контакт для связи
-        /// </summary>
-        string? Contact { get; }
-
-        /// <summary>
         /// Имя
         /// </summary>
         string Firstname { get; }
@@ -49,11 +44,6 @@
         /// Фамилия
         /// </summary>
         string Lastname { get; }
-
-        /// <summary>
-        /// Полное имя
-        /// </summary>
-        string? Fullname { get; }
 
         /// <summary>
         /// Описание
@@ -66,13 +56,8 @@
         byte[] Password { get; }
 
         /// <summary>
-        /// Аватар пользователя
+        /// Тип специальности в IT
         /// </summary>
-        byte[]? Avatar { get; }
-
-        /// <summary>
-        /// Идентификатор типа пользователя
-        /// </summary>
-        int Type { get; }
+        int ITProfession { get; }
     }
 }
