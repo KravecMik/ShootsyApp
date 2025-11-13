@@ -19,6 +19,7 @@ namespace Shootsy.Controllers
 
         [AllowAnonymous]
         [HttpGet("health")]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> HealthCheckAsync(CancellationToken cancellationToken = default)
         {
             var isCanConnectDatabase = await _context.Database.CanConnectAsync(cancellationToken);
@@ -29,6 +30,7 @@ namespace Shootsy.Controllers
 
         [AllowAnonymous]
         [HttpPost("ensure-created")]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> EnsureCreatedAsync(CancellationToken cancellationToken = default)
         {
             await _context.Database.EnsureCreatedAsync(cancellationToken);
@@ -37,6 +39,7 @@ namespace Shootsy.Controllers
 
         [AllowAnonymous]
         [HttpDelete("ensure-deleted")]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> EnsureDeletedAsync(CancellationToken cancellationToken = default)
         {
             if (!await _context.Database.CanConnectAsync(cancellationToken))

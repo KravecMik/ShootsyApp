@@ -21,5 +21,6 @@
         public string UserEvents { get; set; } = "user-events";
         public string FileEvents { get; set; } = "file-events";
         public string SystemEvents { get; set; } = "system-events";
+        public string Messages { get; set; } = "messages";
     }
 }

@@ -12,6 +12,7 @@ using Shootsy.MappingProfiles;
 using Shootsy.Models.Enums;
 using Shootsy.Options;
 using Shootsy.Repositories;
+using Shootsy.Repositories.Interfaces;
 using Shootsy.Security;
 using Shootsy.Service;
 using Swashbuckle.AspNetCore.Filters;
@@ -46,16 +47,16 @@ namespace Shootsy
                 {
                     Title = "Shootsy API",
                     Version = "v1",
-                    Description = "Автогенерируемая документация API"
+                    Description = "Для полноценного использования методов сервиса необходимо при регистрации или авторизации получить session"
                 });
 
                 c.EnableAnnotations();
                 c.ExampleFilters();
 
-                c.MapType<SortByEnum>(() => new OpenApiSchema
+                c.MapType<FileSortByEnum>(() => new OpenApiSchema
                 {
                     Type = "string",
-                    Enum = Enum.GetNames(typeof(SortByEnum))
+                    Enum = Enum.GetNames(typeof(FileSortByEnum))
                    .Select(n => (IOpenApiAny)new OpenApiString(n))
                    .ToList()
                 });
@@ -110,14 +111,18 @@ namespace Shootsy
             services.AddDbContext<ApplicationContext>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IFileRepository, FileRepository>();
+            services.AddScoped<IPostRepository, PostRepository>();
             services.AddAutoMapper(typeof(UserProfiles));
             services.AddAutoMapper(typeof(UserSessionProfiles));
             services.AddSingleton<IMapper, Mapper>();
             services.AddSingleton<UserRepository>();
             services.AddSingleton<InternalConstants>();
             services.AddSingleton<FileRepository>();
+            services.AddSingleton<PostRepository>();
             services.AddHttpClient<FilesController>();
             services.AddHttpClient<UsersController>();
+            services.AddHttpClient<PostsController>();
+            services.AddHttpClient<MessagesConroller>();
             services.AddSingleton<Mapper>();
             services.Configure<KafkaSettings>(_configuration.GetSection("Kafka"));
             services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
@@ -165,6 +170,12 @@ namespace Shootsy
                 endpoints.MapControllerRoute(
                     name: "Service",
                     pattern: "{controller=Service}");
+                endpoints.MapControllerRoute(
+                    name: "Posts",
+                    pattern: "{controller=Posts}");
+                endpoints.MapControllerRoute(
+                    name: "Messages",
+                    pattern: "{controller=Messages}");
                 endpoints.MapGet("/", async context =>
                 {
                     await context.Response.WriteAsync("Shootsy API is running!");

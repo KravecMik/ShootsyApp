@@ -7,7 +7,7 @@ namespace Shootsy.Repositories
     {
         Task<string> CreateAsync(FileStorageEntity file, CancellationToken cancellationToken);
         Task<FileStorageEntity>? GetByIdAsync(string idFile, CancellationToken cancellationToken);
-        Task<(IReadOnlyList<FileStorageEntity>, long total)>? GetListAsync(FileStorageFilter f, CancellationToken cancellationToken);
+        Task<(IReadOnlyList<FileStorageEntity>, long total)>? GetListAsync(FileStorageFilterModel f, CancellationToken cancellationToken);
         Task<bool> ReplaceAsync(FileStorageEntity entity, CancellationToken cancellationToken = default);
         Task DeleteByIdAsync(string id, CancellationToken cancellationToken);
     }

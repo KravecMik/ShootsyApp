@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Shootsy.Database;
 using Shootsy.Database.Entities;
 using Shootsy.Dtos;
+using Shootsy.Service;
 using System.Linq.Dynamic.Core;
 
 namespace Shootsy.Repositories
@@ -13,12 +15,14 @@ namespace Shootsy.Repositories
         private readonly ApplicationContext _context;
         private readonly IMapper _mapper;
         InternalConstants _internalConstants;
+        private readonly IKafkaProducerService _kafkaProducer;
 
-        public UserRepository(ApplicationContext context, IMapper mapper, InternalConstants internalConstants)
+        public UserRepository(ApplicationContext context, IMapper mapper, InternalConstants internalConstants, IKafkaProducerService kafkaProducer)
         {
             _context = context;
             _mapper = mapper;
             _internalConstants = internalConstants;
+            _kafkaProducer = kafkaProducer;
         }
 
         public async Task<int> CreateAsync(UserDto user, CancellationToken cancellationToken = default)
@@ -30,6 +34,7 @@ namespace Shootsy.Repositories
 
             await _context.SaveChangesAsync(cancellationToken);
             userEntityEntry.State = EntityState.Detached;
+            await _kafkaProducer.ProduceFileEventAsync("user.created", new { userEntity.Id });
 
             return userEntity.Id;
         }
@@ -54,7 +59,7 @@ namespace Shootsy.Repositories
             return _mapper.Map<UserDto>(userEntity);
         }
 
-        public async Task<UserDto>? GetByGuidAsync(Guid guid, CancellationToken cancellationToken)
+        public async Task<UserDto>? GetUserIdByGuidAsync(Guid guid, CancellationToken cancellationToken)
         {
             var sessionEntity = await _context.UserSessions
                 .AsNoTracking()
@@ -93,6 +98,7 @@ namespace Shootsy.Repositories
             userEntity.EditDate = DateTime.UtcNow;
             _context.Update(userEntity);
             await _context.SaveChangesAsync();
+            await _kafkaProducer.ProduceFileEventAsync("user.updated", new { userDto.Id });
         }
 
         public async Task DeleteByIdAsync(int id, CancellationToken cancellationToken)
@@ -101,6 +107,7 @@ namespace Shootsy.Repositories
                 .Where(x => x.Id == id)
                 .ExecuteDeleteAsync();
             await _context.SaveChangesAsync(cancellationToken);
+            await _kafkaProducer.ProduceFileEventAsync("user.deleted", new { id });
         }
 
         public async Task<Guid> CreateSessionAsync(int userId, CancellationToken cancellationToken)
@@ -167,7 +174,7 @@ namespace Shootsy.Repositories
         public async Task<bool> IsHaveAccessToIdAsync(string session, int needAccsessToId, CancellationToken cancellationToken)
         {
             var guid = Guid.Parse(session);
-            var user = await GetByGuidAsync(guid, cancellationToken);
+            var user = await GetUserIdByGuidAsync(guid, cancellationToken);
             var isHaveSuperUser = _context.UserRoles
                 .Where(x => x.User == user.Id & x.RoleEntity.isSuperUser == true & x.isActive == true);
             if (isHaveSuperUser.Count() == 0)

@@ -4,7 +4,7 @@ using Shootsy.Dtos;
 
 namespace Shootsy.Models.User
 {
-    public class UpdateUserRequest
+    public class UpdateUserRequestModel
     {
         [FromRoute]
         public int IdUser { get; set; }

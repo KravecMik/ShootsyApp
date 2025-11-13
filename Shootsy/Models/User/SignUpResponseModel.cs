@@ -1,6 +1,6 @@
 ﻿namespace Shootsy.Models.User
 {
-    public class SignInResponse
+    public class SignUpResponseModel
     {
         public required int IdUser { get; set; }
 

@@ -1,11 +1,9 @@
 ﻿namespace Shootsy.Models.Enums
 {
-    public enum SortByEnum
+    public enum PostSortByEnum
     {
         CreateDate,
         EditDate,
-        IdUser,
-        FileName,
-        Extension
+        IdUser
     }
 }

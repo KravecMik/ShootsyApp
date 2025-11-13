@@ -2,7 +2,7 @@
 
 namespace Shootsy.Models.User
 {
-    public class SignInRequest
+    public class SignInRequestModel
     {
         [Required(ErrorMessage = "Укажите логин пользователя")]
         public required string Login { get; set; }

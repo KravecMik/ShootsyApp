@@ -2,10 +2,10 @@
 
 namespace Shootsy.Database.Mongo
 {
-    public class FileStorageFilter
+    public class PostFilterModel
     {
         public int? UserId { get; set; }
-        public HashSet<string>? FileIds { get; set; }           
+        public HashSet<string>? PostIds { get; set; }
         public DateTime? CreatedDateFrom { get; set; }
         public DateTime? CreatedDateTo { get; set; }
         public DateTime? EditDateFrom { get; set; }
@@ -16,7 +16,7 @@ namespace Shootsy.Database.Mongo
         public int Offset { get; set; } = 0;
         public int Limit { get; set; } = 100;
 
-        public SortByEnum SortBy { get; set; } = SortByEnum.CreateDate;
+        public PostSortByEnum SortBy { get; set; } = PostSortByEnum.CreateDate;
         public bool SortDescending { get; set; } = true;
     }
 }

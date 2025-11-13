@@ -4,7 +4,7 @@ using Shootsy.Database.Mongo;
 
 namespace Shootsy.Models.File
 {
-    public class UpdateFileRequest
+    public class UpdateFileRequestModel
     {
         [FromRoute(Name = "id")]
         public required string IdFile { get; set; }

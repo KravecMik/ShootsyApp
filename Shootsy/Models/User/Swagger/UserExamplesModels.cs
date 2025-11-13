@@ -3,27 +3,27 @@ using Swashbuckle.AspNetCore.Filters;
 
 namespace Shootsy.Models.User
 {
-    public class SignInRequestExample : IExamplesProvider<SignInRequest>
+    public class SignInRequestExampleModel : IExamplesProvider<SignInRequestModel>
     {
-        public SignInRequest GetExamples() => new SignInRequest
+        public SignInRequestModel GetExamples() => new SignInRequestModel
         {
             Login = "test",
             Password = "pass123"
         };
     }
 
-    public class SignInResponseExample : IExamplesProvider<SignInResponse>
+    public class SignUpResponseExampleModel : IExamplesProvider<SignUpResponseModel>
     {
-        public SignInResponse GetExamples() => new SignInResponse
+        public SignUpResponseModel GetExamples() => new SignUpResponseModel
         {
             IdUser = 7724,
             Session = Guid.NewGuid()
         };
     }
 
-    public class SignUpRequestExample : IExamplesProvider<SignUpRequest>
+    public class SignUpRequestExampleModel : IExamplesProvider<SignUpRequestModel>
     {
-        public SignUpRequest GetExamples() => new SignUpRequest
+        public SignUpRequestModel GetExamples() => new SignUpRequestModel
         {
             Login = "stalker",
             Password = "coolboy",
@@ -36,15 +36,15 @@ namespace Shootsy.Models.User
         };
     }
 
-    public class GetUserByIdRequestExample : IExamplesProvider<GetUserByIdRequest>
+    public class GetUserByIdRequestExampleModel : IExamplesProvider<GetUserByIdRequestModel>
     {
-        public GetUserByIdRequest GetExamples() => new GetUserByIdRequest
+        public GetUserByIdRequestModel GetExamples() => new GetUserByIdRequestModel
         {
             IdUser = 666
         };
     }
 
-    public class GetUserByIdResponseExample : IExamplesProvider<GetUserByIdResponse>
+    public class GetUserByIdResponseExampleModel : IExamplesProvider<GetUserByIdResponse>
     {
         public GetUserByIdResponse GetExamples() => new GetUserByIdResponse
         {
@@ -61,7 +61,7 @@ namespace Shootsy.Models.User
         };
     }
 
-    public class GetUsersResponseExample : IExamplesProvider<IEnumerable<GetUserByIdResponse>>
+    public class GetUsersResponseExampleModel : IExamplesProvider<IEnumerable<GetUserByIdResponse>>
     {
         public IEnumerable<GetUserByIdResponse> GetExamples() => new[]
         {
@@ -73,18 +73,18 @@ namespace Shootsy.Models.User
         };
     }
 
-    public class UpdateUserRequestExample : IExamplesProvider<UpdateUserRequest>
+    public class UpdateUserRequestExampleModel : IExamplesProvider<UpdateUserRequestModel>
     {
-        public UpdateUserRequest GetExamples() => new UpdateUserRequest
+        public UpdateUserRequestModel GetExamples() => new UpdateUserRequestModel
         {
             IdUser = 1,
             PatchDocument = new Microsoft.AspNetCore.JsonPatch.JsonPatchDocument<Dtos.UserDto>()
         };
     }
 
-    public class GetUsersRequestExample : IExamplesProvider<GetUsersRequest>
+    public class GetUsersRequestExampleModel : IExamplesProvider<GetUsersRequestModel>
     {
-        public GetUsersRequest GetExamples() => new GetUsersRequest
+        public GetUsersRequestModel GetExamples() => new GetUsersRequestModel
         {
             Offset = 5,
             Limit = 100,

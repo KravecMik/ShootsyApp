@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Shootsy.Models.File
 {
-    public class CreateFileRequest
+    public class CreateFileRequestModel
     {
         [Required(ErrorMessage = "Укажите идентификатор пользователя")]
         [FromForm]

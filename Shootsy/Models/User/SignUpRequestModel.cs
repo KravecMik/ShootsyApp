@@ -2,7 +2,7 @@
 
 namespace Shootsy.Models.User
 {
-    public class SignUpRequest
+    public class SignUpRequestModel
     {
         [Required(ErrorMessage = "Укажите логин пользователя")]
         [MaxLength(50, ErrorMessage = "Максимальная длинна поля 50 символов")]

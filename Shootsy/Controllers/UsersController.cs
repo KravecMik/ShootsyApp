@@ -19,26 +19,24 @@ namespace Shootsy.Controllers
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
         private readonly InternalConstants _internalConstants;
-        private readonly IKafkaProducerService _kafkaProducer;
         private readonly HttpClient _httpClient;
 
-        public UsersController(IUserRepository userRepository, IMapper mapper, HttpClient httpClient, InternalConstants internalConstants, IKafkaProducerService kafkaProducer)
+        public UsersController(IUserRepository userRepository, IMapper mapper, HttpClient httpClient, InternalConstants internalConstants)
         {
             _userRepository = userRepository;
             _mapper = mapper;
             _httpClient = httpClient;
             _internalConstants = internalConstants;
-            _kafkaProducer = kafkaProducer;
         }
 
         [AllowAnonymous]
         [HttpPost("sign-up")]
         [SwaggerOperation(Summary = "Регистрация пользователя")]
         [Consumes("application/json")]
-        [SwaggerRequestExample(typeof(SignUpRequest), typeof(SignUpRequestExample))]
-        [SwaggerResponse(statusCode: 201, description: "OK", type: typeof(SignInResponse))]
-        [SwaggerResponseExample(201, typeof(SignInResponseExample))]
-        public async Task<IActionResult> SignUpAsync([FromBody, BindRequired] SignUpRequest model, CancellationToken cancellationToken = default)
+        [SwaggerRequestExample(typeof(SignUpRequestModel), typeof(SignUpRequestExampleModel))]
+        [SwaggerResponse(statusCode: 201, description: "Created", type: typeof(SignUpResponseModel))]
+        [SwaggerResponseExample(201, typeof(SignUpResponseExampleModel))]
+        public async Task<IActionResult> SignUpAsync([FromBody, BindRequired] SignUpRequestModel model, CancellationToken cancellationToken = default)
         {
             var user = _mapper.Map<UserDto>(model);
             var existUsers = await _userRepository.GetByLoginAsync(model.Login, cancellationToken);
@@ -51,18 +49,17 @@ namespace Shootsy.Controllers
             var id = await _userRepository.CreateAsync(user, cancellationToken);
             var session = await _userRepository.CreateSessionAsync(id, cancellationToken);
 
-            await _kafkaProducer.ProduceUserEventAsync("user.created", new { id, user.Login });
-            return StatusCode(201, new SignInResponse { IdUser = id, Session = session });
+            return StatusCode(201, new SignUpResponseModel { IdUser = id, Session = session });
         }
 
         [AllowAnonymous]
         [HttpPost("sign-in")]
         [Consumes("application/json")]
         [SwaggerOperation(Summary = "Авторизация пользователя")]
-        [SwaggerRequestExample(typeof(SignInRequest), typeof(SignInRequestExample))]
-        [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(SignInResponse))]
-        [SwaggerResponseExample(200, typeof(SignInResponseExample))]
-        public async Task<IActionResult> SignInAsync([FromBody, BindRequired] SignInRequest model, CancellationToken cancellationToken = default)
+        [SwaggerRequestExample(typeof(SignInRequestModel), typeof(SignInRequestExampleModel))]
+        [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(string))]
+        [SwaggerResponseExample(200, typeof(string))]
+        public async Task<IActionResult> SignInAsync([FromBody, BindRequired] SignInRequestModel model, CancellationToken cancellationToken = default)
         {
             var user = await _userRepository.GetByLoginAsync(model.Login, cancellationToken);
             if (user is null) return NotFound();
@@ -75,17 +72,16 @@ namespace Shootsy.Controllers
             }    
 
             var session = await _userRepository.CreateSessionAsync(user.Id, cancellationToken);
-            await _kafkaProducer.ProduceUserEventAsync("user.authorized", $"Пользователь с логином {model.Login} успешно авторизовался");
-            return StatusCode(200, session);
+            return Content(session.ToString(), "text/plain");
         }
 
         [Authorize]
         [HttpGet]
         [SwaggerOperation(Summary = "Получить список пользователей")]
-        [SwaggerRequestExample(typeof(GetUsersRequest), typeof(GetUsersRequestExample))]
+        [SwaggerRequestExample(typeof(GetUsersRequestModel), typeof(GetUsersRequestExampleModel))]
         [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(IEnumerable<GetUserByIdResponse>))]
-        [SwaggerResponseExample(200, typeof(GetUsersResponseExample))]
-        public async Task<IActionResult> GetUsersAsync([FromQuery] GetUsersRequest model, CancellationToken cancellationToken = default)
+        [SwaggerResponseExample(200, typeof(GetUsersResponseExampleModel))]
+        public async Task<IActionResult> GetUsersAsync([FromQuery] GetUsersRequestModel model, CancellationToken cancellationToken = default)
         {
             var users = await _userRepository.GetListAsync(model.Limit, model.Offset, model.Filter, model.Sort, cancellationToken);
             var result = _mapper.Map<IEnumerable<GetUserByIdResponse>>(users);
@@ -95,10 +91,10 @@ namespace Shootsy.Controllers
         [Authorize]
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Получить данные пользователя по идентификатору")]
-        [SwaggerRequestExample(typeof(GetUserByIdRequest), typeof(GetUserByIdRequestExample))]
+        [SwaggerRequestExample(typeof(GetUserByIdRequestModel), typeof(GetUserByIdRequestExampleModel))]
         [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(GetUserByIdResponse))]
-        [SwaggerResponseExample(200, typeof(GetUserByIdResponseExample))]
-        public async Task<IActionResult> GetUserByIdAsync([FromQuery] GetUserByIdRequest model, CancellationToken cancellationToken = default)
+        [SwaggerResponseExample(200, typeof(GetUserByIdResponseExampleModel))]
+        public async Task<IActionResult> GetUserByIdAsync([FromQuery] GetUserByIdRequestModel model, CancellationToken cancellationToken = default)
         {
             var user = await _userRepository.GetByIdAsync(model.IdUser, cancellationToken);
             if (user is null) return NotFound("Пользователь по указанному идентификатору не найден");
@@ -110,9 +106,9 @@ namespace Shootsy.Controllers
         [Authorize]
         [HttpPatch("{id}")]
         [SwaggerOperation(Summary = "Обновить данные пользователя по идентификатору")]
-        [SwaggerRequestExample(typeof(UpdateUserRequest), typeof(UpdateUserRequestExample))]
+        [SwaggerRequestExample(typeof(UpdateUserRequestModel), typeof(UpdateUserRequestExampleModel))]
         [SwaggerResponse(statusCode: 204, description: "NoContent")]
-        public async Task<IActionResult> UpdateUserAsync([FromBody] UpdateUserRequest model, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> UpdateUserAsync([FromBody] UpdateUserRequestModel model, CancellationToken cancellationToken = default)
         {
             var currentUser = await _userRepository.GetByIdAsync(model.IdUser, cancellationToken);
             if (currentUser is null) return NotFound("Пользователь по указанному идентификатору не найден");
@@ -130,9 +126,9 @@ namespace Shootsy.Controllers
         [Authorize]
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Удалить пользователя по идентификатору")]
-        [SwaggerRequestExample(typeof(GetUserByIdRequest), typeof(GetUserByIdRequestExample))]
+        [SwaggerRequestExample(typeof(GetUserByIdRequestModel), typeof(GetUserByIdRequestExampleModel))]
         [SwaggerResponse(statusCode: 204, description: "NoContent")]
-        public async Task<IActionResult> DeleteUserByIdAsync([FromQuery] GetUserByIdRequest model, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> DeleteUserByIdAsync([FromQuery] GetUserByIdRequestModel model, CancellationToken cancellationToken = default)
         {
             var user = await _userRepository.GetByIdAsync(model.IdUser, cancellationToken);
             if (user is null) return NotFound("Пользователь по указанному идентификатору id не найден");

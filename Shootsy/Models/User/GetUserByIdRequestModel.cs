@@ -2,7 +2,7 @@
 
 namespace Shootsy.Models.User
 {
-    public class GetUserByIdRequest
+    public class GetUserByIdRequestModel
     {
         [FromRoute(Name = "id")]
         public int IdUser { get; set; }

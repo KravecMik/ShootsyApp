@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Shootsy.Database.Mongo;
 using Shootsy.Models.Enums;
+using Shootsy.Service;
 using System.Text.RegularExpressions;
 
 namespace Shootsy.Repositories
@@ -11,19 +13,25 @@ namespace Shootsy.Repositories
     public class FileRepository : IFileRepository
     {
         private readonly IMongoCollection<FileStorageEntity> _collection;
+        private readonly IKafkaProducerService _kafkaProducer;
 
-        public FileRepository(IMongoCollection<FileStorageEntity> collection) => _collection = collection;
+        public FileRepository(IMongoDatabase database, IKafkaProducerService kafkaProducer)
+        {
+            _collection = database.GetCollection<FileStorageEntity>("FileStorage");
+            _kafkaProducer = kafkaProducer;
+        }
 
         public async Task<string> CreateAsync(FileStorageEntity fileItem, CancellationToken cancellationToken = default)
         {
             await _collection.InsertOneAsync(fileItem);
+            await _kafkaProducer.ProduceFileEventAsync("file.created", new { fileItem.Id });
             return fileItem.Id;
         }
 
         public async Task<FileStorageEntity>? GetByIdAsync(string idFile, CancellationToken cancellationToken)
             => await _collection.Find(x => x.Id == idFile).FirstOrDefaultAsync(cancellationToken);
 
-        public async Task<(IReadOnlyList<FileStorageEntity>, long total)>? GetListAsync(FileStorageFilter f, CancellationToken cancellationToken = default)
+        public async Task<(IReadOnlyList<FileStorageEntity>, long total)>? GetListAsync(FileStorageFilterModel f, CancellationToken cancellationToken = default)
         {
             var fb = Builders<FileStorageEntity>.Filter;
             var filters = new List<FilterDefinition<FileStorageEntity>>();
@@ -60,16 +68,16 @@ namespace Shootsy.Repositories
 
             var sort = f.SortBy switch
             {
-                SortByEnum.EditDate => f.SortDescending
+                FileSortByEnum.EditDate => f.SortDescending
                     ? Builders<FileStorageEntity>.Sort.Descending(x => x.EditDate).Descending(x => x.CreateDate)
                     : Builders<FileStorageEntity>.Sort.Ascending(x => x.EditDate).Ascending(x => x.CreateDate),
-                SortByEnum.IdUser => f.SortDescending
+                FileSortByEnum.IdUser => f.SortDescending
                     ? Builders<FileStorageEntity>.Sort.Descending(x => x.IdUser).Descending(x => x.CreateDate)
                     : Builders<FileStorageEntity>.Sort.Ascending(x => x.IdUser).Ascending(x => x.CreateDate),
-                SortByEnum.FileName => f.SortDescending
+                FileSortByEnum.FileName => f.SortDescending
                     ? Builders<FileStorageEntity>.Sort.Descending(x => x.FileInfo.FileName)
                     : Builders<FileStorageEntity>.Sort.Ascending(x => x.FileInfo.FileName),
-                SortByEnum.Extension => f.SortDescending
+                FileSortByEnum.Extension => f.SortDescending
                     ? Builders<FileStorageEntity>.Sort.Descending(x => x.FileInfo.Extension)
                     : Builders<FileStorageEntity>.Sort.Ascending(x => x.FileInfo.Extension),
                 _ => f.SortDescending
@@ -90,11 +98,16 @@ namespace Shootsy.Repositories
         public async Task<bool> ReplaceAsync(FileStorageEntity entity, CancellationToken cancellationToken = default)
         {
             var res = await _collection.ReplaceOneAsync(x => x.Id == entity.Id, entity, cancellationToken: cancellationToken);
+            await _kafkaProducer.ProduceFileEventAsync("file.updated", new { entity.Id });
+
             return res.MatchedCount == 1; 
         }
 
         public async Task DeleteByIdAsync(string idFile, CancellationToken cancellationToken)
-            => await _collection.DeleteOneAsync(x => x.Id == idFile, cancellationToken);
+        {
+            await _collection.DeleteOneAsync(x => x.Id == idFile, cancellationToken);
+            await _kafkaProducer.ProduceFileEventAsync("file.deleted", new { idFile });
+        }
 
         private static string RegexEscapeForMongo(string input)
         {

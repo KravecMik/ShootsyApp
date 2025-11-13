@@ -1,11 +1,11 @@
-﻿namespace Shootsy.Models.File
+﻿namespace Shootsy.Models.Post
 {
-    public class GetFileByIdResponse
+    public class GetPostByIdResponseModel
     {
         public required string Id { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime EditDate { get; set; }
         public int IdUser { get; set; }
-        public required Database.Mongo.FileInfo FileInfo { get; set; }
+        public required string Text { get; set; }
     }
 }

@@ -8,7 +8,6 @@ using Shootsy.Models.File.Swagger;
 using Shootsy.Repositories;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
-using System.IO;
 
 namespace Shootsy.Controllers
 {
@@ -21,24 +20,21 @@ namespace Shootsy.Controllers
         private readonly IFileRepository _fileRepository;
         private readonly IUserRepository _userRepository;
         private readonly InternalConstants _internalConstants;
-        private readonly HttpClient _httpClient;
 
-        public FilesController(IFileRepository fileRepository, IUserRepository userRepository, InternalConstants internalConstants, IMapper mapper, HttpClient httpClient, IObjectStorage objectStorage)
+        public FilesController(IFileRepository fileRepository, IUserRepository userRepository, InternalConstants internalConstants, IMapper mapper, IObjectStorage objectStorage)
         {
             _fileRepository = fileRepository;
             _internalConstants = internalConstants;
             _userRepository = userRepository;
             _mapper = mapper;
-            _httpClient = httpClient;
             _objectStorage = objectStorage;
         }
 
         [Authorize]
         [HttpPost]
         [SwaggerOperation(Summary = "Создание карточки файла")]
-        [SwaggerResponse(statusCode: 201, description: "OK", type: typeof(CreateFileResponse))]
-        [SwaggerResponseExample(201, typeof(CreateFileResponseExample))]
-        public async Task<IActionResult> CreateFileAsync([FromForm] CreateFileRequest model, CancellationToken cancellationToken = default)
+        [SwaggerResponse(statusCode: 201, description: "Created", type: typeof(String))]
+        public async Task<IActionResult> CreateFileAsync([FromForm] CreateFileRequestModel model, CancellationToken cancellationToken = default)
         {
             var user = await _userRepository.GetByIdAsync(model.IdUser, cancellationToken);
             if (user is null) return NotFound();
@@ -65,16 +61,16 @@ namespace Shootsy.Controllers
                 }
             }, cancellationToken);
 
-            return CreatedAtAction(nameof(GetFileByIdAsync), new { id = fileId }, new { id = fileId, objectKey = key, url = publicUrl });
+            return CreatedAtAction(nameof(CreateFileAsync), fileId);
         }
 
         [Authorize]
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Получение карточки файла по идентификатору")]
-        [SwaggerRequestExample(typeof(GetFileByIdRequest), typeof(GetFileByIdRequestExample))]
-        [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(GetFileByIdResponse))]
-        [SwaggerResponseExample(200, typeof(GetFileByIdResponseExample))]
-        public async Task<IActionResult> GetFileByIdAsync([FromQuery] GetFileByIdRequest model, CancellationToken cancellationToken = default)
+        [SwaggerRequestExample(typeof(GetFileByIdRequestModel), typeof(GetFileByIdRequestExampleModel))]
+        [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(GetFileByIdResponseModel))]
+        [SwaggerResponseExample(200, typeof(GetFileByIdResponseExampleModel))]
+        public async Task<IActionResult> GetFileByIdAsync([FromQuery] GetFileByIdRequestModel model, CancellationToken cancellationToken = default)
         {
             var file = await _fileRepository.GetByIdAsync(model.IdFile, cancellationToken);
             if (file is null) return NotFound();
@@ -84,10 +80,10 @@ namespace Shootsy.Controllers
         [Authorize]
         [HttpGet]
         [SwaggerOperation(Summary = "Получить список карточек файлов")]
-        [SwaggerRequestExample(typeof(FileStorageFilter), typeof(GetFileListRequestExample))]
-        [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(IEnumerable<GetFileByIdResponse>))]
-        [SwaggerResponseExample(200, typeof(GetFileListResponseExample))]
-        public async Task<IActionResult> GetFilesAsync([FromQuery] FileStorageFilter filter, CancellationToken cancellationToken = default)
+        [SwaggerRequestExample(typeof(FileStorageFilterModel), typeof(GetFileListRequestExampleModel))]
+        [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(IEnumerable<GetFileByIdResponseModel>))]
+        [SwaggerResponseExample(200, typeof(GetFileListResponseExampleModel))]
+        public async Task<IActionResult> GetFilesAsync([FromQuery] FileStorageFilterModel filter, CancellationToken cancellationToken = default)
         {
             var result = await _fileRepository.GetListAsync(filter, cancellationToken);
             return Ok(result.Item1);
@@ -144,9 +140,9 @@ namespace Shootsy.Controllers
         [Authorize]
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Удалить файл по идентификатору")]
-        [SwaggerRequestExample(typeof(GetFileByIdRequest), typeof(GetFileByIdRequestExample))]
+        [SwaggerRequestExample(typeof(GetFileByIdRequestModel), typeof(GetFileByIdRequestExampleModel))]
         [SwaggerResponse(statusCode: 204, description: "NoContent")]
-        public async Task<IActionResult> DeleteFileByIdAsync([FromQuery] GetFileByIdRequest model, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> DeleteFileByIdAsync([FromQuery] GetFileByIdRequestModel model, CancellationToken cancellationToken = default)
         {
             var file = await _fileRepository.GetByIdAsync(model.IdFile, cancellationToken);
             if (file is null) return NotFound();
@@ -160,11 +156,14 @@ namespace Shootsy.Controllers
         [Authorize]
         [HttpDelete("iduser={id}")]
         [SwaggerOperation(Summary = "Удалить все файлы по идентификатору пользователя")]
-        [SwaggerRequestExample(typeof(DeleteUserFilesRequest), typeof(DeleteUserFilesRequestExample))]
+        [SwaggerRequestExample(typeof(DeleteUserFilesRequestModel), typeof(DeleteUserFilesRequestExampleModel))]
         [SwaggerResponse(statusCode: 204, description: "NoContent")]
-        public async Task<IActionResult> DeleteUserFilesAsync([FromQuery] DeleteUserFilesRequest model, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> DeleteUserFilesAsync([FromQuery] DeleteUserFilesRequestModel model, CancellationToken cancellationToken = default)
         {
-            var fileList = await _fileRepository.GetListAsync(new FileStorageFilter { UserId = model.IdUser }, cancellationToken);
+            var user = await _userRepository.GetByIdAsync(model.IdUser, cancellationToken);
+            if (user is null) return NotFound();
+
+            var fileList = await _fileRepository.GetListAsync(new FileStorageFilterModel { UserId = model.IdUser }, cancellationToken);
 
             foreach (var file in fileList.Item1)
             {

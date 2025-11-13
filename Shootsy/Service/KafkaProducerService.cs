@@ -37,7 +37,7 @@ public class KafkaProducerService : IKafkaProducerService, IDisposable
             EventId = Guid.NewGuid(),
             EventType = eventType,
             Timestamp = DateTime.UtcNow,
-            Data = userData
+            IdUser = userData
         };
 
         return await ProduceAsync(_kafkaSettings.Topics.UserEvents, message);
@@ -50,23 +50,35 @@ public class KafkaProducerService : IKafkaProducerService, IDisposable
             EventId = Guid.NewGuid(),
             EventType = eventType,
             Timestamp = DateTime.UtcNow,
-            Data = fileData
+            IdFile = fileData
         };
 
         return await ProduceAsync(_kafkaSettings.Topics.FileEvents, message);
     }
 
-    public async Task<bool> ProduceSystemEventAsync(string eventType, object systemData)
+    public async Task<bool> ProduceSystemEventAsync(string eventType)
+    {
+        var message = new
+        {
+            EventId = Guid.NewGuid(),
+            EventType = eventType,
+            Timestamp = DateTime.UtcNow
+        };
+
+        return await ProduceAsync(_kafkaSettings.Topics.SystemEvents, message);
+    }
+
+    public async Task<bool> ProducePostEventAsync(string eventType, object postData)
     {
         var message = new
         {
             EventId = Guid.NewGuid(),
             EventType = eventType,
             Timestamp = DateTime.UtcNow,
-            Data = systemData
+            IdPost = postData
         };
 
-        return await ProduceAsync(_kafkaSettings.Topics.SystemEvents, message);
+        return await ProduceAsync(_kafkaSettings.Topics.UserEvents, message);
     }
 
     public async Task<bool> ProduceAsync<T>(string topic, T message) where T : class
@@ -90,6 +102,20 @@ public class KafkaProducerService : IKafkaProducerService, IDisposable
             _logger.LogError(ex, "Failed to deliver message to Kafka. Error: {Error}", ex.Error.Reason);
             return false;
         }
+    }
+
+    public async Task<bool> SendMessageByUserLoginAsync(string fromUserLogin, string toUserLogin, string messageText)
+    {
+        var message = new
+        {
+            EventId = Guid.NewGuid(),
+            CreateDate = DateTime.UtcNow,
+            From = fromUserLogin,
+            To = toUserLogin,
+            Message = messageText
+        };
+
+        return await ProduceAsync(_kafkaSettings.Topics.Messages, message);
     }
 
     public void Dispose()

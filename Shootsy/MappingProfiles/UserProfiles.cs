@@ -13,7 +13,7 @@ namespace Shootsy.MappingProfiles
     {
         public UserProfiles()
         {
-            CreateMap<SignUpRequest, UserDto>();
+            CreateMap<SignUpRequestModel, UserDto>();
             CreateMap<UserDto, GetUserByIdResponse>()
                 .ForMember(dest => dest.City, opt => opt.MapFrom(
                     src => ((CityEnum)src.City).AsString(EnumFormat.Description)))
@@ -23,7 +23,7 @@ namespace Shootsy.MappingProfiles
                     src => ((GenderEnums)src.Gender).AsString(EnumFormat.Description)));
             CreateMap<IUser, UserDto>();
             CreateMap<UserDto, UserEntity>();
-            CreateMap<SignUpRequest, UserDto>()
+            CreateMap<SignUpRequestModel, UserDto>()
                 .ForMember(dest => dest.Password, opt => opt.MapFrom(
                     src => src.Password.EncryptString(src.Login)));
         }

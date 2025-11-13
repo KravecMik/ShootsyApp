@@ -2,7 +2,7 @@
 
 namespace Shootsy.Models.User
 {
-    public class GetUsersRequest
+    public class GetUsersRequestModel
     {
         [FromQuery(Name = "offset")]
         public int Offset { get; set; }
