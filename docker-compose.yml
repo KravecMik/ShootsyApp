@@ -73,6 +73,10 @@ services:
     container_name: mongoDb
     ports:
       - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    command: [--auth]
     volumes:
       - shootsy_mongodata:/data/db
     networks:
@@ -86,8 +90,11 @@ services:
     environment:
       - ME_CONFIG_MONGODB_SERVER=mongoDb
       - ME_CONFIG_MONGODB_PORT=27017
-      - ME_CONFIG_BASICAUTH_USERNAME=admin
-      - ME_CONFIG_BASICAUTH_PASSWORD=admin   
+      - ME_CONFIG_MONGODB_AUTH_USERNAME=readonly
+      - ME_CONFIG_MONGODB_AUTH_PASSWORD=readonly
+      - ME_CONFIG_MONGODB_AUTH_DATABASE=shootsy
+      - ME_CONFIG_BASICAUTH=false
+      - ME_CONFIG_SITE_READONLY=true  
     ports:
       - "8081:8081"
     networks:
