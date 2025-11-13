@@ -84,7 +84,8 @@ services:
     depends_on:
       - mongoDb
     environment:
-      - ME_CONFIG_MONGODB_URL=mongodb://mongoDb:27017
+      - ME_CONFIG_MONGODB_SERVER=mongoDb
+      - ME_CONFIG_MONGODB_PORT=27017
       - ME_CONFIG_BASICAUTH_USERNAME=admin
       - ME_CONFIG_BASICAUTH_PASSWORD=admin   
     ports:
