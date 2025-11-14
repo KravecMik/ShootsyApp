@@ -17,9 +17,6 @@ services:
       - ASPNETCORE_URLS=http://+:80
       - ConnectionStrings__DefaultConnection=Host=shootsy-pg-15;Port=5432;Database=testdb;Username=postgres;Password=postgres
       - Kafka__BootstrapServers=kafka:9092
-      - Mongo__ConnectionString=mongodb://mongoDb:27017
-      - Mongo__Database=shootsy
-      - Mongo__CardsCollection=FileStorage
     networks:
       - shootsy-network
 
