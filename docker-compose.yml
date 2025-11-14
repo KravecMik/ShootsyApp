@@ -73,6 +73,7 @@ services:
     container_name: mongoDb
     ports:
       - "27017:27017"
+    command: [--auth]
     volumes:
       - shootsy_mongodata:/data/db
     networks:
