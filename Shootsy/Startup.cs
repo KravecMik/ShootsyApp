@@ -94,19 +94,12 @@ namespace Shootsy
                 var opts = sp.GetRequiredService<IOptions<MongoOptions>>().Value;
                 return new MongoClient(opts.ConnectionString);
             });
-            services.AddSingleton(sp =>
+            services.AddScoped(serviceProvider =>
             {
-                var opts = sp.GetRequiredService<IOptions<MongoOptions>>().Value;
-                var client = sp.GetRequiredService<IMongoClient>();
-                return client.GetDatabase(opts.Database);
+                var client = serviceProvider.GetRequiredService<IMongoClient>();
+                var settings = serviceProvider.GetRequiredService<IOptions<MongoOptions>>().Value;
+                return client.GetDatabase(settings.Database);
             });
-            services.AddSingleton<IMongoCollection<FileStorageEntity>>(sp =>
-            {
-                var opts = sp.GetRequiredService<IOptions<MongoOptions>>().Value;
-                var db = sp.GetRequiredService<IMongoDatabase>();
-                return db.GetCollection<FileStorageEntity>(opts.CardsCollection);
-            });
-
             services.AddSwaggerExamplesFromAssemblyOf<Startup>();
             services.AddDbContext<ApplicationContext>();
             services.AddScoped<IUserRepository, UserRepository>();
