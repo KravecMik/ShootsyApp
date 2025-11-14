@@ -36,19 +36,19 @@ else
 fi
 
 log "🐳 Rebuilding Docker containers..."
-docker-compose down
+docker compose down
 
 log "Building new images..."
-docker-compose build --no-cache
+docker compose build --no-cache
 
 log "Starting services..."
-docker-compose up -d
+docker compose up -d
 
 log "⏳ Waiting for services to start..."
 sleep 30
 
 log "🔍 Checking services status..."
-if docker-compose ps | grep -q "Up"; then
+if docker compose ps | grep -q "Up"; then
     log "✅ All services are running successfully"
 else
     error "Some services failed to start"
@@ -59,6 +59,6 @@ docker image prune -f
 docker container prune -f
 
 log "📊 Final status:"
-docker-compose ps
+docker compose ps
 
 log "🎉 Deployment completed successfully!"
