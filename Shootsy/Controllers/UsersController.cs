@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Shootsy.Dtos;
@@ -106,20 +107,23 @@ namespace Shootsy.Controllers
         [Authorize]
         [HttpPatch("{id}")]
         [SwaggerOperation(Summary = "Обновить данные пользователя по идентификатору")]
-        [SwaggerRequestExample(typeof(UpdateUserRequestModel), typeof(UpdateUserRequestExampleModel))]
         [SwaggerResponse(statusCode: 204, description: "NoContent")]
-        public async Task<IActionResult> UpdateUserAsync([FromBody] UpdateUserRequestModel model, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> UpdateUserAsync(
+            int id,
+            [FromBody] JsonPatchDocument<UserDto> patchDocument,
+            CancellationToken cancellationToken = default)
         {
-            var currentUser = await _userRepository.GetByIdAsync(model.IdUser, cancellationToken);
-            if (currentUser is null) return NotFound("Пользователь по указанному идентификатору не найден");
+            var currentUser = await _userRepository.GetByIdAsync(id, cancellationToken);
+            if (currentUser is null)
+                return NotFound("Пользователь по указанному идентификатору не найден");
 
-            if (model.PatchDocument.Operations.Any(x => x.path.ToLower().Contains("login")))
+            if (patchDocument.Operations.Any(x => x.path.ToLower().Contains("login")))
             {
                 ModelState.AddModelError("Login", "Поле логин недоступно для редактирования");
                 return ValidationProblem();
             }
 
-            await _userRepository.UpdateAsync(currentUser, model.PatchDocument, cancellationToken);
+            await _userRepository.UpdateAsync(currentUser, patchDocument, cancellationToken);
             return NoContent();
         }
 
