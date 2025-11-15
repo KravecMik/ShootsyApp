@@ -30,7 +30,7 @@ git fetch origin master
 
 if git status -uno | grep -q 'Your branch is behind'; then
     log "New changes found, pulling updates..."
-    git pull origin main
+    git pull origin master
 else
     log "No new changes, already up to date"
 fi
