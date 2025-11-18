@@ -10,7 +10,7 @@ namespace Shootsy.Database.Mongo
         public string Id { get; set; } = default!;
         public DateTime CreateDate { get; set; } = DateTime.UtcNow;
         public DateTime EditDate { get; set; } = DateTime.UtcNow;
-        public int IdUser { get; set; }
+        public int UserId { get; set; }
         public required FileInfo FileInfo { get; set; }
     }
 

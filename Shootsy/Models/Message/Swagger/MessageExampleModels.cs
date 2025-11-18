@@ -1,5 +1,4 @@
-﻿using Shootsy.Models.Post;
-using Swashbuckle.AspNetCore.Filters;
+﻿using Swashbuckle.AspNetCore.Filters;
 
 namespace Shootsy.Models.Message.Swagger
 {
@@ -7,8 +6,7 @@ namespace Shootsy.Models.Message.Swagger
     {
         public SendMessageRequestModel GetExamples() => new SendMessageRequestModel
         {
-            Login = "DarkStalker",
-            MessageText = "Я шлю тебе письмо прям в кафку!!!"
+            Message = "Я шлю тебе письмо прям в кафку!!!"
         };
     }
 }

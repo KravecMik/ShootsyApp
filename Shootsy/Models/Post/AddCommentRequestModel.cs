@@ -2,10 +2,10 @@
 
 namespace Shootsy.Models.Post
 {
-    public class CreatePostRequestModel
+    public class AddCommentRequestModel
     {
-        [MinLength(10, ErrorMessage = "Минимальная длинна поля 10 символов")]
+        [MinLength(1, ErrorMessage = "Минимальная длинна поля 1 символ")]
         [MaxLength(250, ErrorMessage = "Максимальная длинна поля 250 символов")]
-        public required string Text { get; init; }
+        public string Text { get; set; } = string.Empty;
     }
 }

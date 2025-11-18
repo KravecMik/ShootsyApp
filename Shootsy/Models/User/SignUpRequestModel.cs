@@ -20,7 +20,7 @@ namespace Shootsy.Models.User
         public string? Lastname { get; init; }
 
         [MaxLength(250, ErrorMessage = "Максимальная длинна поля 250 символов")]
-        public string? Discription { get; init; }
+        public string? Description { get; init; }
 
         [Required(ErrorMessage = "Укажите пол пользователя")]
         [Range(1, 2, ErrorMessage = "Указанное значение поля не поддерживается")]

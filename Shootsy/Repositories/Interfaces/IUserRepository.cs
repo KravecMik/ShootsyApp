@@ -1,22 +1,21 @@
 ﻿using Microsoft.AspNetCore.JsonPatch;
-using Shootsy.Dtos;
+using Shootsy.Database.Entities;
+using Shootsy.Models.Dtos;
 
 namespace Shootsy.Repositories
 {
     public interface IUserRepository
     {
-        Task<int> CreateAsync(UserDto user, CancellationToken cancellationToken);
-        Task<UserDto>? GetByIdAsync(int id, CancellationToken cancellationToken);
-        Task<UserDto>? GetByLoginAsync(string Login, CancellationToken cancellationToken);
-        Task<UserDto>? GetUserIdByGuidAsync(Guid guid, CancellationToken cancellationToken);
-        Task<Guid> GetLastSessionAsync(int userId, CancellationToken cancellationToken);
-        Task<IReadOnlyList<UserDto>> GetListAsync(int limit, int offset, string filter, string sort, CancellationToken cancellationToken);
-        Task UpdateAsync(UserDto userDto, JsonPatchDocument<UserDto> jsonPatchDocument, CancellationToken cancellationToken = default);
-        Task DeleteByIdAsync(int id, CancellationToken cancellationToken);
-
+        Task<int> CreateUserAsync(UserEntity user, CancellationToken cancellationToken);
+        Task<UserEntity?> GetUserByIdAsync(int userId, CancellationToken cancellationToken);
+        Task<UserEntity?> GetUserByLoginAsync(string userLogin, CancellationToken cancellationToken);
+        Task<UserEntity?> GetUserByGuidAsync(Guid guid, CancellationToken cancellationToken);
+        Task<Guid?> GetLastSessionAsync(int userId, CancellationToken cancellationToken);
+        Task<(IReadOnlyList<UserEntity>, int)> GetUsersListAsync(UserFilterDto filter, CancellationToken cancellationToken);
+        Task UpdateUserAsync(UserEntity userDto, JsonPatchDocument<UserEntity> jsonPatchDocument, CancellationToken cancellationToken);
+        Task DeleteUserByIdAsync(int userId, CancellationToken cancellationToken);
         Task<Guid> CreateSessionAsync(int userId, CancellationToken cancellationToken);
-        Task<UserSessionDto>? GetSessionByGuidAsync(Guid guid, CancellationToken cancellationToken);
-        Task<bool> IsAuthorized(string? guid, CancellationToken cancellationToken = default);
-        Task<bool> IsHaveAccessToIdAsync(string session, int needAccsessToId, CancellationToken cancellationToken);
+        Task<UserSessionEntity?> GetSessionByGuidAsync(Guid guid, CancellationToken cancellationToken);
+        Task<bool> IsAuthorizedAsync(string? guid, CancellationToken cancellationToken);
     }
 }

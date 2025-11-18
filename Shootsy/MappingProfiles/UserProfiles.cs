@@ -1,9 +1,6 @@
 ﻿using AutoMapper;
-using EnumsNET;
-using Shootsy.Core.Interfaces;
 using Shootsy.Database.Entities;
-using Shootsy.Dtos;
-using Shootsy.Enums;
+using Shootsy.Models.Dtos;
 using Shootsy.Models.User;
 using Shootsy.Security;
 
@@ -13,19 +10,25 @@ namespace Shootsy.MappingProfiles
     {
         public UserProfiles()
         {
-            CreateMap<SignUpRequestModel, UserDto>();
-            CreateMap<UserDto, GetUserByIdResponse>()
-                .ForMember(dest => dest.City, opt => opt.MapFrom(
-                    src => ((CityEnum)src.City).AsString(EnumFormat.Description)))
-                 .ForMember(dest => dest.ITProfession, opt => opt.MapFrom(
-                    src => ((ITProfessionEnums)src.ITProfession).AsString(EnumFormat.Description)))
-                .ForMember(dest => dest.Gender, opt => opt.MapFrom(
-                    src => ((GenderEnums)src.Gender).AsString(EnumFormat.Description)));
-            CreateMap<IUser, UserDto>();
-            CreateMap<UserDto, UserEntity>();
-            CreateMap<SignUpRequestModel, UserDto>()
+            CreateMap<UserEntity, UserDto>()
+                 .ForMember(dest => dest.City,
+                       opt => opt.MapFrom(src => src.CityEntity.CityName))
+                 .ForMember(dest => dest.Profession,
+                       opt => opt.MapFrom(src => src.ProfessionEntity.Name))
+                 .ForMember(dest => dest.Category,
+                       opt => opt.MapFrom(src => src.ProfessionEntity.Category))
+                 .ForMember(dest => dest.Gender,
+                       opt => opt.MapFrom(src => src.GenderEntity.GenderName));
+
+            CreateMap<SignUpRequestModel, UserEntity>()
                 .ForMember(dest => dest.Password, opt => opt.MapFrom(
-                    src => src.Password.EncryptString(src.Login)));
+                    src => src.Password.EncryptString(src.Login)))
+                .ForMember(dest => dest.CityId, opt => opt.MapFrom(
+                    src => src.City))
+                .ForMember(dest => dest.ProfessionId, opt => opt.MapFrom(
+                    src => src.ITProfession))
+                .ForMember(dest => dest.GenderId, opt => opt.MapFrom(
+                    src => src.Gender));
         }
     }
 }

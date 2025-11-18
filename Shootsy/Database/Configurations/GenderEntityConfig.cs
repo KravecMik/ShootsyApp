@@ -8,14 +8,17 @@ namespace Shootsy.Database.Configurations
     {
         public void Configure(EntityTypeBuilder<GenderEntity> entity)
         {
-            entity.ToTable("gender", "security");
+            entity.ToTable("gender", "public");
             entity.HasKey(x => x.Id);
+
             entity.Property(x => x.Id)
                 .HasColumnName("id")
                 .HasComment("Идентификатор пола");
+
             entity.Property(x => x.GenderName)
                 .HasColumnName("gender_name")
                 .HasComment("Название пола");
+
             entity.HasData(
                 new GenderEntity { Id = 1, GenderName = "Мужской" },
                 new GenderEntity { Id = 2, GenderName = "Женский" }

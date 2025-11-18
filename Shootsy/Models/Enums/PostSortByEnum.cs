@@ -4,6 +4,6 @@
     {
         CreateDate,
         EditDate,
-        IdUser
+        UserId
     }
 }

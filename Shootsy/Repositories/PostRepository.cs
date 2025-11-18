@@ -1,110 +1,225 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Hosting;
-using MongoDB.Bson;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
-using Shootsy.Database.Mongo;
-using Shootsy.Models.Enums;
+using Shootsy.Database;
+using Shootsy.Database.Entities;
+using Shootsy.Models.Dtos;
 using Shootsy.Repositories.Interfaces;
 using Shootsy.Service;
-using System.Text.RegularExpressions;
 
 namespace Shootsy.Repositories
 {
     public class PostRepository : IPostRepository
     {
-        private readonly IMongoCollection<PostEntity> _collection;
+        private readonly ApplicationContext _context;
+        private readonly IMapper _mapper;
         private readonly IKafkaProducerService _kafkaProducer;
 
-        public PostRepository(IMongoDatabase database, IKafkaProducerService kafkaProducer)
-        { 
-            _collection = database.GetCollection<PostEntity>("Post");
+        public PostRepository(ApplicationContext context, IMapper mapper, IKafkaProducerService kafkaProducer)
+        {
+            _context = context;
+            _mapper = mapper;
             _kafkaProducer = kafkaProducer;
         }
 
-        public async Task<string> CreateAsync(PostEntity post, CancellationToken cancellationToken)
+        public async Task<int> CreatePostAsync(PostEntity post, CancellationToken cancellationToken)
         {
-            await _collection.InsertOneAsync(post);
-            await _kafkaProducer.ProduceFileEventAsync("post.created", new { post.Id });
+            post.CreateDate = DateTime.UtcNow;
+            post.EditDate = DateTime.UtcNow;
+            _context.Posts.Add(post);
+            await _context.SaveChangesAsync(cancellationToken);
+            await _kafkaProducer.ProducePostEventAsync("post.created", new { post.Id });
 
             return post.Id;
         }
 
-        public async Task DeleteByIdAsync(string idPost, CancellationToken cancellationToken)
+        public async Task DeletePostByIdAsync(int postId, CancellationToken cancellationToken)
         {
-            await _collection.DeleteOneAsync(x => x.Id == idPost, cancellationToken);
-            await _kafkaProducer.ProduceFileEventAsync("post.deleted", new { idPost });
+            var post = await _context.Posts.Where(x => x.Id == postId).FirstOrDefaultAsync();
+            if (post != null)
+            {
+                _context.Posts.Remove(post);
+                await _context.SaveChangesAsync(cancellationToken);
+                await _kafkaProducer.ProducePostEventAsync("post.deleted", new { postId });
+            }
         }
 
-        public async Task<PostEntity>? GetByIdAsync(string idPost, CancellationToken cancellationToken)
-            => await _collection.Find(x => x.Id == idPost).FirstOrDefaultAsync(cancellationToken);
-
-        public async Task<(IReadOnlyList<PostEntity>, long total)>? GetListAsync(PostFilterModel f, CancellationToken cancellationToken = default)
+        public async Task<PostEntity?> GetPostByIdAsync(int postId, CancellationToken cancellationToken)
         {
-            var fb = Builders<PostEntity>.Filter;
-            var filters = new List<FilterDefinition<PostEntity>>();
+            return await _context.Posts.AsNoTracking()
+                .Where(x => x.Id == postId)
+                .FirstOrDefaultAsync();
+        }
 
-            if (f.UserId is int userId)
-                filters.Add(fb.Eq(x => x.IdUser, userId));
+        public async Task<(IReadOnlyList<PostEntity> Posts, int TotalCount)> GetPostsListAsync(PostFilterDto filter, CancellationToken cancellationToken = default)
+        {
+            var query = _context.Posts
+                    .AsNoTracking();
 
-            if (f.PostIds is { Count: > 0 })
-                filters.Add(fb.In(x => x.Id, f.PostIds));
+            if (filter.UserId.HasValue)
+                query = query.Where(p => p.UserId == filter.UserId.Value);
 
-            if (f.CreatedDateFrom is DateTime cFrom)
-                filters.Add(fb.Gte(x => x.CreateDate, DateTime.SpecifyKind(cFrom, DateTimeKind.Utc)));
-            if (f.CreatedDateTo is DateTime cTo)
-                filters.Add(fb.Lte(x => x.CreateDate, DateTime.SpecifyKind(cTo, DateTimeKind.Utc)));
-
-            if (f.EditDateFrom is DateTime uFrom)
-                filters.Add(fb.Gte(x => x.EditDate, DateTime.SpecifyKind(uFrom, DateTimeKind.Utc)));
-            if (f.EditDateTo is DateTime uTo)
-                filters.Add(fb.Lte(x => x.EditDate, DateTime.SpecifyKind(uTo, DateTimeKind.Utc)));
-
-            if (!string.IsNullOrWhiteSpace(f.Search))
+            if (!string.IsNullOrEmpty(filter.Search))
             {
-                var pattern = RegexEscapeForMongo(f.Search.Trim());
-                var regex = new BsonRegularExpression(pattern, "i");
-
-                filters.Add(fb.Or(
-                    fb.Regex(x => x.Text, regex)
-                ));
+                var searchTerm = filter.Search.ToLower();
+                query = query.Where(p => p.Text.ToLower().Contains(searchTerm));
             }
 
-            var filter = filters.Count > 0 ? fb.And(filters) : FilterDefinition<PostEntity>.Empty;
+            if (filter.FromDate.HasValue)
+                query = query.Where(p => p.CreateDate >= filter.FromDate.Value);
 
-            var sort = f.SortBy switch
+            if (filter.ToDate.HasValue)
+                query = query.Where(p => p.CreateDate <= filter.ToDate.Value);
+
+            query = filter.SortBy?.ToLower() switch
             {
-                PostSortByEnum.EditDate => f.SortDescending
-                    ? Builders<PostEntity>.Sort.Descending(x => x.EditDate).Descending(x => x.CreateDate)
-                    : Builders<PostEntity>.Sort.Ascending(x => x.EditDate).Ascending(x => x.CreateDate),
-                PostSortByEnum.IdUser => f.SortDescending
-                    ? Builders<PostEntity>.Sort.Descending(x => x.IdUser).Descending(x => x.CreateDate)
-                    : Builders<PostEntity>.Sort.Ascending(x => x.IdUser).Ascending(x => x.CreateDate),
-                _ => f.SortDescending
-                    ? Builders<PostEntity>.Sort.Descending(x => x.CreateDate)
-                    : Builders<PostEntity>.Sort.Ascending(x => x.CreateDate),
+                "editdate" => filter.SortDesc ? query.OrderByDescending(p => p.EditDate) : query.OrderBy(p => p.EditDate),
+                "userid" => filter.SortDesc ? query.OrderByDescending(p => p.UserId) : query.OrderBy(p => p.UserId),
+                _ => filter.SortDesc ? query.OrderByDescending(p => p.CreateDate) : query.OrderBy(p => p.CreateDate)
             };
 
-            var total = await _collection.CountDocumentsAsync(filter, cancellationToken: cancellationToken);
-            var items = await _collection.Find(filter)
-                                    .Sort(sort)
-                                    .Skip(Math.Max(0, f.Offset))
-                                    .Limit(Math.Clamp(f.Limit, 1, 200))
-                                    .ToListAsync(cancellationToken);
+            var totalCount = await query.CountAsync(cancellationToken);
 
-            return (items, total);
+            var posts = await query
+                .Skip((filter.Page - 1) * filter.PageSize)
+                .Take(filter.PageSize)
+                .ToListAsync(cancellationToken);
+
+            return (posts, totalCount);
         }
 
-
-        public async Task<bool> ReplaceAsync(PostEntity entity, CancellationToken cancellationToken = default)
+        public async Task UpdatePostAsync(PostEntity post, JsonPatchDocument<PostEntity> jsonPatchDocument, CancellationToken cancellationToken = default)
         {
-            var res = await _collection.ReplaceOneAsync(x => x.Id == entity.Id, entity, cancellationToken: cancellationToken);
-            await _kafkaProducer.ProduceFileEventAsync("post.updated", new { entity.Id });
-            return res.MatchedCount == 1;
+            jsonPatchDocument.ApplyTo(post);
+            post.EditDate = DateTime.UtcNow;
+            _context.Update(post);
+            await _context.SaveChangesAsync();
+            await _kafkaProducer.ProducePostEventAsync("post.updated", new { post.Id });
         }
 
-        private static string RegexEscapeForMongo(string input)
+        public async Task<CommentEntity?> GetCommentByIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            return Regex.Escape(input);
+            return await _context.Comments.AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+        }
+
+        public async Task<IReadOnlyList<CommentEntity?>> GetCommentListAsync(int postId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Comments.AsNoTracking()
+                .Where(c => c.PostId == postId)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<int> AddCommentAsync(CommentEntity comment, CancellationToken cancellationToken = default)
+        {
+            comment.CreateDate = DateTime.UtcNow;
+            comment.EditDate = DateTime.UtcNow;
+
+            _context.Comments.Add(comment);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            await _kafkaProducer.ProducePostEventAsync("comment.created", new { comment.Id });
+
+            return comment.Id;
+        }
+
+        public async Task<bool> UpdateCommentAsync(CommentEntity comment, CancellationToken cancellationToken = default)
+        {
+            comment.EditDate = DateTime.UtcNow;
+
+            _context.Comments.Update(comment);
+            var result = await _context.SaveChangesAsync(cancellationToken);
+
+            if (result > 0)
+            {
+                await _kafkaProducer.ProducePostEventAsync("comment.updated", new { comment.Id });
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> DeleteCommentAsync(int commentId, CancellationToken cancellationToken = default)
+        {
+            var comment = await _context.Comments.FindAsync(new object[] { commentId }, cancellationToken);
+            if (comment != null)
+            {
+                _context.Comments.Remove(comment);
+                await _context.SaveChangesAsync(cancellationToken);
+                await _kafkaProducer.ProducePostEventAsync("comment.deleted", new { commentId });
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> AddLikeAsync(LikeEntity like, CancellationToken cancellationToken = default)
+        {
+            var existingLike = await _context.Likes
+                .FirstOrDefaultAsync(l => l.UserId == like.UserId &&
+                    ((like.PostId.HasValue && l.PostId == like.PostId) ||
+                     (like.CommentId.HasValue && l.CommentId == like.CommentId)),
+                    cancellationToken);
+
+            if (existingLike != null)
+                return false;
+
+            like.CreateDate = DateTime.UtcNow;
+            _context.Likes.Add(like);
+            var result = await _context.SaveChangesAsync(cancellationToken);
+
+            if (result > 0)
+            {
+                var targetId = like.PostId ?? like.CommentId;
+                await _kafkaProducer.ProducePostEventAsync("like.added", new { like.Id, targetId });
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> RemoveLikeAsync(int likeId, CancellationToken cancellationToken = default)
+        {
+            var like = await _context.Likes.FindAsync(new object[] { likeId }, cancellationToken);
+            if (like != null)
+            {
+                _context.Likes.Remove(like);
+                await _context.SaveChangesAsync(cancellationToken);
+
+                var targetId = like.PostId ?? like.CommentId;
+                await _kafkaProducer.ProducePostEventAsync("like.removed", new { likeId, targetId });
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> RemoveLikeAsync(int userId, int? postId, int? commentId, CancellationToken cancellationToken = default)
+        {
+            var like = await _context.Likes
+                .FirstOrDefaultAsync(l => l.UserId == userId &&
+                    l.PostId == postId && l.CommentId == commentId,
+                    cancellationToken);
+
+            if (like != null)
+            {
+                _context.Likes.Remove(like);
+                await _context.SaveChangesAsync(cancellationToken);
+
+                var targetId = postId ?? commentId;
+                await _kafkaProducer.ProducePostEventAsync("like.removed", new { like.Id, targetId });
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<int> GetLikeCountByPostIdAsync(int postId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Likes.AsNoTracking()
+                .Where(c => c.PostId == postId)
+                .CountAsync(cancellationToken);
         }
     }
 }

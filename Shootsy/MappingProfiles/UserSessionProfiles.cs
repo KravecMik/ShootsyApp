@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Shootsy.Database.Entities;
-using Shootsy.Dtos;
+using Shootsy.Models.Dtos;
 
 namespace Shootsy.MappingProfiles
 {

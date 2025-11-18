@@ -1,126 +1,135 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.JsonPatch;
+﻿using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 using Shootsy.Database;
 using Shootsy.Database.Entities;
-using Shootsy.Dtos;
+using Shootsy.Models.Dtos;
 using Shootsy.Service;
-using System.Linq.Dynamic.Core;
 
 namespace Shootsy.Repositories
 {
     public class UserRepository : IUserRepository
     {
         private readonly ApplicationContext _context;
-        private readonly IMapper _mapper;
         InternalConstants _internalConstants;
         private readonly IKafkaProducerService _kafkaProducer;
 
-        public UserRepository(ApplicationContext context, IMapper mapper, InternalConstants internalConstants, IKafkaProducerService kafkaProducer)
+        public UserRepository(ApplicationContext context, InternalConstants internalConstants, IKafkaProducerService kafkaProducer)
         {
             _context = context;
-            _mapper = mapper;
             _internalConstants = internalConstants;
             _kafkaProducer = kafkaProducer;
         }
 
-        public async Task<int> CreateAsync(UserDto user, CancellationToken cancellationToken = default)
+        public async Task<int> CreateUserAsync(UserEntity user, CancellationToken cancellationToken = default)
         {
-            var userEntity = _mapper.Map<UserEntity>(user);
-            var userEntityEntry = await _context.Users.AddAsync(userEntity, cancellationToken);
-            userEntity.CreateDate = DateTime.UtcNow;
-            userEntity.EditDate = DateTime.UtcNow;
+            var userEntityEntry = await _context.Users.AddAsync(user, cancellationToken);
+            user.CreateDate = DateTime.UtcNow;
+            user.EditDate = DateTime.UtcNow;
 
             await _context.SaveChangesAsync(cancellationToken);
             userEntityEntry.State = EntityState.Detached;
-            await _kafkaProducer.ProduceFileEventAsync("user.created", new { userEntity.Id });
+            await _kafkaProducer.ProduceFileEventAsync("user.created", new { user.Id });
 
-            return userEntity.Id;
+            return user.Id;
         }
 
-        public async Task<UserDto>? GetByIdAsync(int id, CancellationToken cancellationToken)
+        public async Task<UserEntity?> GetUserByIdAsync(int userId, CancellationToken cancellationToken)
         {
-            var userEntity = await _context.Users
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-            if (userEntity is null)
-                return null;
-            return _mapper.Map<UserDto>(userEntity);
+            return await _context.Users.AsNoTracking()
+                .Include(u => u.ProfessionEntity)
+                .Include(u => u.CityEntity)
+                .Include(u => u.GenderEntity)
+                .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
         }
 
-        public async Task<UserDto>? GetByLoginAsync(string Login, CancellationToken cancellationToken)
+        public async Task<UserEntity?> GetUserByLoginAsync(string userLogin, CancellationToken cancellationToken)
         {
-            var userEntity = await _context.Users
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Login == Login, cancellationToken);
-            if (userEntity is null)
-                return null;
-            return _mapper.Map<UserDto>(userEntity);
+            return await _context.Users.AsNoTracking()
+                .Include(u => u.ProfessionEntity)
+                .Include(u => u.CityEntity)
+                .Include(u => u.GenderEntity)
+                .FirstOrDefaultAsync(x => x.Login == userLogin, cancellationToken);
         }
 
-        public async Task<UserDto>? GetUserIdByGuidAsync(Guid guid, CancellationToken cancellationToken)
+        public async Task<UserEntity?> GetUserByGuidAsync(Guid guid, CancellationToken cancellationToken)
         {
-            var sessionEntity = await _context.UserSessions
-                .AsNoTracking()
+            var sessionEntity = await _context.UserSessions.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Guid == guid, cancellationToken);
+
             if (sessionEntity is null)
                 return null;
 
-            var user = await GetByIdAsync(sessionEntity.User, cancellationToken);
-            if (user is null)
-                return null;
-
-            return user;
+            return await GetUserByIdAsync(sessionEntity.UserId, cancellationToken);
         }
 
-        public async Task<IReadOnlyList<UserDto>> GetListAsync(
-            int limit,
-            int offset,
-            string filter,
-            string sort,
-            CancellationToken cancellationToken = default)
+        public async Task<(IReadOnlyList<UserEntity>, int)> GetUsersListAsync(UserFilterDto filter, CancellationToken cancellationToken = default)
         {
-            var query = _context.Users.AsNoTracking().Select(x => x).Where(filter);
-            var userEntities = await query
-                .Skip(offset)
-                .Take(limit)
-                .OrderBy(sort)
-                .ToArrayAsync(cancellationToken);
-            return _mapper.Map<IReadOnlyList<UserDto>>(userEntities);
+            var query = _context.Users
+                   .Include(u => u.ProfessionEntity)
+                   .Include(u => u.CityEntity)
+                   .Include(u => u.GenderEntity)
+                   .AsNoTracking();
+
+            if (!string.IsNullOrEmpty(filter.City))
+                query = query.Where(u => u.CityEntity.CityName.ToLower() == filter.City.ToLower());
+
+            if (!string.IsNullOrEmpty(filter.Profession))
+                query = query.Where(u => u.ProfessionEntity.Name.ToLower() == filter.Profession.ToLower());
+
+            if (!string.IsNullOrEmpty(filter.Category))
+                query = query.Where(u => u.ProfessionEntity.Category.ToLower() == filter.Category.ToLower());
+
+            if (!string.IsNullOrEmpty(filter.Gender))
+                query = query.Where(u => u.GenderEntity.GenderName.ToLower() == filter.Gender.ToLower());
+
+            if (!string.IsNullOrEmpty(filter.Search))
+            {
+                query = query.Where(u =>
+                    u.Firstname.Contains(filter.Search) ||
+                    u.Lastname.Contains(filter.Search) ||
+                    u.Login.Contains(filter.Search));
+            }
+
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var users = await query
+                .OrderBy(u => u.Id)
+                .Skip((filter.Page - 1) * filter.PageSize)
+                .Take(filter.PageSize)
+                .ToListAsync(cancellationToken);
+
+            return (users, totalCount);
         }
 
-        public async Task UpdateAsync(UserDto userDto, JsonPatchDocument<UserDto> jsonPatchDocument, CancellationToken cancellationToken = default)
+        public async Task UpdateUserAsync(UserEntity user, JsonPatchDocument<UserEntity> jsonPatchDocument, CancellationToken cancellationToken = default)
         {
-            jsonPatchDocument.ApplyTo(userDto);
-            var userEntity = _mapper.Map<UserEntity>(userDto);
+            jsonPatchDocument.ApplyTo(user);
 
-            userEntity.EditDate = DateTime.UtcNow;
-            _context.Update(userEntity);
+            user.EditDate = DateTime.UtcNow;
+            _context.Update(user);
             await _context.SaveChangesAsync();
-            await _kafkaProducer.ProduceFileEventAsync("user.updated", new { userDto.Id });
+            await _kafkaProducer.ProduceFileEventAsync("user.updated", new { user.Id });
         }
 
-        public async Task DeleteByIdAsync(int id, CancellationToken cancellationToken)
+        public async Task DeleteUserByIdAsync(int userId, CancellationToken cancellationToken)
         {
-            var userEntityEntry = await _context.Users
-                .Where(x => x.Id == id)
+            var userEntityEntry = await _context.Users.Where(x => x.Id == userId)
                 .ExecuteDeleteAsync();
             await _context.SaveChangesAsync(cancellationToken);
-            await _kafkaProducer.ProduceFileEventAsync("user.deleted", new { id });
+            await _kafkaProducer.ProduceFileEventAsync("user.deleted", new { userId });
         }
 
         public async Task<Guid> CreateSessionAsync(int userId, CancellationToken cancellationToken)
         {
             var sessionEntity = new UserSessionEntity
             {
-                User = userId,
+                UserId = userId,
                 Guid = Guid.NewGuid()
             };
             var sessionEntityEntry = await _context.UserSessions.AddAsync(sessionEntity, cancellationToken);
 
-            sessionEntity.SessionDateFrom = DateTime.UtcNow;
-            sessionEntity.SessionDateTo = DateTime.UtcNow.AddDays(_internalConstants.SessionActivityTime);
+            sessionEntity.StartDate = DateTime.UtcNow;
+            sessionEntity.EndDate = DateTime.UtcNow.AddDays(_internalConstants.SessionActivityTime);
 
             await _context.SaveChangesAsync(cancellationToken);
             sessionEntityEntry.State = EntityState.Detached;
@@ -128,59 +137,33 @@ namespace Shootsy.Repositories
             return sessionEntity.Guid;
         }
 
-        public async Task<Guid>? GetLastSessionAsync(int userId, CancellationToken cancellationToken)
+        public async Task<Guid?> GetLastSessionAsync(int userId, CancellationToken cancellationToken)
         {
-            var query = _context.UserSessions.AsNoTracking().Select(x => x).Where($"user eq {userId}");
-            var sessionEntities = await query
-                .Skip(0)
-                .Take(1)
-                .OrderBy("id desc")
-                .ToArrayAsync(cancellationToken);
-            var session = sessionEntities.FirstOrDefault();
+            var session = await _context.UserSessions.AsNoTracking()
+                .Where(x => x.UserId.Equals(userId))
+                .OrderByDescending(x => x.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+
             if (session is null)
                 return Guid.Empty;
 
             return session.Guid;
         }
 
-        public async Task<UserSessionDto>? GetSessionByGuidAsync(Guid guid, CancellationToken cancellationToken)
+        public async Task<UserSessionEntity?> GetSessionByGuidAsync(Guid guid, CancellationToken cancellationToken)
         {
-            var sessionEntity = await _context.UserSessions
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Guid == guid, cancellationToken);
-
-            if (sessionEntity is null)
-            {
-                return null;
-            }
-            return _mapper.Map<UserSessionDto>(sessionEntity);
+            return await _context.UserSessions.AsNoTracking()
+                .Where(x => x.Guid == guid)
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
-        public async Task<bool> IsAuthorized(string? session, CancellationToken cancellationToken)
+        public async Task<bool> IsAuthorizedAsync(string? session, CancellationToken cancellationToken)
         {
-            if (session is null) return false;
+            if (string.IsNullOrEmpty(session) || !Guid.TryParse(session, out Guid guid))
+                return false;
 
-            var sessionParseRes = Guid.TryParse(session, out Guid guid);
-            if (!sessionParseRes) return false;
-
-            var sessionDto = await GetSessionByGuidAsync(guid, cancellationToken);
-            if (sessionDto is null) return false;
-
-            var isAuthorized = sessionDto.SessionDateTo >= DateTime.UtcNow;
-
-            return isAuthorized;
-        }
-
-        public async Task<bool> IsHaveAccessToIdAsync(string session, int needAccsessToId, CancellationToken cancellationToken)
-        {
-            var guid = Guid.Parse(session);
-            var user = await GetUserIdByGuidAsync(guid, cancellationToken);
-            var isHaveSuperUser = _context.UserRoles
-                .Where(x => x.User == user.Id & x.RoleEntity.isSuperUser == true & x.isActive == true);
-            if (isHaveSuperUser.Count() == 0)
-                if (user.Id != needAccsessToId)
-                    return false;
-            return true;
+            var sessionEntity = await GetSessionByGuidAsync(guid, cancellationToken);
+            return sessionEntity?.EndDate >= DateTime.UtcNow;
         }
     }
 }

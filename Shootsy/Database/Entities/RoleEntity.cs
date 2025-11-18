@@ -6,6 +6,6 @@
         public required string RoleName { get; set; }
         public bool isSuperUser { get; set; }
         public bool isActive { get; set; }
-        public ICollection<UserRoleEntity>? UserRoleEntity { get; init; }
+        public ICollection<UserRoleEntity>? UserRoleEntity { get; init; } = new List<UserRoleEntity>();
     }
 }

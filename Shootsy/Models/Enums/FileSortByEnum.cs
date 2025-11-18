@@ -4,7 +4,7 @@
     {
         CreateDate,
         EditDate,
-        IdUser,
+        UserId,
         FileName,
         Extension
     }

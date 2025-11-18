@@ -18,8 +18,7 @@ public class MinioStorageService : IObjectStorage
             .Build();
     }
 
-    public async Task<(string ObjectKey, string? PublicUrl)> UploadAsync(
-        Stream stream, string objectKey, string contentType, CancellationToken ct = default)
+    public async Task<(string ObjectKey, string? PublicUrl)> UploadAsync(Stream stream, string objectKey, string contentType, CancellationToken ct = default)
     {
         var exists = await _client.BucketExistsAsync(new BucketExistsArgs().WithBucket(_opt.Bucket), ct);
         if (!exists)
@@ -33,7 +32,7 @@ public class MinioStorageService : IObjectStorage
             .WithObjectSize(stream.Length)
             .WithContentType(string.IsNullOrWhiteSpace(contentType) ? "application/octet-stream" : contentType);
 
-        await _client.PutObjectAsync(putArgs, ct);
+        var res = await _client.PutObjectAsync(putArgs, ct);
 
         string? publicUrl = null;
         if (!string.IsNullOrEmpty(_opt.PublicBaseUrl))

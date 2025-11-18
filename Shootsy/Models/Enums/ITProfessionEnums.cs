@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace Shootsy.Enums
+﻿namespace Shootsy.Enums
 {
     public enum ITProfessionEnums
     {
@@ -8,7 +6,7 @@ namespace Shootsy.Enums
         QA = 1,
         AQA = 2,
         ManualQA = 3,
-        TestEngineer = 4,
+        SDET = 4,
         QALead = 5,
 
         // Development
@@ -20,7 +18,6 @@ namespace Shootsy.Enums
         iOSDeveloper = 15,
         AndroidDeveloper = 16,
         GameDeveloper = 17,
-        EmbeddedDeveloper = 18,
 
         // DevOps & Infrastructure
         DevOps = 20,
@@ -94,24 +91,6 @@ namespace Shootsy.Enums
         ContentManager = 121,
         SEOSpecialist = 122,
         ITMarketer = 123,
-
-        // Sales
-        PresaleEngineer = 130,
-        TechnicalSales = 131,
-        AccountManager = 132,
-
-        // Research & Education
-        Researcher = 140,
-        DataResearcher = 141,
-        Lecturer = 142,
-        Mentor = 143,
-
-        // Specialized
-        BlockchainDeveloper = 150,
-        AIEngineer = 151,
-        ComputerVisionEngineer = 152,
-        NLPEngineer = 153,
-        ARVRDeveloper = 154,
 
         // Other
         Other = 999

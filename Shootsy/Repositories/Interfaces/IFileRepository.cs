@@ -1,14 +1,13 @@
-﻿using Microsoft.AspNetCore.JsonPatch;
-using Shootsy.Database.Mongo;
+﻿using Shootsy.Database.Mongo;
 
 namespace Shootsy.Repositories
 {
     public interface IFileRepository
     {
-        Task<string> CreateAsync(FileStorageEntity file, CancellationToken cancellationToken);
-        Task<FileStorageEntity>? GetByIdAsync(string idFile, CancellationToken cancellationToken);
-        Task<(IReadOnlyList<FileStorageEntity>, long total)>? GetListAsync(FileStorageFilterModel f, CancellationToken cancellationToken);
-        Task<bool> ReplaceAsync(FileStorageEntity entity, CancellationToken cancellationToken = default);
-        Task DeleteByIdAsync(string id, CancellationToken cancellationToken);
+        Task<string> CreateFileAsync(FileStorageEntity file, CancellationToken cancellationToken);
+        Task<FileStorageEntity?> GetFileByIdAsync(string idFile, CancellationToken cancellationToken);
+        Task<IReadOnlyList<FileStorageEntity?>> GetFilesListByUserIdAsync(int userId, CancellationToken cancellationToken);
+        Task<bool> UpdateFileAsync(FileStorageEntity entity, CancellationToken cancellationToken);
+        Task<bool> DeleteFileByIdAsync(string id, CancellationToken cancellationToken);
     }
 }

@@ -25,7 +25,7 @@ namespace Shootsy.Security
             if (!Request.Headers.TryGetValue("Session", out var session) || string.IsNullOrWhiteSpace(session))
                 return AuthenticateResult.NoResult();
 
-            var isAuthorized = await _userRepository.IsAuthorized(session!);
+            var isAuthorized = await _userRepository.IsAuthorizedAsync(session!, new CancellationToken());
             if (!isAuthorized)
                 return AuthenticateResult.Fail("Invalid session");
 

@@ -37,7 +37,7 @@ public class KafkaProducerService : IKafkaProducerService, IDisposable
             EventId = Guid.NewGuid(),
             EventType = eventType,
             Timestamp = DateTime.UtcNow,
-            IdUser = userData
+            UserId = userData
         };
 
         return await ProduceAsync(_kafkaSettings.Topics.UserEvents, message);

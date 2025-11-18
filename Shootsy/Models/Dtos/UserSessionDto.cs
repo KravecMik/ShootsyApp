@@ -1,8 +1,6 @@
-﻿using Shootsy.Core.Interfaces;
-
-namespace Shootsy.Dtos
+﻿namespace Shootsy.Models.Dtos
 {
-    public class UserSessionDto : IUserSession
+    public class UserSessionDto
     {
         public int Id { get; init; }
         public int User { get; init; }

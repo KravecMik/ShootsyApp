@@ -7,7 +7,6 @@ using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using Shootsy.Controllers;
 using Shootsy.Database;
-using Shootsy.Database.Mongo;
 using Shootsy.MappingProfiles;
 using Shootsy.Models.Enums;
 using Shootsy.Options;
@@ -65,7 +64,6 @@ namespace Shootsy
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 if (File.Exists(xmlPath))
                     c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
-                c.OperationFilter<JsonPatchExampleFilter>();
                 c.AddSecurityDefinition("Session", new OpenApiSecurityScheme
                 {
                     Name = "Session",
@@ -107,6 +105,7 @@ namespace Shootsy
             services.AddScoped<IPostRepository, PostRepository>();
             services.AddAutoMapper(typeof(UserProfiles));
             services.AddAutoMapper(typeof(UserSessionProfiles));
+            services.AddAutoMapper(typeof(PostProfiles));
             services.AddSingleton<IMapper, Mapper>();
             services.AddSingleton<UserRepository>();
             services.AddSingleton<InternalConstants>();
@@ -115,7 +114,7 @@ namespace Shootsy
             services.AddHttpClient<FilesController>();
             services.AddHttpClient<UsersController>();
             services.AddHttpClient<PostsController>();
-            services.AddHttpClient<MessagesConroller>();
+            services.AddHttpClient<MessagesController>();
             services.AddSingleton<Mapper>();
             services.Configure<KafkaSettings>(_configuration.GetSection("Kafka"));
             services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
@@ -133,7 +132,6 @@ namespace Shootsy
                         .AllowCredentials()
                         .AllowAnyHeader());
             });
-
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -145,7 +143,7 @@ namespace Shootsy
             app.UseCors("CorsPolicy");
             app.UseRouting();
             app.UseAuthentication();
-            app.UseAuthorization();    
+            app.UseAuthorization();
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
