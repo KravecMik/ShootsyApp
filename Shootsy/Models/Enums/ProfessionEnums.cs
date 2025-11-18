@@ -1,6 +1,6 @@
 ﻿namespace Shootsy.Enums
 {
-    public enum ITProfessionEnums
+    public enum ProfessionEnums
     {
         // Quality Assurance
         QA = 1,

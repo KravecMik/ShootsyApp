@@ -47,7 +47,7 @@ namespace Shootsy.Models.User
             Login = "stalker",
             Gender = "Мужчина",
             City = "Новосибирск",
-            Profession = ITProfessionEnums.QA.ToString(),
+            Profession = ProfessionEnums.QA.ToString(),
             Category = "Quality Assurance",
             Firstname = "Олег",
             Lastname = "Пронин",
@@ -59,11 +59,11 @@ namespace Shootsy.Models.User
     {
         public IEnumerable<UserDto> GetExamples() => new[]
         {
-        new UserDto { Id = 74, CreateDate = DateTime.UtcNow.AddDays(-3), EditDate = DateTime.UtcNow.AddDays(-2), Login = "stalkerNoob228", Gender = "Мужчина", City = "Новосибирск", Firstname = "Олег", Lastname = "Прокин", Profession = ITProfessionEnums.AQA.ToString(), Category = "Quality Assurance"},
-        new UserDto { Id = 762, CreateDate = DateTime.UtcNow.AddDays(-67), EditDate = DateTime.UtcNow.AddDays(-6), Login = "Chelkastij", Gender = "Женщина", City = "Москва", Firstname = "Оля", Profession = ITProfessionEnums.AndroidDeveloper.ToString(), Category = "Development"},
-        new UserDto { Id = 978, CreateDate = DateTime.UtcNow.AddDays(-6), EditDate = DateTime.UtcNow.AddDays(-2), Login = "Shabra", Gender = "Мужчина", City = "Барнаул", Firstname = "Гена", Description = "Люблю шарпы и маму", Profession = ITProfessionEnums.BIAnalyst.ToString(), Category = "Data"},
-        new UserDto { Id = 123, CreateDate = DateTime.UtcNow.AddDays(-27), EditDate = DateTime.UtcNow.AddDays(-12), Login = "Kitaez", Gender = "Женщина", City = "Новосибирск", Firstname = "Вика", Profession = ITProfessionEnums.CloudEngineer.ToString(), Category = "DevOps & Infrastructure"},
-        new UserDto { Id = 1, CreateDate = DateTime.UtcNow.AddDays(-99), EditDate = DateTime.UtcNow.AddDays(-76), Login = "Biliboba28", Gender = "Мужчина", City = "Москва", Firstname = "Анжела", Profession = ITProfessionEnums.DevOps.ToString(), Category = "DevOps & Infrastructure"}
+        new UserDto { Id = 74, CreateDate = DateTime.UtcNow.AddDays(-3), EditDate = DateTime.UtcNow.AddDays(-2), Login = "stalkerNoob228", Gender = "Мужчина", City = "Новосибирск", Firstname = "Олег", Lastname = "Прокин", Profession = ProfessionEnums.AQA.ToString(), Category = "Quality Assurance"},
+        new UserDto { Id = 762, CreateDate = DateTime.UtcNow.AddDays(-67), EditDate = DateTime.UtcNow.AddDays(-6), Login = "Chelkastij", Gender = "Женщина", City = "Москва", Firstname = "Оля", Profession = ProfessionEnums.AndroidDeveloper.ToString(), Category = "Development"},
+        new UserDto { Id = 978, CreateDate = DateTime.UtcNow.AddDays(-6), EditDate = DateTime.UtcNow.AddDays(-2), Login = "Shabra", Gender = "Мужчина", City = "Барнаул", Firstname = "Гена", Description = "Люблю шарпы и маму", Profession = ProfessionEnums.BIAnalyst.ToString(), Category = "Data"},
+        new UserDto { Id = 123, CreateDate = DateTime.UtcNow.AddDays(-27), EditDate = DateTime.UtcNow.AddDays(-12), Login = "Kitaez", Gender = "Женщина", City = "Новосибирск", Firstname = "Вика", Profession = ProfessionEnums.CloudEngineer.ToString(), Category = "DevOps & Infrastructure"},
+        new UserDto { Id = 1, CreateDate = DateTime.UtcNow.AddDays(-99), EditDate = DateTime.UtcNow.AddDays(-76), Login = "Biliboba28", Gender = "Мужчина", City = "Москва", Firstname = "Анжела", Profession = ProfessionEnums.DevOps.ToString(), Category = "DevOps & Infrastructure"}
         };
     }
 }

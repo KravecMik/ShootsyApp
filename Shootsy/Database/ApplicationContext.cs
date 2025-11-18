@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Shootsy.Database.Configurations;
 using Shootsy.Database.Entities;
 using System.Reflection;
 
@@ -16,7 +15,7 @@ namespace Shootsy.Database
         public DbSet<UserSessionEntity> UserSessions { get; set; }
         public DbSet<CityEntity> Cities { get; set; }
         public DbSet<GenderEntity> Genders { get; set; }
-        public DbSet<ProfessionEntity> ITProfessions { get; set; }
+        public DbSet<ProfessionEntity> Professions { get; set; }
         public DbSet<RoleEntity> Roles { get; set; }
         public DbSet<UserRoleEntity> UserRoles { get; set; }
 
