@@ -2,18 +2,18 @@
 {
     public class UserEntity
     {
-        public int Id { get; init; }
+        public int Id { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime EditDate { get; set; }
         public required string Login { get; set; }
-        public required byte[] Password { get; init; }
-        public int GenderId { get; init; }
-        public int CityId { get; init; }
-        public required string Firstname { get; init; }
-        public string? Lastname { get; init; }
-        public string? Description { get; init; }
-        public int ProfessionId { get; init; }
-        public bool? IsDeleted { get; init; } = false;
+        public required byte[] Password { get; set; }
+        public int GenderId { get; set; }
+        public int CityId { get; set; }
+        public required string Firstname { get; set; }
+        public string? Lastname { get; set; }
+        public string? Description { get; set; }
+        public int ProfessionId { get; set; }
+        public bool? IsDeleted { get; set; } = false;
 
         public ICollection<UserSessionEntity>? UserSessionEntity { get; init; } = new List<UserSessionEntity>();
         public CityEntity? CityEntity { get; init; }

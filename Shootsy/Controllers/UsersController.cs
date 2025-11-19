@@ -8,7 +8,7 @@ using Shootsy.Models;
 using Shootsy.Models.Dtos;
 using Shootsy.Models.User;
 using Shootsy.Repositories;
-using Shootsy.Security;
+using Shootsy.Service;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
 
@@ -20,11 +20,13 @@ namespace Shootsy.Controllers
     {
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
+        private readonly IPasswordService _passwordService;
 
-        public UsersController(IUserRepository userRepository, IMapper mapper)
+        public UsersController(IUserRepository userRepository, IMapper mapper, IPasswordService passwordService)
         {
             _userRepository = userRepository;
             _mapper = mapper;
+            _passwordService = passwordService;
         }
 
         [AllowAnonymous]
@@ -44,6 +46,8 @@ namespace Shootsy.Controllers
                 return ValidationProblem();
             }
 
+            user.Password = _passwordService.EncryptString(request.Password, request.Login);
+
             var id = await _userRepository.CreateUserAsync(user, cancellationToken);
             var session = await _userRepository.CreateSessionAsync(id, cancellationToken);
 
@@ -60,10 +64,10 @@ namespace Shootsy.Controllers
         public async Task<IActionResult> SignInAsync([FromBody, BindRequired] SignInRequestModel request, CancellationToken cancellationToken = default)
         {
             var user = await _userRepository.GetUserByLoginAsync(request.Login, cancellationToken);
-            if (user is null) 
+            if (user is null)
                 return NotFound();
 
-            var passwordVerification = request.Password.IsPasswordValid(request.Login, user.Password);
+            var passwordVerification = _passwordService.VerifyPassword(request.Password, request.Login, user.Password);
             if (!passwordVerification)
             {
                 ModelState.AddModelError("detail", "Неверно указан логин или пароль пользователя");
@@ -86,7 +90,7 @@ namespace Shootsy.Controllers
 
             var response = new PagedResponse<UserDto>
             {
-                Data = users, 
+                Data = users,
                 Page = filter.Page,
                 PageSize = filter.PageSize,
                 TotalCount = totalCount,

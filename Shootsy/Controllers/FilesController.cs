@@ -66,7 +66,7 @@ namespace Shootsy.Controllers
         [Authorize]
         [HttpGet("{fileId}")]
         [SwaggerOperation(Summary = "Получение карточки файла по идентификатору")]
-        [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(GetFileByIdResponseModel))]
+        [SwaggerResponse(statusCode: 200, description: "OK")]
         [SwaggerResponseExample(200, typeof(GetFileByIdResponseExampleModel))]
         public async Task<IActionResult> GetFileByIdAsync([FromRoute] string fileId, CancellationToken cancellationToken = default)
         {
@@ -112,12 +112,12 @@ namespace Shootsy.Controllers
                         return ValidationProblem();
                     }
                 }
-                if (item.path.ToLower().Contains("ContentPath"))
+                if (item.path.ToLower().Contains("contentpath"))
                 {
                     ModelState.AddModelError("ContentPath", "Данное поле редактировать запрещено");
                     return ValidationProblem();
                 }
-                if (item.path.ToLower().Contains("ObjectKey"))
+                if (item.path.ToLower().Contains("objectkey"))
                 {
                     ModelState.AddModelError("ObjectKey", "Данное поле редактировать запрещено");
                     return ValidationProblem();
@@ -125,8 +125,6 @@ namespace Shootsy.Controllers
             }
 
             patch.ApplyTo(entity, ModelState);
-            if (!ModelState.IsValid)
-                return ValidationProblem(ModelState);
 
             entity.EditDate = DateTime.UtcNow;
 
@@ -162,7 +160,7 @@ namespace Shootsy.Controllers
         [Authorize]
         [HttpGet("linked-user/{userId:int}")]
         [SwaggerOperation(Summary = "Получить список файлов пользователя")]
-        [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(IEnumerable<GetFileByIdResponseModel>))]
+        [SwaggerResponse(statusCode: 200, description: "OK")]
         [SwaggerResponseExample(200, typeof(GetFileListResponseExampleModel))]
         public async Task<IActionResult> GetFilesListByUserIdAsync([FromRoute] int userId, CancellationToken cancellationToken = default)
         {

@@ -103,6 +103,7 @@ namespace Shootsy
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IFileRepository, FileRepository>();
             services.AddScoped<IPostRepository, PostRepository>();
+            services.AddScoped<IPasswordService, PasswordService>();
             services.AddAutoMapper(typeof(UserProfiles));
             services.AddAutoMapper(typeof(UserSessionProfiles));
             services.AddAutoMapper(typeof(PostProfiles));

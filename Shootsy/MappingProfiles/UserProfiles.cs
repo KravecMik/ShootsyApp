@@ -2,7 +2,6 @@
 using Shootsy.Database.Entities;
 using Shootsy.Models.Dtos;
 using Shootsy.Models.User;
-using Shootsy.Security;
 
 namespace Shootsy.MappingProfiles
 {
@@ -21,12 +20,11 @@ namespace Shootsy.MappingProfiles
                        opt => opt.MapFrom(src => src.GenderEntity.GenderName));
 
             CreateMap<SignUpRequestModel, UserEntity>()
-                .ForMember(dest => dest.Password, opt => opt.MapFrom(
-                    src => src.Password.EncryptString(src.Login)))
+                .ForMember(dest => dest.Password, opt => opt.Ignore())
                 .ForMember(dest => dest.CityId, opt => opt.MapFrom(
                     src => src.City))
                 .ForMember(dest => dest.ProfessionId, opt => opt.MapFrom(
-                    src => src.ITProfession))
+                    src => src.Profession))
                 .ForMember(dest => dest.GenderId, opt => opt.MapFrom(
                     src => src.Gender));
         }

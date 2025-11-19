@@ -33,7 +33,7 @@ namespace Shootsy.Models.User
             Description = "Это мое описание 54346",
             Gender = 1,
             City = 2,
-            ITProfession = 1
+            Profession = 1
         };
     }
 

@@ -30,6 +30,6 @@ namespace Shootsy.Models.User
         public required int City { get; init; }
 
         [Required(ErrorMessage = "Укажите IT профессию")]
-        public required int ITProfession { get; init; }
+        public required int Profession { get; init; }
     }
 }
