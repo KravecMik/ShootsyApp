@@ -58,7 +58,7 @@ ShootsyApp - это open-source dating приложение, созданное 
 * "BootstrapServers": "kafka:9092"
 * "SecurityProtocol": "PLAINTEXT"
 
-## Креды к Minio сможете узнать в файле проекта `appsettings.json`
+### Креды к Minio сможете узнать в файле проекта `appsettings.json`
 
 Контакты для связи:
 * Telegram: [@kravec_tv](https://t.me/kravectv)
