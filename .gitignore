@@ -10,3 +10,5 @@
 /obj
 /Shootsy/bin/Release/net8.0/runtimes/win/lib/netstandard2.0/System.Security.Cryptography.ProtectedData.dll
 /Shootsy/bin/Release/net8.0
+/Tests/bin/Debug/net8.0
+/Tests/obj
