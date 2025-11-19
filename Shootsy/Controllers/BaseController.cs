@@ -12,6 +12,22 @@ namespace Shootsy.Controllers
             return await userRepository.GetUserByGuidAsync(sessionGuid, cancellationToken);
         }
 
+        protected async Task<(bool HasAccess, IActionResult? ErrorResult)> CheckAccessByUserIdAsync(int targetUserId, IUserRepository userRepository, CancellationToken cancellationToken = default)
+        {
+            var currentUser = await GetCurrentUserIdAsync(userRepository, cancellationToken);
+            if (currentUser == null)
+            {
+                return (false, Unauthorized("Пользователь не найден"));
+            }
+
+            if (targetUserId != currentUser.Id)
+            {
+                return (false, Forbid());
+            }
+
+            return (true, null);
+        }
+
         protected Guid GetSessionGuidFromHeaders()
         {
             if (!Request.Headers.TryGetValue("Session", out var sessionHeader))

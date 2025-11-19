@@ -3,16 +3,16 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Hosting;
 using Shootsy.Database.Entities;
-using Shootsy.Models.Dtos;
 using Shootsy.Models;
+using Shootsy.Models.Dtos;
 using Shootsy.Models.Post;
 using Shootsy.Models.Post.Swagger;
 using Shootsy.Repositories;
 using Shootsy.Repositories.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
-using System.ComponentModel.Design;
 
 namespace Shootsy.Controllers
 {
@@ -98,6 +98,12 @@ namespace Shootsy.Controllers
             if (post is null)
                 return NotFound("Публикация по указанному идентификатору не найдена");
 
+            var (hasAccess, errorResult) = await CheckAccessByUserIdAsync(post.UserId, _userRepository, cancellationToken);
+            if (!hasAccess)
+            {
+                return errorResult!;
+            }
+
             foreach (var operation in patch.Operations)
             {
                 if (operation.path.Equals("/UserId", StringComparison.OrdinalIgnoreCase))
@@ -117,6 +123,16 @@ namespace Shootsy.Controllers
         [SwaggerResponse(statusCode: 204, description: "NoContent")]
         public async Task<IActionResult> DeletePostByIdAsync([FromRoute] int postId, CancellationToken cancellationToken = default)
         {
+            var post = await _postRepository.GetPostByIdAsync(postId, cancellationToken);
+            if (post is null)
+                return NotFound("Публикация по указанному идентификатору не найдена");
+
+            var (hasAccess, errorResult) = await CheckAccessByUserIdAsync(post.UserId, _userRepository, cancellationToken);
+            if (!hasAccess)
+            {
+                return errorResult!;
+            }
+
             await _postRepository.DeletePostByIdAsync(postId, cancellationToken);
             return NoContent();
         }
@@ -125,7 +141,7 @@ namespace Shootsy.Controllers
         [HttpPost("{postId:int}/comments")]
         [SwaggerOperation(Summary = "Добавить комментарий к публикации")]
         [SwaggerResponse(statusCode: 201, description: "Created", type: typeof(int))]
-        public async Task<IActionResult> AddCommentAsync([FromRoute] int postId, [FromBody] AddCommentRequestModel request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> CreateCommentAsync([FromRoute] int postId, [FromBody] AddCommentRequestModel request, CancellationToken cancellationToken = default)
         {
             var post = await _postRepository.GetPostByIdAsync(postId, cancellationToken);
             if (post is null)
@@ -139,7 +155,7 @@ namespace Shootsy.Controllers
                 PostId = postId
             };
 
-            var commentId = await _postRepository.AddCommentAsync(comment, cancellationToken);
+            var commentId = await _postRepository.CreateCommentAsync(comment, cancellationToken);
             return Created(string.Empty, new { commentId });
         }
 
@@ -172,7 +188,7 @@ namespace Shootsy.Controllers
         [HttpPost("{postId:int}/comments/{commentId:int}")]
         [SwaggerOperation(Summary = "Добавить комментарий на другой комментарий к публикации")]
         [SwaggerResponse(statusCode: 201, description: "Created", type: typeof(int))]
-        public async Task<IActionResult> AddCommentReplyAsync([FromRoute] int postId, [FromRoute] int commentId, [FromBody] AddCommentRequestModel request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> CreateCommentReplyAsync([FromRoute] int postId, [FromRoute] int commentId, [FromBody] AddCommentRequestModel request, CancellationToken cancellationToken = default)
         {
             var post = await _postRepository.GetPostByIdAsync(postId, cancellationToken);
             if (post is null)
@@ -187,7 +203,7 @@ namespace Shootsy.Controllers
                 ParentCommentId = commentId
             };
 
-            var answerCommentId = await _postRepository.AddCommentAsync(comment, cancellationToken);
+            var answerCommentId = await _postRepository.CreateCommentAsync(comment, cancellationToken);
             return Created(string.Empty, new { answerCommentId });
         }
 
@@ -201,6 +217,12 @@ namespace Shootsy.Controllers
             var comment = await _postRepository.GetCommentByIdAsync(commentId, cancellationToken);
             if (comment is null || comment.PostId != postId)
                 return NotFound("Комментарий не найден");
+
+            var (hasAccess, errorResult) = await CheckAccessByUserIdAsync(comment.UserId, _userRepository, cancellationToken);
+            if (!hasAccess)
+            {
+                return errorResult!;
+            }
 
             foreach (var operation in patch.Operations)
             {
@@ -247,6 +269,12 @@ namespace Shootsy.Controllers
             if (comment is null || comment.PostId != postId)
                 return NotFound("Комментарий не найден");
 
+            var (hasAccess, errorResult) = await CheckAccessByUserIdAsync(comment.UserId, _userRepository, cancellationToken);
+            if (!hasAccess)
+            {
+                return errorResult!;
+            }
+
             var deleted = await _postRepository.DeleteCommentAsync(commentId, cancellationToken);
             if (!deleted)
                 return StatusCode(500, "Не удалось удалить комментарий");
@@ -258,7 +286,7 @@ namespace Shootsy.Controllers
         [HttpPost("{postId:int}/likes")]
         [SwaggerOperation(Summary = "Добавить лайк к публикации")]
         [SwaggerResponse(statusCode: 201, description: "Created", type: typeof(int))]
-        public async Task<IActionResult> AddPostLikeAsync([FromRoute] int postId, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> CreatePostLikeAsync([FromRoute] int postId, CancellationToken cancellationToken = default)
         {
             var post = await _postRepository.GetPostByIdAsync(postId, cancellationToken);
             if (post is null)
@@ -272,7 +300,7 @@ namespace Shootsy.Controllers
                 PostId = postId
             };
 
-            var added = await _postRepository.AddLikeAsync(like, cancellationToken);
+            var added = await _postRepository.CreateLikeAsync(like, cancellationToken);
             if (!added)
             {
                 return BadRequest("Лайк уже был добавлен данным пользователем");
@@ -285,7 +313,7 @@ namespace Shootsy.Controllers
         [HttpPost("{postId:int}/comments/{commentId:int}/likes")]
         [SwaggerOperation(Summary = "Добавить лайк к комментарию")]
         [SwaggerResponse(statusCode: 201, description: "Created", type: typeof(int))]
-        public async Task<IActionResult> AddCommentLikeAsync([FromRoute] int postId, [FromRoute] int commentId, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> CreateCommentLikeAsync([FromRoute] int postId, [FromRoute] int commentId, CancellationToken cancellationToken = default)
         {
             var comment = await _postRepository.GetCommentByIdAsync(commentId, cancellationToken);
             if (comment is null || comment.PostId != postId)
@@ -299,7 +327,7 @@ namespace Shootsy.Controllers
                 CommentId = commentId
             };
 
-            var added = await _postRepository.AddLikeAsync(like, cancellationToken);
+            var added = await _postRepository.CreateLikeAsync(like, cancellationToken);
             if (!added)
             {
                 return BadRequest("Лайк уже был добавлен данным пользователем");

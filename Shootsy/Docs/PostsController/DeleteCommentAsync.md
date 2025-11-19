@@ -1,4 +1,4 @@
-﻿# DELETE /Posts/[postId]/comments/[commentId]
+﻿# Method :: [DELETE]/Posts/[postId]/comments/[commentId]
 
 **Удалить комментарий**
 
@@ -19,6 +19,7 @@
 | 204 NoContent | Комментарий успешно удален |
 | 404 NotFound | Комментарий не найден |
 | 401 Unauthorized | Пользователь не авторизован |
+|403 Forbidden | Доступ запрещен |
 | 500 Internal Server Error | Ошибка при удалении |
 
 [← Назад к контроллеру](PostsController.md)

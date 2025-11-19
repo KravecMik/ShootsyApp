@@ -1,4 +1,4 @@
-﻿# POST /Files
+﻿# Method :: [POST]/Files
 
 **Создание карточки файла**
 

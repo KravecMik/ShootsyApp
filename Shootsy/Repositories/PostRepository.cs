@@ -111,7 +111,7 @@ namespace Shootsy.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<int> AddCommentAsync(CommentEntity comment, CancellationToken cancellationToken = default)
+        public async Task<int> CreateCommentAsync(CommentEntity comment, CancellationToken cancellationToken = default)
         {
             comment.CreateDate = DateTime.UtcNow;
             comment.EditDate = DateTime.UtcNow;
@@ -154,7 +154,7 @@ namespace Shootsy.Repositories
             return false;
         }
 
-        public async Task<bool> AddLikeAsync(LikeEntity like, CancellationToken cancellationToken = default)
+        public async Task<bool> CreateLikeAsync(LikeEntity like, CancellationToken cancellationToken = default)
         {
             var existingLike = await _context.Likes
                 .FirstOrDefaultAsync(l => l.UserId == like.UserId &&

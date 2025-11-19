@@ -71,7 +71,7 @@ namespace Shootsy.Controllers
         public async Task<IActionResult> GetFileByIdAsync([FromRoute] string fileId, CancellationToken cancellationToken = default)
         {
             var file = await _fileRepository.GetFileByIdAsync(fileId, cancellationToken);
-            if (file is null) 
+            if (file is null)
                 return NotFound();
             return Ok(file);
         }
@@ -83,9 +83,16 @@ namespace Shootsy.Controllers
         [SwaggerResponse(statusCode: 204, description: "NoContent")]
         public async Task<IActionResult> UpdateFileAsync([FromRoute] string fileId, [FromBody] JsonPatchDocument<FileStorageEntity> patch, CancellationToken cancellationToken = default)
         {
+
             var entity = await _fileRepository.GetFileByIdAsync(fileId, cancellationToken);
-            if (entity is null) 
+            if (entity is null)
                 return NotFound();
+
+            var (hasAccess, errorResult) = await CheckAccessByUserIdAsync(entity.UserId, _userRepository, cancellationToken);
+            if (!hasAccess)
+            {
+                return errorResult!;
+            }
 
             var targetPath = patch.Operations.Select(x => x).ToList();
 
@@ -118,7 +125,7 @@ namespace Shootsy.Controllers
             }
 
             patch.ApplyTo(entity, ModelState);
-            if (!ModelState.IsValid) 
+            if (!ModelState.IsValid)
                 return ValidationProblem(ModelState);
 
             entity.EditDate = DateTime.UtcNow;
@@ -137,8 +144,14 @@ namespace Shootsy.Controllers
         public async Task<IActionResult> DeleteFileByIdAsync([FromRoute] string fileId, CancellationToken cancellationToken = default)
         {
             var file = await _fileRepository.GetFileByIdAsync(fileId, cancellationToken);
-            if (file is null) 
+            if (file is null)
                 return NotFound();
+
+            var (hasAccess, errorResult) = await CheckAccessByUserIdAsync(file.UserId, _userRepository, cancellationToken);
+            if (!hasAccess)
+            {
+                return errorResult!;
+            }
 
             await _objectStorage.DeleteAsync(file.FileInfo.ObjectKey, cancellationToken);
             await _fileRepository.DeleteFileByIdAsync(fileId, cancellationToken);
@@ -166,6 +179,12 @@ namespace Shootsy.Controllers
             var user = await _userRepository.GetUserByIdAsync(userId, cancellationToken);
             if (user is null)
                 return NotFound();
+
+            var (hasAccess, errorResult) = await CheckAccessByUserIdAsync(user.Id, _userRepository, cancellationToken);
+            if (!hasAccess)
+            {
+                return errorResult!;
+            }
 
             var userFilesList = await _fileRepository.GetFilesListByUserIdAsync(userId, cancellationToken);
 

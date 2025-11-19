@@ -9,14 +9,14 @@
 
 ## Методы API
 
-| Метод | Endpoint | Описание | Аутентификация |
-|-------|----------|-----------|----------------|
-| POST | [CreateFileAsync](CreateFileAsync.md) | Создание карточки файла | Требуется |
-| GET | [GetFileByIdAsync](GetFileByIdAsync.md) | Получение карточки файла по ID | Требуется |
-| PATCH | [UpdateFileAsync](UpdateFileAsync.md) | Обновление карточки файла | Требуется |
-| DELETE | [DeleteFileByIdAsync](DeleteFileByIdAsync.md) | Удаление файла по ID | Требуется |
-| GET | [GetFilesListByUserIdAsync](GetFilesListByUserIdAsync.md) | Получить список файлов пользователя | Требуется |
-| DELETE | [DeleteUserFilesAsync](DeleteUserFilesAsync.md) | Удалить все файлы пользователя | Требуется |
+| Метод | Endpoint | Описание | 
+|-------|----------|-----------|
+| POST | [CreateFileAsync](CreateFileAsync.md) | Создание карточки файла | 
+| GET | [GetFileByIdAsync](GetFileByIdAsync.md) | Получение карточки файла по ID | 
+| PATCH | [UpdateFileAsync](UpdateFileAsync.md) | Обновление карточки файла |
+| DELETE | [DeleteFileByIdAsync](DeleteFileByIdAsync.md) | Удаление файла по ID |
+| GET | [GetFilesListByUserIdAsync](GetFilesListByUserIdAsync.md) | Получить список файлов пользователя |
+| DELETE | [DeleteUserFilesAsync](DeleteUserFilesAsync.md) | Удалить все файлы пользователя |
 
 ## Технологии
 - **Хранилище:** MinIO (S3-совместимое объектное хранилище)

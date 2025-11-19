@@ -1,4 +1,4 @@
-﻿# GET /Posts/[postId]/comments/[commentId]
+﻿# Method :: [GET]/Posts/[postId]/comments/[commentId]
 
 **Получить комментарий по идентификатору**
 

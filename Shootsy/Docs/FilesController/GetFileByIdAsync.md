@@ -1,4 +1,4 @@
-﻿# GET /Files/[fileId]
+﻿# Method :: [GET]/Files/[fileId]
 
 **Получение карточки файла по идентификатору**
 

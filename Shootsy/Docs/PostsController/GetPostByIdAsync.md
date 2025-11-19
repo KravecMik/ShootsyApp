@@ -1,4 +1,4 @@
-﻿# GET /Posts/[postId]
+﻿# Method :: [GET]/Posts/[postId]
 
 **Получение карточки публикации по идентификатору**
 

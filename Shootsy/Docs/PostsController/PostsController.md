@@ -5,41 +5,35 @@
 **Базовый URL:** `/Posts`
 
 ### Аутентификация
-Все методы требуют авторизации (`[Authorize]`)
+Все методы требуют авторизации
 
 ## Методы API
 
 ### Публикации
-| Метод | Endpoint | Описание | Аутентификация |
-|-------|----------|-----------|----------------|
-| POST | [/](create-post.md) | Создать публикацию | Требуется |
-| GET | [/{postId}](get-post-by-id.md) | Получить публикацию по ID | Требуется |
-| GET | [/?](get-posts.md) | Получить список публикаций | Требуется |
-| PATCH | [/{postId}](update-post.md) | Обновить публикацию | Требуется |
-| DELETE | [/{postId}](delete-post.md) | Удалить публикацию | Требуется |
+| Метод | Endpoint | Описание | 
+|-------|----------|-----------|
+| POST | [CreatePostAsync](CreatePostAsync.md) | Создать публикацию |
+| GET | [GetPostByIdAsync](GetPostByIdAsync.md) | Получить публикацию по ID | 
+| GET | [GetPostsAsync](GetPostsAsync.md) | Получить список публикаций |
+| PATCH | [UpdatePostAsync](UpdatePostAsync.md) | Обновить публикацию |
+| DELETE | [DeletePostByIdAsync](DeletePostByIdAsync.md) | Удалить публикацию |
 
 ### Комментарии
-| Метод | Endpoint | Описание | Аутентификация |
-|-------|----------|-----------|----------------|
-| POST | [/{postId}/comments](add-comment.md) | Добавить комментарий к публикации | Требуется |
-| GET | [/{postId}/comments](get-comments.md) | Получить все комментарии к посту | Требуется |
-| GET | [/{postId}/comments/{commentId}](get-comment.md) | Получить комментарий по ID | Требуется |
-| POST | [/{postId}/comments/{commentId}](add-comment-reply.md) | Ответить на комментарий | Требуется |
-| PATCH | [/{postId}/comments/{commentId}](update-comment.md) | Обновить комментарий | Требуется |
-| DELETE | [/{postId}/comments/{commentId}](delete-comment.md) | Удалить комментарий | Требуется |
+| Метод | Endpoint | Описание | 
+|-------|----------|-----------|
+| POST | [CreateCommentAsync](CreateCommentAsync.md) | Добавить комментарий к публикации |
+| GET | [GetCommentsByPostIdAsync](GetCommentsByPostIdAsync.md) | Получить все комментарии к посту |
+| GET | [GetCommentByIdAsync](GetCommentByIdAsync.md) | Получить комментарий по ID |
+| POST | [CreateCommentReplyAsync](CreateCommentReplyAsync.md) | Ответить на комментарий |
+| PATCH | [UpdateCommentAsync](UpdateCommentAsync.md) | Обновить комментарий |
+| DELETE | [DeleteCommentAsync](DeleteCommentAsync.md) | Удалить комментарий | 
 
 ### Лайки
-| Метод | Endpoint | Описание | Аутентификация |
-|-------|----------|-----------|----------------|
-| POST | [/{postId}/likes](add-post-like.md) | Добавить лайк к публикации | Требуется |
-| POST | [/{postId}/comments/{commentId}/likes](add-comment-like.md) | Добавить лайк к комментарию | Требуется |
-| GET | [/{postId}/likes/count](get-likes-count.md) | Получить количество лайков к посту | Требуется |
-
-## Модели данных
-- [CreatePostRequestModel](../models/CreatePostRequestModel.md)
-- [PostDto](../models/PostDto.md)
-- [CommentDto](../models/CommentDto.md)
-- [AddCommentRequestModel](../models/AddCommentRequestModel.md)
+| Метод | Endpoint | Описание |
+|-------|----------|-----------|
+| POST | [CreatePostLikeAsync](CreatePostLikeAsync.md) | Добавить лайк к публикации | 
+| POST | [CreateCommentLikeAsync](CreateCommentLikeAsync.md) | Добавить лайк к комментарию | 
+| GET | [GetLikeCountByPostIdAsync](GetLikeCountByPostIdAsync.md) | Получить количество лайков к посту |
 
 ### Особенности
 - Поддержка древовидных комментариев (ответы на комментарии)

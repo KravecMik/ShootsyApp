@@ -1,4 +1,4 @@
-﻿# GET /Files/linked-user/[userId]
+﻿# Method :: [GET]/Files/linked-user/[userId]
 
 **Получить список файлов пользователя**
 

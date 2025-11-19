@@ -1,4 +1,4 @@
-﻿# GET /Posts/[postId]/likes/count
+﻿# Method :: [GET]/Posts/[postId]/likes/count
 
 **Получить количество лайков к посту**
 

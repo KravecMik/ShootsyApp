@@ -1,4 +1,4 @@
-﻿# PATCH /Posts/[postId]/comments/[commentId]
+﻿# Method :: [PATCH]/Posts/[postId]/comments/[commentId]
 
 **Обновить комментарий**
 
@@ -27,6 +27,7 @@
 | 404 NotFound | Комментарий не найден |
 | 400 BadRequest | Ошибка валидации |
 | 401 Unauthorized | Пользователь не авторизован |
+|403 Forbidden | Доступ запрещен |
 | 500 Internal Server Error | Ошибка при сохранении |
 
 [← Назад к контроллеру](PostsController.md)

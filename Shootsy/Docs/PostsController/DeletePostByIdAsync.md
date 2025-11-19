@@ -1,4 +1,4 @@
-﻿# DELETE /Posts/[postId]
+﻿# Method :: [DELETE]/Posts/[postId]
 
 **Удалить публикацию по идентификатору**
 
@@ -18,5 +18,6 @@
 | 204 No Content | Публикация успешно удалена |
 | 404 Not Found | Публикация не найдена |
 | 401 Unauthorized | Пользователь не авторизован |
+|403 Forbidden | Доступ запрещен |
 
 [← Назад к контроллеру](PostsController.md)

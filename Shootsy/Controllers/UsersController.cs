@@ -16,7 +16,7 @@ namespace Shootsy.Controllers
 {
     [ApiController]
     [Route("Users")]
-    public class UsersController : ControllerBase
+    public class UsersController : BaseController
     {
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
@@ -117,9 +117,15 @@ namespace Shootsy.Controllers
         [SwaggerResponse(statusCode: 204, description: "NoContent")]
         public async Task<IActionResult> UpdateUserAsync([FromRoute] int userId, [FromBody] JsonPatchDocument<UserEntity> patch, CancellationToken cancellationToken = default)
         {
-            var currentUser = await _userRepository.GetUserByIdAsync(userId, cancellationToken);
-            if (currentUser is null)
+            var user = await _userRepository.GetUserByIdAsync(userId, cancellationToken);
+            if (user is null)
                 return NotFound("Пользователь по указанному идентификатору не найден");
+
+            var (hasAccess, errorResult) = await CheckAccessByUserIdAsync(user.Id, _userRepository, cancellationToken);
+            if (!hasAccess)
+            {
+                return errorResult!;
+            }
 
             if (patch.Operations.Any(x => x.path.ToLower().Contains("login")))
             {
@@ -127,7 +133,7 @@ namespace Shootsy.Controllers
                 return ValidationProblem();
             }
 
-            await _userRepository.UpdateUserAsync(currentUser, patch, cancellationToken);
+            await _userRepository.UpdateUserAsync(user, patch, cancellationToken);
             return NoContent();
         }
 
@@ -140,6 +146,12 @@ namespace Shootsy.Controllers
             var user = await _userRepository.GetUserByIdAsync(userId, cancellationToken);
             if (user is null)
                 return NotFound("Пользователь по указанному идентификатору id не найден");
+
+            var (hasAccess, errorResult) = await CheckAccessByUserIdAsync(user.Id, _userRepository, cancellationToken);
+            if (!hasAccess)
+            {
+                return errorResult!;
+            }
 
             await _userRepository.DeleteUserByIdAsync(userId, cancellationToken);
             return NoContent();

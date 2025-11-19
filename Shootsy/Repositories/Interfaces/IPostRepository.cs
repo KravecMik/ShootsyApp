@@ -12,10 +12,10 @@ namespace Shootsy.Repositories.Interfaces
         Task UpdatePostAsync(PostEntity post, JsonPatchDocument<PostEntity> jsonPatchDocument, CancellationToken cancellationToken);
         Task DeletePostByIdAsync(int id, CancellationToken cancellationToken);
         Task<CommentEntity?> GetCommentByIdAsync(int id, CancellationToken cancellationToken);
-        Task<int> AddCommentAsync(CommentEntity comment, CancellationToken cancellationToken);
+        Task<int> CreateCommentAsync(CommentEntity comment, CancellationToken cancellationToken);
         Task<bool> UpdateCommentAsync(CommentEntity comment, CancellationToken cancellationToken);
         Task<bool> DeleteCommentAsync(int commentId, CancellationToken cancellationToken);
-        Task<bool> AddLikeAsync(LikeEntity like, CancellationToken cancellationToken);
+        Task<bool> CreateLikeAsync(LikeEntity like, CancellationToken cancellationToken);
         Task<bool> RemoveLikeAsync(int likeId, CancellationToken cancellationToken);
         Task<bool> RemoveLikeAsync(int userId, int? postId, int? commentId, CancellationToken cancellationToken);
         Task <int> GetLikeCountByPostIdAsync(int postId, CancellationToken cancellationToken);

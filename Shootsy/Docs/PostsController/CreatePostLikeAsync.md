@@ -1,4 +1,4 @@
-﻿# POST /Posts/[postId]/likes
+﻿# Method :: [POST]/Posts/[postId]/likes
 
 **Добавить лайк к публикации**
 
