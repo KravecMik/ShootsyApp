@@ -1,7 +1,7 @@
 # Документация API
 
 ### Контроллеры
-- [UsersController](UsersController/UsersController.md) - Управление пользователями
+- [UsersController](Shootsy/Docs/UsersController/UsersController.md) - Управление пользователями
 - [MessagesController](MessagesController/MessagesController.md) - Отправка сообщений
 - [FilesController](FilesController/FilesController.md) - Управление файлами
 - [PostsController](PostsController/PostsController.md) - Публикации, комментарии и лайки
