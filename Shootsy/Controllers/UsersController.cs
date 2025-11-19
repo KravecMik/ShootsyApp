@@ -60,7 +60,8 @@ namespace Shootsy.Controllers
         public async Task<IActionResult> SignInAsync([FromBody, BindRequired] SignInRequestModel request, CancellationToken cancellationToken = default)
         {
             var user = await _userRepository.GetUserByLoginAsync(request.Login, cancellationToken);
-            if (user is null) return NotFound();
+            if (user is null) 
+                return NotFound();
 
             var passwordVerification = request.Password.IsPasswordValid(request.Login, user.Password);
             if (!passwordVerification)

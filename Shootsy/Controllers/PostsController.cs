@@ -12,6 +12,7 @@ using Shootsy.Repositories;
 using Shootsy.Repositories.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
+using System.ComponentModel.Design;
 
 namespace Shootsy.Controllers
 {
@@ -46,7 +47,7 @@ namespace Shootsy.Controllers
             };
 
             var postId = await _postRepository.CreatePostAsync(post, cancellationToken);
-            return StatusCode(201, postId);
+            return Created(string.Empty, new { postId });
         }
 
         [Authorize]
@@ -95,7 +96,7 @@ namespace Shootsy.Controllers
         {
             var post = await _postRepository.GetPostByIdAsync(postId, cancellationToken);
             if (post is null)
-                return NotFound("Пользователь по указанному идентификатору не найден");
+                return NotFound("Публикация по указанному идентификатору не найдена");
 
             foreach (var operation in patch.Operations)
             {
@@ -139,7 +140,7 @@ namespace Shootsy.Controllers
             };
 
             var commentId = await _postRepository.AddCommentAsync(comment, cancellationToken);
-            return CreatedAtAction(nameof(AddCommentAsync), new { commentId });
+            return Created(string.Empty, new { commentId });
         }
 
         [Authorize]
@@ -171,7 +172,7 @@ namespace Shootsy.Controllers
         [HttpPost("{postId:int}/comments/{commentId:int}")]
         [SwaggerOperation(Summary = "Добавить комментарий на другой комментарий к публикации")]
         [SwaggerResponse(statusCode: 201, description: "Created", type: typeof(int))]
-        public async Task<IActionResult> AddAnswerToCommentAsync([FromRoute] int postId, [FromRoute] int commentId, [FromBody] AddCommentRequestModel request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> AddCommentReplyAsync([FromRoute] int postId, [FromRoute] int commentId, [FromBody] AddCommentRequestModel request, CancellationToken cancellationToken = default)
         {
             var post = await _postRepository.GetPostByIdAsync(postId, cancellationToken);
             if (post is null)
@@ -187,7 +188,7 @@ namespace Shootsy.Controllers
             };
 
             var answerCommentId = await _postRepository.AddCommentAsync(comment, cancellationToken);
-            return CreatedAtAction(nameof(AddAnswerToCommentAsync), new { answerCommentId });
+            return Created(string.Empty, new { answerCommentId });
         }
 
         [Authorize]

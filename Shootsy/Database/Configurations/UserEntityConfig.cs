@@ -17,7 +17,7 @@ namespace Shootsy.Database.Configurations
                 .ValueGeneratedOnAdd();
 
             entity.Property(x => x.Login)
-                .HasColumnName("Login")
+                .HasColumnName("login")
                 .HasComment("Имя пользователя")
                 .IsRequired()
                 .HasMaxLength(50);

@@ -23,13 +23,19 @@ namespace Shootsy.Models.Post.Swagger
         };
     }
 
-    public class GetPostListResponseExampleModel : IExamplesProvider<IEnumerable<PostDto>>
+    public class GetPostListResponseExampleModel : IExamplesProvider<PagedResponse<PostDto>>
     {
-        public IEnumerable<PostDto> GetExamples() => new[]
+        public PagedResponse<PostDto> GetExamples() => new PagedResponse<PostDto>
         {
-            new PostDto { Id = 1, CreateDate = DateTime.Now.AddDays(-2), EditDate = DateTime.Now, UserId = 57954, Text = "бла бла бла" },
-            new PostDto { Id = 2, CreateDate = DateTime.Now.AddDays(-3), EditDate = DateTime.Now, UserId = 57954, Text = "я люблю манную кашу" },
-            new PostDto { Id = 3, CreateDate = DateTime.Now.AddDays(-4), EditDate = DateTime.Now, UserId = 57954, Text = "дева4ки, я тащусь" },
+            Data = new[] {
+                new PostDto { Id = 1, CreateDate = DateTime.Now.AddDays(-2), EditDate = DateTime.Now, UserId = 57954, Text = "бла бла бла" },
+                new PostDto { Id = 2, CreateDate = DateTime.Now.AddDays(-3), EditDate = DateTime.Now, UserId = 57954, Text = "я люблю манную кашу" },
+                new PostDto { Id = 3, CreateDate = DateTime.Now.AddDays(-4), EditDate = DateTime.Now, UserId = 57954, Text = "дева4ки, я тащусь" },
+            },
+            Page = 1,
+            PageSize = 20,
+            TotalCount = 200,
+            TotalPages = 10
         };
     }
 }
