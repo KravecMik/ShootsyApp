@@ -51,8 +51,8 @@ ShootsyApp - это open-source dating приложение, созданное 
 * Ссылка на MongoUI: http://45.130.147.122:8081/db/shootsy/
 
 ## Строки подключения к БД:
-* MongoDB: "mongodb://admin:admin@mongoDb:27017/shootsy?authSource=admin"
-* PostgresDB: "Host=shootsy-pg-15;Port=5432;Database=testdb;Username=postgres;Password=postgres"
+* MongoDB: "mongodb://a***n:a***n@mongoDb:27017/shootsy?authSource=admin"
+* PostgresDB: "Host=shootsy-pg-15;Port=5432;Database=testdb;Username=p***gres;Password=p***gres"
 
 ## Kafka
 * "BootstrapServers": "kafka:9092"
